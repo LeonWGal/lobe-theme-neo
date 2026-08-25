@@ -45,7 +45,7 @@ export const DEFAULT_SETTING: WebuiSetting = {
   extraNetworkFixedMode: 'fixed',
   extraNetworkSidebarExpand: true,
   extraNetworkSidebarWidth: 340,
-  i18n: 'ru_RU',
+  i18n: 'en_US',
   layoutHideFooter: false,
   layoutSplitPreview: false,
   liteAnimation: true,

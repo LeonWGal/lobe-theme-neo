@@ -35,11 +35,11 @@ export const resources = {
 const readLocalI18n = (): string => {
   try {
     const raw = localStorage.getItem(SETTING_KEY);
-    if (!raw) return 'ru_RU';
+    if (!raw) return 'en_US';
     const localSetting = JSON.parse(raw) as WebuiSetting;
-    return localSetting?.i18n || 'ru_RU';
+    return localSetting?.i18n || 'en_US';
   } catch {
-    return 'ru_RU';
+    return 'en_US';
   }
 };
 
