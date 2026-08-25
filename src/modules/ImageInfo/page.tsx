@@ -7,10 +7,15 @@ import Layout from './layout';
 
 const ImageInfo = (parentId: string, containerId: string) => {
   if (document.querySelector(containerId)) return;
+  const parent = (typeof gradioApp === 'function' ? gradioApp() : document).querySelector(
+    parentId,
+  ) as HTMLDivElement | null;
+  if (!parent) return;
+
   const settingsDiv = document.createElement('div') as HTMLDivElement;
   settingsDiv.id = containerId.replace('#', '');
 
-  (gradioApp().querySelector(parentId) as HTMLDivElement).append(settingsDiv);
+  parent.append(settingsDiv);
 
   createRoot(settingsDiv).render(
     <StrictMode>

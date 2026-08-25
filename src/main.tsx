@@ -10,52 +10,87 @@ if (window.global === undefined) window.global = window;
 const skipLoad = window.location.href.includes('dev') && process.env.NODE_ENV === 'production';
 
 if (!skipLoad) {
+  let isMounted = false;
+
   const mountApp = () => {
+    if (isMounted || document.getElementById('root')) return;
+    isMounted = true;
+
     applyForgeDocumentFlag();
     consola.start(`🤯 Lobe Theme load in ${process.env.NODE_ENV}`);
-
-    // Avoid double mounting
-    if (document.getElementById('root')) return;
 
     const root = document.createElement('div');
     root.setAttribute('id', 'root');
 
-    let mounted = false;
-    const attachRoot = () => {
-      if (mounted) return true;
-      try {
-        const app = typeof gradioApp === 'function' ? gradioApp() : null;
-        if (app) {
-          app.append(root);
-          mounted = true;
-          return true;
+    try {
+      const app = typeof gradioApp === 'function' ? gradioApp() : null;
+      if (app) {
+        app.append(root);
+      } else {
+        const gradioAppElem = document.querySelector('gradio-app');
+        if (gradioAppElem) {
+          gradioAppElem.append(root);
+        } else {
+          document.body.append(root);
         }
-      } catch {
-        /* continue to querySelector */
       }
-
-      const gradioAppElem = document.querySelector('gradio-app');
-      if (gradioAppElem) {
-        gradioAppElem.append(root);
-        mounted = true;
-        return true;
-      }
-      return false;
-    };
-
-    if (!attachRoot()) {
-      // If Gradio app tag is still initializing, attach to body as fallback or poll
+    } catch {
       document.body.append(root);
-      mounted = true;
     }
 
     const client = createRoot(root);
     client.render(<Page />);
   };
 
+  const isUiAlreadyReady = () => {
+    try {
+      const root = typeof gradioApp === 'function' ? gradioApp() : document;
+      return !!root.querySelector('#txt2img_prompt, #tabs, #quicksettings');
+    } catch {
+      return false;
+    }
+  };
+
+  const init = () => {
+    if (isUiAlreadyReady()) {
+      mountApp();
+      return;
+    }
+
+    // Register with WebUI's official onUiLoaded callback
+    if (typeof (window as any).onUiLoaded === 'function') {
+      (window as any).onUiLoaded(mountApp);
+    }
+
+    // Fallback: observe DOM until txt2img_prompt or tabs exist
+    let observer: MutationObserver | null = null;
+    const target = (typeof gradioApp === 'function' ? gradioApp() : null) || document.body;
+    if (target) {
+      observer = new MutationObserver(() => {
+        if (isUiAlreadyReady()) {
+          if (observer) {
+            observer.disconnect();
+            observer = null;
+          }
+          mountApp();
+        }
+      });
+      observer.observe(target, { childList: true, subtree: true });
+    }
+
+    // Safety timeout: mount anyway after 2s if onUiLoaded didn't fire
+    setTimeout(() => {
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+      mountApp();
+    }, 2000);
+  };
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountApp, { once: true });
+    document.addEventListener('DOMContentLoaded', init, { once: true });
   } else {
-    mountApp();
+    init();
   }
 }

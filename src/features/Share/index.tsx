@@ -9,7 +9,7 @@ const Share = memo<{ type: 'txt' | 'img' }>(({ type }) => {
   const [open, setOpen] = useState(false);
   const buttonReference = useRef<any>(createButton(type, setOpen));
 
-  useInject(buttonReference, `#image_buttons_${type}2img > .form`, {
+  useInject(buttonReference, `#image_buttons_${type}2img, #image_buttons_${type}2img > .form`, {
     debug: `[layout] inject - Share ${type}`,
     inverse: true,
   });

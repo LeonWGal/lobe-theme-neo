@@ -13,13 +13,15 @@ declare global {
 
 const PromptHighlight = (parentId: string, containerId: string) => {
   if (document.querySelector(containerId)) return;
+  const parent = (typeof gradioApp === 'function' ? gradioApp() : document).querySelector(
+    parentId,
+  ) as HTMLDivElement | null;
+  if (!parent) return;
+
   const settingsDiv = document.createElement('div') as HTMLDivElement;
   settingsDiv.id = containerId.replace('#', '');
 
-  (gradioApp().querySelector(parentId) as HTMLDivElement).insertBefore(
-    settingsDiv,
-    (gradioApp().querySelector(parentId) as HTMLDivElement).firstChild,
-  );
+  parent.insertBefore(settingsDiv, parent.firstChild);
 
   createRoot(settingsDiv).render(
     <StrictMode>
@@ -36,6 +38,9 @@ export default () => {
   try {
     PromptHighlight('#txt2img_prompt', '#lobe_txt2img_prompt');
     PromptHighlight('#img2img_prompt', '#lobe_img2img_prompt');
+    if (!window.ignore_ids_for_localization) {
+      window.ignore_ids_for_localization = {};
+    }
     window.ignore_ids_for_localization['lobe_highlighter'] = 'SPAN';
     consola.success('🤯 [module] inject - PromptHighlight');
   } catch (error) {
