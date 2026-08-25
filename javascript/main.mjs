@@ -1455,7 +1455,8 @@ const m4='\n<svg\n  class="lucide lucide-arrow-right"\n  xmlns="http://www.w3.or
     backdrop-filter: saturate(180%) blur(10px);
   }
 
-  .wrap:has(> div),
+  .wrap:has(> .progressDiv),
+  .wrap:has(> .progress-container),
   .wrap.svelte-j1gjts:has(div) {
     overflow: hidden;
 
@@ -1477,6 +1478,10 @@ const m4='\n<svg\n  class="lucide lucide-arrow-right"\n  xmlns="http://www.w3.or
     top: 0 !important;
     overflow: hidden;
     background: ${A.colorFillSecondary} !important;
+
+    &:has(~ .progressDiv) {
+      display: none !important;
+    }
 
     > .progress {
       position: relative;

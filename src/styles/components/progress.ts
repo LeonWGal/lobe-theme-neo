@@ -25,7 +25,8 @@ export default (token: Theme) => css`
     backdrop-filter: saturate(180%) blur(10px);
   }
 
-  .wrap:has(> div),
+  .wrap:has(> .progressDiv),
+  .wrap:has(> .progress-container),
   .wrap.svelte-j1gjts:has(div) {
     overflow: hidden;
 
@@ -47,6 +48,10 @@ export default (token: Theme) => css`
     top: 0 !important;
     overflow: hidden;
     background: ${token.colorFillSecondary} !important;
+
+    &:has(~ .progressDiv) {
+      display: none !important;
+    }
 
     > .progress {
       position: relative;
