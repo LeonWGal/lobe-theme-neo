@@ -16,13 +16,28 @@ export default (token: Theme) => css`
       gap: 0 !important;
     }
 
+    /* Multiselect chip row: let it wrap and shrink cleanly */
     .wrap-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       min-width: 0 !important;
     }
 
     .secondary-wrap {
       position: relative;
+
+      display: flex;
+      flex: 1;
+      align-items: center;
+
       min-width: 0 !important;
+    }
+
+    .token {
+      overflow: hidden;
+      max-width: 100%;
+      text-overflow: ellipsis;
     }
 
     .icon-wrap {
@@ -43,6 +58,11 @@ export default (token: Theme) => css`
       max-width: 16px !important;
       height: 16px !important;
       margin: 0 !important;
+
+      svg {
+        width: 100%;
+        height: 100%;
+      }
     }
 
     .container .wrap {

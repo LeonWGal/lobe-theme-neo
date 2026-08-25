@@ -24,10 +24,11 @@ export default defineConfig({
       input: resolve(__dirname, 'src/main.tsx'),
       output: {
         assetFileNames: `[name].[ext]`,
-        // Keep chunks out of javascript/ root — Forge auto-loads every *.js there
-        // as a classic script, which breaks ES-module chunks (e.g. giscus).
+        // Forge Neo auto-loads every *.js in javascript/ root as a classic script.
+        // Putting chunks into chunks/ keeps them out of Forge's auto-loader while
+        // main.mjs (loaded via <script type="module">) dynamically imports them.
         chunkFileNames: `chunks/[name]-[hash].js`,
-        entryFileNames: `[name].js`,
+        entryFileNames: `[name].mjs`,
       },
     },
   },

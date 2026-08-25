@@ -12,14 +12,23 @@ export default () => {
     label {
       position: relative;
       min-width: 64px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
 
-      > span {
-        overflow: hidden;
-        width: 100%;
+      &:not(:has(input[type='checkbox']), :has(input[type='radio']), .checkbox-label) {
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        > span {
+          overflow: hidden;
+          width: 100%;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
+      &:has(input[type='checkbox']),
+      &:has(input[type='radio']) {
+        word-break: break-word;
+        white-space: normal;
       }
     }
   `;

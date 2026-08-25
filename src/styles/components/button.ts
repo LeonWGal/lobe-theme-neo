@@ -58,7 +58,7 @@ export default (token: Theme) => css`
         }
       }
 
-      &:not(.tool) {
+      &:not(.tool, .svelte-1p4r00v) {
         &.primary,
         &.secondary {
           &.lg {
@@ -91,7 +91,9 @@ export default (token: Theme) => css`
         box-shadow: none !important;
       }
 
-      &[id$='_interrupt'] {
+      /* Forge Neo added an 'Interrupting...' button state during interrupt */
+      &[id$='_interrupt'],
+      &[id$='_interrupting'] {
         min-width: 0;
         border: 1px solid ${token.colorError};
         border-right: none !important;

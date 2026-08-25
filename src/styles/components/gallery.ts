@@ -80,8 +80,9 @@ export default (token: Theme) => {
       }
 
       > .grid-wrap {
-        margin: -52px;
-        padding: 60px;
+        margin: 0;
+        padding: 8px;
+        border-radius: ${token.borderRadius}px;
       }
     }
 

@@ -32,6 +32,15 @@ export const useInject = (
         } else {
           ref.current?.append(ele);
         }
+
+        // Gradio/Svelte components (esp. multiselect Dropdowns Forge Neo uses
+        // for "VAE / Text Encoder") measure layout via ResizeObserver.
+        // Nudge browser on next frames so components re-measure against their new parent.
+        requestAnimationFrame(() => {
+          window.dispatchEvent(new Event('resize'));
+          requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+        });
+
         setElement(ele);
         onSuccess?.(ele);
         isInject.current = true;

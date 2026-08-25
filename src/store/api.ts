@@ -25,16 +25,19 @@ export const getSetting = async (): Promise<WebuiSetting | undefined> => {
   }
 };
 
-export const postSetting = async (setting: WebuiSetting) => {
-  const res = await fetch('/lobe/config', {
-    body: JSON.stringify(setting),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    method: 'POST',
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to save lobe config: ${res.status}`);
+export const postSetting = async (setting: WebuiSetting): Promise<boolean> => {
+  try {
+    const res = await fetch('/lobe/config', {
+      body: JSON.stringify(setting),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    });
+    return res.ok;
+  } catch (error) {
+    console.warn('🤯 [setting] Failed to save lobe config:', error);
+    return false;
   }
 };
 

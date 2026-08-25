@@ -3,14 +3,21 @@ import { useEffect, useRef, useState } from 'react';
 
 import civitaiHelperFix from '@/scripts/civitaiHelperFix';
 
-const replaceCivitaiHelper = (type: 'txt' | 'img') => {
-  const button = document.querySelector(`#${type}2img_extra_refresh`) as HTMLButtonElement;
-  button.click();
+const findRefreshButtons = (type: 'txt' | 'img') =>
+  [
+    ...document.querySelectorAll(
+      `#${type}2img_extra_refresh, #${type}2img_extra_tabs [id$='_extra_refresh']`,
+    ),
+  ] as HTMLButtonElement[];
 
-  const civitaiButton = document.querySelector(`#${type}2img_extra_refresh`)
-    ?.nextSibling as HTMLButtonElement;
-  if (civitaiButton) {
-    civitaiButton.onclick = civitaiHelperFix;
+const replaceCivitaiHelper = (type: 'txt' | 'img') => {
+  for (const button of findRefreshButtons(type)) {
+    button.click();
+
+    const civitaiButton = button.nextSibling as HTMLButtonElement | null;
+    if (civitaiButton) {
+      civitaiButton.onclick = civitaiHelperFix;
+    }
   }
 };
 
@@ -32,22 +39,21 @@ export const useCivitaiHelperFix = ({
     if (isInject.current) return;
     onStart?.();
     const canInject =
-      !!document.querySelector('#tab_civitai_helper') &&
-      !!document.querySelector('#txt2img_extra_refresh');
+      !!document.querySelector('#tab_civitai_helper') && findRefreshButtons('txt').length > 0;
 
     let timoutFn: any;
 
     if (canInject) {
-      try {
-        timoutFn = setTimeout(() => {
+      timoutFn = setTimeout(() => {
+        try {
           replaceCivitaiHelper('txt');
           replaceCivitaiHelper('img');
           civitaiHelperFix();
-        }, timeout);
-      } catch (error: any) {
-        setIsLoading(false);
-        if (debug) consola.success(`🤯 ${debug}`, error);
-      }
+        } catch (error: any) {
+          setIsLoading(false);
+          if (debug) consola.error(`🤯 ${debug}`, error);
+        }
+      }, timeout);
     }
 
     onSuccess?.();

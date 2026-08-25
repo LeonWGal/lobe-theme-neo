@@ -48,21 +48,26 @@ export const createSettings: StateCreator<Store, [['zustand/devtools', never]], 
   onInit: async () => {
     set(() => ({ loading: true }), false, 'onInit');
 
-    applyForgeDocumentFlag();
-    set(() => ({ isForgeNeo: detectForgeNeo() }), false, 'detectForgeNeo');
-    if (detectForgeNeo()) {
-      consola.info('🤯 [compat] Forge Neo / Gradio 4 detected');
+    try {
+      applyForgeDocumentFlag();
+      set(() => ({ isForgeNeo: detectForgeNeo() }), false, 'detectForgeNeo');
+      if (detectForgeNeo()) {
+        consola.info('🤯 [compat] Forge Neo / Gradio 4 detected');
+      }
+
+      const { onLoadSetting, onLoadVersion, onLoadLatestVersion, onLoadLocalOptions } = get();
+
+      // Version check must not block settings / UI ready
+      void onLoadLatestVersion().catch((error) => {
+        consola.warn('🤯 [version] latest version check failed', error);
+      });
+
+      await Promise.allSettled([onLoadLocalOptions(), onLoadVersion(), onLoadSetting()]);
+    } catch (error) {
+      consola.warn('🤯 [init] initialization encountered an error:', error);
+    } finally {
+      set(() => ({ loading: false }), false, 'onInit');
     }
-
-    const { onLoadSetting, onLoadVersion, onLoadLatestVersion, onLoadLocalOptions } = get();
-
-    // Version check must not block settings / UI ready
-    void onLoadLatestVersion().catch((error) => {
-      consola.warn('🤯 [version] latest version check failed', error);
-    });
-
-    await Promise.all([onLoadLocalOptions(), onLoadVersion(), onLoadSetting()]);
-    set(() => ({ loading: false }), false, 'onInit');
   },
   onLoadLatestVersion: async () => {
     try {
@@ -73,45 +78,59 @@ export const createSettings: StateCreator<Store, [['zustand/devtools', never]], 
     }
   },
   onLoadLocalOptions: async () => {
-    const localeOptions = await getLocaleOptions();
-    set(() => ({ localeOptions }), false, 'onLoadLocalOptions');
+    try {
+      const localeOptions = await getLocaleOptions();
+      set(() => ({ localeOptions }), false, 'onLoadLocalOptions');
+    } catch (error) {
+      consola.warn('🤯 [locale] getLocaleOptions failed', error);
+    }
   },
   onLoadSetting: async () => {
-    let themeSetting: WebuiSetting | undefined;
-    const webuiSetting = await getSetting();
-    const localSetting = readLocalSetting();
+    try {
+      let themeSetting: WebuiSetting | undefined;
+      const webuiSetting = await getSetting();
+      const localSetting = readLocalSetting();
 
-    if (webuiSetting) {
-      consola.start('🤯 [setting] loaded webui setting');
-      // Prefer server as source of truth after successful POST; fill gaps from local
-      themeSetting = { ...localSetting, ...webuiSetting };
-    } else if (localSetting) {
-      consola.info('🤯 [setting] loaded local setting');
-      themeSetting = localSetting;
+      if (webuiSetting) {
+        consola.start('🤯 [setting] loaded webui setting');
+        // Prefer server as source of truth after successful POST; fill gaps from local
+        themeSetting = { ...localSetting, ...webuiSetting };
+      } else if (localSetting) {
+        consola.info('🤯 [setting] loaded local setting');
+        themeSetting = localSetting;
+      }
+
+      if (!themeSetting) {
+        consola.info('🤯 [setting] loaded default setting');
+        themeSetting = DEFAULT_SETTING;
+      }
+
+      // Drop unknown keys left from older Lobe builds (e.g. uiTheme: studio)
+      const allowed = new Set(Object.keys(DEFAULT_SETTING) as WebuiSettingKeys[]);
+      const merged = { ...DEFAULT_SETTING, ...themeSetting };
+      const setting = Object.fromEntries(
+        Object.entries(merged).filter(([key]) => allowed.has(key as WebuiSettingKeys)),
+      ) as unknown as WebuiSetting;
+
+      localStorage.setItem(SETTING_KEY, JSON.stringify(setting));
+      void postSetting(setting);
+      void syncLanguage(setting.i18n);
+      set(() => ({ setting }), false, 'onLoadSetting');
+      consola.success('🤯 [setting] loaded');
+      console.table(setting);
+    } catch (error) {
+      consola.warn('🤯 [setting] onLoadSetting error, applying defaults:', error);
+      const fallbackSetting = readLocalSetting() || DEFAULT_SETTING;
+      set(() => ({ setting: fallbackSetting }), false, 'onLoadSettingFallback');
     }
-
-    if (!themeSetting) {
-      consola.info('🤯 [setting] loaded default setting');
-      themeSetting = DEFAULT_SETTING;
-    }
-
-    // Drop unknown keys left from older Lobe builds (e.g. uiTheme: studio)
-    const allowed = new Set(Object.keys(DEFAULT_SETTING) as WebuiSettingKeys[]);
-    const merged = { ...DEFAULT_SETTING, ...themeSetting };
-    const setting = Object.fromEntries(
-      Object.entries(merged).filter(([key]) => allowed.has(key as WebuiSettingKeys)),
-    ) as unknown as WebuiSetting;
-
-    localStorage.setItem(SETTING_KEY, JSON.stringify(setting));
-    await postSetting(setting);
-    await syncLanguage(setting.i18n);
-    set(() => ({ setting }), false, 'onLoadSetting');
-    consola.success('🤯 [setting] loaded');
-    console.table(setting);
   },
   onLoadVersion: async () => {
-    const version = await getVersion();
-    set(() => ({ version }), false, 'onLoadVersion');
+    try {
+      const version = await getVersion();
+      set(() => ({ version }), false, 'onLoadVersion');
+    } catch (error) {
+      consola.warn('🤯 [version] onLoadVersion failed', error);
+    }
   },
   onSetSetting: async (setting) => {
     const oldSetting = get().setting;

@@ -265,5 +265,48 @@ export default (token: Theme) => css`
       position: relative;
       z-index: 1;
     }
+
+    /* —— Forge Neo Prompt layout modes (Default, Compact, Scrollable, Accordion) —— */
+    [id$='_prompt_container'] {
+      gap: 8px;
+
+      .prompt-row {
+        gap: 8px;
+      }
+    }
+
+    .prompt-container-scroll div.gradio-textbox.prompt {
+      border-radius: ${token.borderRadius}px;
+    }
+
+    div.toprow-compact-stylerow {
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0;
+    }
+
+    div.toprow-compact-tools [id$='2img_tools'] {
+      flex-wrap: nowrap;
+      gap: 4px;
+    }
+
+    .extra-page-prompts {
+      gap: 8px;
+
+      &.extra-page-prompts-active {
+        margin-bottom: 16px;
+      }
+    }
+
+    .compact-checkbox-group div label {
+      padding: 2px 8px !important;
+      border-radius: ${token.borderRadius}px !important;
+    }
+
+    /* Generation footer (time taken / VRAM / profiling) */
+    .html-log .performance {
+      gap: 8px;
+      color: ${token.colorTextDescription};
+    }
   }
 `;
