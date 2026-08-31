@@ -1,5 +1,6 @@
 import { RefObject, useRef } from 'react';
 
 export const useSelectorRef = (selectors: string): RefObject<HTMLDivElement> => {
-  return useRef<HTMLDivElement>(gradioApp().querySelector(selectors) as HTMLDivElement);
+  const root = (typeof gradioApp === 'function' ? gradioApp() : null) || document;
+  return useRef<HTMLDivElement>(root.querySelector(selectors) as HTMLDivElement);
 };

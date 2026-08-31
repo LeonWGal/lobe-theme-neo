@@ -11,38 +11,49 @@ export const useGalleryObserver = (selector: string) => {
   const [value, setValue] = useState<string>('');
   const [allValue, setAllValue] = useState<string[]>([]);
   useEffect(() => {
-    const observer = new MutationObserver((mutationsList) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === 'childList' || mutation.type === 'characterData') {
-          const info = (mutation.target as any)?.querySelector?.(
-            'img[data-testid="detailed-image"]',
-          );
-          const infoDoms =
-            (mutation.target as any)?.querySelectorAll?.('.thumbnails button img') ?? [];
-          const infos = Array.from(infoDoms)
-            .filter(Boolean)
-            .map((i: any) => i.src);
-          if (info) setValue(String(info.src));
-          setAllValue(infos);
-        }
-      }
-    });
+    const getRoot = () => (typeof gradioApp === 'function' ? gradioApp() : null) || document;
+    let observer: MutationObserver | null = null;
+    let rootObserver: MutationObserver | null = null;
 
-    const infoContainer = gradioApp().querySelector(selector);
-
-    if (infoContainer) {
-      observer.observe(infoContainer, observerOptions);
-      const info = infoContainer.querySelector('img[data-testid="detailed-image"]');
-      const infoDoms = infoContainer.querySelectorAll('.thumbnails button img');
+    const readGallery = (container: Element) => {
+      const info = container.querySelector('img[data-testid="detailed-image"]');
+      const infoDoms = container.querySelectorAll('.thumbnails button img');
       const infos = Array.from(infoDoms)
         .filter(Boolean)
         .map((i: any) => i.src);
-      setValue((info as any)?.src);
+      if (info) setValue(String((info as any)?.src || ''));
       setAllValue(infos);
+    };
+
+    const attach = (container: Element) => {
+      readGallery(container);
+      observer = new MutationObserver(() => {
+        readGallery(container);
+      });
+      observer.observe(container, observerOptions);
+    };
+
+    const root = getRoot();
+    const infoContainer = root.querySelector(selector);
+    if (infoContainer) {
+      attach(infoContainer);
+    } else {
+      rootObserver = new MutationObserver(() => {
+        const found = getRoot().querySelector(selector);
+        if (found) {
+          if (rootObserver) {
+            rootObserver.disconnect();
+            rootObserver = null;
+          }
+          attach(found);
+        }
+      });
+      rootObserver.observe(root, { childList: true, subtree: true });
     }
 
     return () => {
-      observer.disconnect();
+      if (observer) observer.disconnect();
+      if (rootObserver) rootObserver.disconnect();
     };
   }, [selector]);
 

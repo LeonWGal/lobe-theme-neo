@@ -23,23 +23,56 @@ const PromptPicker = memo(() => {
 
   const isCN = i18n === 'zh_CN' || i18n === 'zh_HK';
 
+  const getActiveTabContent = () => {
+    if (typeof (window as any).get_uiCurrentTabContent === 'function') {
+      try {
+        const el = (window as any).get_uiCurrentTabContent();
+        if (el) return el;
+      } catch {}
+    }
+    const root = typeof gradioApp === 'function' ? gradioApp() : document;
+    return (
+      root.querySelector(
+        '.tabitem[style*="display: block"], .tabitem:not([style*="display: none"]), [id^="tab_txt2img"], [id^="tab_img2img"]',
+      ) || root
+    );
+  };
+
+  const dispatchUpdate = (textarea: HTMLTextAreaElement) => {
+    if (typeof (window as any).updateInput === 'function') {
+      try {
+        (window as any).updateInput(textarea);
+      } catch {}
+    }
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    textarea.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
   const getValue = useCallback(() => {
     try {
-      const textarea = get_uiCurrentTabContent().querySelector(ID) as HTMLTextAreaElement;
-      const data = formatPrompt(textarea.value);
-      if (textarea) setTags(data);
-      return data;
+      const container = getActiveTabContent();
+      const textarea = container?.querySelector(ID) as HTMLTextAreaElement | null;
+      if (textarea) {
+        const data = formatPrompt(textarea.value);
+        setTags(data);
+        return data;
+      }
+      return [];
     } catch (error) {
       consola.error('🤯 [prompt]', error);
+      return [];
     }
   }, []);
 
   const setValue = useCallback((currentTags: TagItem[]) => {
     try {
       const newValue = currentTags.map((t) => t.text).join(', ');
-      const textarea = get_uiCurrentTabContent().querySelector(ID) as HTMLTextAreaElement;
-      if (textarea) textarea.value = newValue;
-      updateInput(textarea);
+      const container = getActiveTabContent();
+      const textarea = container?.querySelector(ID) as HTMLTextAreaElement | null;
+      if (textarea) {
+        textarea.value = newValue;
+        dispatchUpdate(textarea);
+      }
     } catch (error) {
       consola.error('🤯 [prompt]', error);
     }

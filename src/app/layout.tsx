@@ -42,15 +42,24 @@ export const Layout = memo<PropsWithChildren>(({ children }) => {
       // Re-run after Gradio hydrates shadow DOM — early DOMContentLoaded detect can miss it
       applyForgeDocumentFlag();
       setLoading(false);
-      consola.success('🤯 Lobe Theme loading');
+      consola.success('🤯 Lobe Theme loaded');
     };
 
-    // Theme toggle used to full-reload with ?__theme=… After reload Gradio can
-    // fire onUiLoaded before React mounts, so the callback never runs and the
-    // UI stays stuck on the Loading screen. Also poll + hard timeout.
-    onUiLoaded(finish);
-    const alreadyReady = () =>
-      typeof gradioApp === 'function' && Boolean(gradioApp()?.querySelector('#txt2img_prompt'));
+    if (typeof (window as any).onUiLoaded === 'function') {
+      try {
+        (window as any).onUiLoaded(finish);
+      } catch {}
+    }
+
+    const alreadyReady = () => {
+      try {
+        const root = (typeof gradioApp === 'function' ? gradioApp() : null) || document;
+        return Boolean(root.querySelector('#txt2img_prompt, #tabs, #quicksettings, .tabitem'));
+      } catch {
+        return false;
+      }
+    };
+
     if (alreadyReady()) {
       finish();
     } else {
@@ -63,12 +72,16 @@ export const Layout = memo<PropsWithChildren>(({ children }) => {
       window.setTimeout(() => {
         window.clearInterval(poll);
         finish();
-      }, 12_000);
+      }, 2500);
     }
 
-    onUiTabChange(() => {
-      setCurrentTab();
-    });
+    if (typeof (window as any).onUiTabChange === 'function') {
+      try {
+        (window as any).onUiTabChange(() => {
+          setCurrentTab();
+        });
+      } catch {}
+    }
   }, []);
 
   return (
