@@ -186,13 +186,12 @@ export const Converter = {
   },
 
   /**
-   * 触发 input 事件
+   * 触发 input 和 change 事件
    * @param target 目标元素
    */
   dispatchInputEvent(target: EventTarget) {
-    let inputEvent = new Event('input');
-    Object.defineProperty(inputEvent, 'target', { value: target });
-    target.dispatchEvent(inputEvent);
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    target.dispatchEvent(new Event('change', { bubbles: true }));
   },
 
   /**
@@ -202,25 +201,31 @@ export const Converter = {
   onClickConvert(type: string) {
     const default_prompt = '';
     const default_negative = '';
+    const root = (typeof gradioApp === 'function' ? gradioApp() : null) || document;
 
-    const prompt = gradioApp().querySelector(
-      `#${type}2img_prompt > label > textarea`,
-    ) as HTMLTextAreaElement;
-    const result = Converter.convert(prompt.value);
-    prompt.value =
-      result.match(/^masterpiece, best quality,/) === null ? default_prompt + result : result;
-    Converter.dispatchInputEvent(prompt);
-    const negprompt = gradioApp().querySelector(
-      `#${type}2img_neg_prompt > label > textarea`,
-    ) as HTMLTextAreaElement;
-    const negResult = Converter.convert(negprompt.value);
-    negprompt.value =
-      negResult.match(/^lowres,/) === null ?
-        negResult.length === 0 ?
-          default_negative :
-          default_negative + negResult :
-        negResult;
-    Converter.dispatchInputEvent(negprompt);
+    const prompt = root.querySelector(
+      `#${type}2img_prompt textarea, #${type}2img_prompt_textarea, #${type}2img_prompt > label > textarea`,
+    ) as HTMLTextAreaElement | null;
+    if (prompt && prompt.value) {
+      const result = Converter.convert(prompt.value);
+      prompt.value =
+        result.match(/^masterpiece, best quality,/) === null ? default_prompt + result : result;
+      Converter.dispatchInputEvent(prompt);
+    }
+
+    const negprompt = root.querySelector(
+      `#${type}2img_neg_prompt textarea, #${type}2img_neg_prompt_textarea, #${type}2img_neg_prompt > label > textarea`,
+    ) as HTMLTextAreaElement | null;
+    if (negprompt && negprompt.value) {
+      const negResult = Converter.convert(negprompt.value);
+      negprompt.value =
+        negResult.match(/^lowres,/) === null ?
+          negResult.length === 0 ?
+            default_negative :
+            default_negative + negResult :
+          negResult;
+      Converter.dispatchInputEvent(negprompt);
+    }
   },
 
   /**

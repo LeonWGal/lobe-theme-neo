@@ -19,35 +19,67 @@ const Prompt = memo<PromptProps>(({ type }) => {
   const id =
     type === 'positive' ? "[id$='2img_prompt'] textarea" : "[id$='2img_neg_prompt'] textarea";
 
+  const getActiveTabContent = () => {
+    if (typeof (window as any).get_uiCurrentTabContent === 'function') {
+      try {
+        const el = (window as any).get_uiCurrentTabContent();
+        if (el) return el;
+      } catch {}
+    }
+    const root = typeof gradioApp === 'function' ? gradioApp() : document;
+    return (
+      root.querySelector(
+        '.tabitem[style*="display: block"], .tabitem:not([style*="display: none"]), [id^="tab_txt2img"], [id^="tab_img2img"]',
+      ) || root
+    );
+  };
+
+  const dispatchUpdate = (textarea: HTMLTextAreaElement) => {
+    if (typeof (window as any).updateInput === 'function') {
+      try {
+        (window as any).updateInput(textarea);
+      } catch {}
+    }
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    textarea.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
   const getValue = useCallback(() => {
     try {
-      const textarea = get_uiCurrentTabContent().querySelector(id) as HTMLTextAreaElement;
+      const container = getActiveTabContent();
+      const textarea = container?.querySelector(id) as HTMLTextAreaElement | null;
       if (textarea) setTags(formatPrompt(textarea.value));
     } catch (error) {
       consola.error('🤯 [prompt]', error);
     }
-  }, []);
+  }, [id]);
 
   const setValue = useCallback(() => {
     try {
       const newValue = tags.map((t) => t.text).join(', ');
-      const textarea = get_uiCurrentTabContent().querySelector(id) as HTMLTextAreaElement;
-      if (textarea) textarea.value = newValue;
-      updateInput(textarea);
+      const container = getActiveTabContent();
+      const textarea = container?.querySelector(id) as HTMLTextAreaElement | null;
+      if (textarea) {
+        textarea.value = newValue;
+        dispatchUpdate(textarea);
+      }
     } catch (error) {
       consola.error('🤯 [prompt]', error);
     }
-  }, [tags, type]);
+  }, [tags, id]);
 
   const setCurrentValue = useCallback((currentTags: TagItem[]) => {
     try {
-      const textarea = get_uiCurrentTabContent().querySelector(id) as HTMLTextAreaElement;
-      if (textarea) textarea.value = currentTags.map((t) => t.text).join(', ');
-      updateInput(textarea);
+      const container = getActiveTabContent();
+      const textarea = container?.querySelector(id) as HTMLTextAreaElement | null;
+      if (textarea) {
+        textarea.value = currentTags.map((t) => t.text).join(', ');
+        dispatchUpdate(textarea);
+      }
     } catch (error) {
       consola.error('🤯 [prompt]', error);
     }
-  }, []);
+  }, [id]);
 
   return (
     <div className={styles.promptView}>

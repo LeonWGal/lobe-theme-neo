@@ -21,19 +21,24 @@ const formatPrompt = (prompt: string) => {
 };
 
 export const formatInfo = (info: string) => {
-  if (!info || info === 'undefined') return;
-  if (!info.includes('<br>')) return;
+  if (!info || info === 'undefined' || !info.trim()) return;
+
+  // Normalize HTML breaks and escaped characters to clean newlines
+  const normalized = info
+    .replaceAll(/<br\s*\/?>/gi, '\n')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');
 
   let {
     prompt: position,
     negative_prompt: negative,
     ...config
-  } = parseFromRawInfo(info, {
+  } = parseFromRawInfo(normalized, {
     isIncludePrompts: true,
   });
 
-  position = position.trim().replaceAll('<br>', '\n').replaceAll(/\s+$/g, '');
-  negative = negative.trim().replaceAll('<br>', '\n').replaceAll(/\s+$/g, '');
+  position = (position || '').trim().replaceAll(/\s+$/g, '');
+  negative = (negative || '').trim().replaceAll(/\s+$/g, '');
 
   position = position ? formatPrompt(position) : '';
   negative = negative ? formatPrompt(negative) : '';

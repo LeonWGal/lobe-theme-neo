@@ -64,15 +64,16 @@ export default (token: Theme) => css`
 
   .modalPrev,
   .modalNext {
-    top: 0 !important;
-    transform: translate(0, calc(50% + 63px)) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     width: 44px !important;
-    height: 50%;
+    height: auto !important;
+    min-height: 64px !important;
     padding: 8px !important;
 
     font-size: 20px !important;

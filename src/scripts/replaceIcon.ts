@@ -42,7 +42,7 @@ const createSvgHtml = (svg: string, size: number) =>
   svg.replace(`width="24"`, `width="${size}"`).replace(`height="24"`, `height="${size}"`);
 
 const replaceIcon = (element: HTMLElement, emoji: string[], svg: string, size: number) => {
-  if (!element?.textContent || !svg) return;
+  if (!element?.textContent || !svg || element.dataset.lobeIconDone) return;
   const raw = element.textContent.trim();
   const svgHtml = createSvgHtml(svg, size);
 
@@ -56,6 +56,7 @@ const replaceIcon = (element: HTMLElement, emoji: string[], svg: string, size: n
       element.classList.contains('icon-only')
     ) {
       element.innerHTML = svgHtml;
+      element.dataset.lobeIconDone = '1';
       return;
     }
 
@@ -63,6 +64,8 @@ const replaceIcon = (element: HTMLElement, emoji: string[], svg: string, size: n
     if (element.innerHTML.includes(e)) {
       const wrapped = `<span class="lobe-svg-inline" style="display:inline-flex;align-items:center;vertical-align:middle;margin-right:4px;">${svgHtml}</span>`;
       element.innerHTML = element.innerHTML.replace(e, wrapped);
+      element.dataset.lobeIconDone = '1';
+      return;
     }
   }
 };

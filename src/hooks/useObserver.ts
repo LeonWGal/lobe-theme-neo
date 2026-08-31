@@ -12,30 +12,48 @@ export const useObserver = (
   { subSelector, valueProp = 'innerHTML' }: { subSelector?: string; valueProp?: string } = {},
 ) => {
   const [value, setValue] = useState<string>('');
+
   useEffect(() => {
-    const observer = new MutationObserver((mutationsList) => {
-      for (const mutation of mutationsList) {
-        if (mutation.type === 'childList' || mutation.type === 'characterData') {
-          if (subSelector) {
-            const info = (mutation.target as any)?.querySelector?.(subSelector);
-            if (info) setValue(String(info[valueProp]));
-          } else {
-            setValue(String((mutation.target as any)?.innerHTML));
-          }
-        }
+    const getRoot = () => (typeof gradioApp === 'function' ? gradioApp() : null) || document;
+    let observer: MutationObserver | null = null;
+    let rootObserver: MutationObserver | null = null;
+
+    const readValue = (container: Element) => {
+      const info = subSelector ? container.querySelector(subSelector) : container;
+      if (info) {
+        setValue(String((info as any)?.[valueProp] || ''));
       }
-    });
+    };
 
-    const infoContainer = gradioApp().querySelector(selector);
+    const attach = (container: Element) => {
+      readValue(container);
+      observer = new MutationObserver(() => {
+        readValue(container);
+      });
+      observer.observe(container, observerOptions);
+    };
 
+    const root = getRoot();
+    const infoContainer = root.querySelector(selector);
     if (infoContainer) {
-      observer.observe(infoContainer, observerOptions);
-      const info = subSelector ? infoContainer.querySelector(subSelector) : infoContainer;
-      setValue(String((info as any)?.[valueProp]));
+      attach(infoContainer);
+    } else {
+      rootObserver = new MutationObserver(() => {
+        const found = getRoot().querySelector(selector);
+        if (found) {
+          if (rootObserver) {
+            rootObserver.disconnect();
+            rootObserver = null;
+          }
+          attach(found);
+        }
+      });
+      rootObserver.observe(root, { childList: true, subtree: true });
     }
 
     return () => {
-      observer.disconnect();
+      if (observer) observer.disconnect();
+      if (rootObserver) rootObserver.disconnect();
     };
   }, [selector, subSelector, valueProp]);
 

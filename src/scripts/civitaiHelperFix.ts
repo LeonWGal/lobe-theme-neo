@@ -54,7 +54,10 @@ function is_nullable<T>(v: INullable<T>): v is null | undefined {
 const updateCardForCivitai = () => {
   if (!document.querySelector('#tab_civitai_helper')) return;
 
-  const replacePreviewText = getTranslation('replace preview') || 'replace preview';
+  const replacePreviewText =
+    (typeof (window as any).getTranslation === 'function'
+      ? (window as any).getTranslation('replace preview')
+      : null) || 'replace preview';
 
   // Get component
   const chAlwaysDisplayCkb = document.querySelector(
@@ -194,7 +197,7 @@ const updateCardForCivitai = () => {
         // Search_term node
         // Search_term = subfolder path + model name + ext
         searchTermNode = card.querySelector('.actions .additional .search_term');
-        if (!searchTermNode) return;
+        if (!searchTermNode) continue;
         // Get search_term
         searchTerm = searchTermNode.innerHTML;
         if (!searchTerm) continue;

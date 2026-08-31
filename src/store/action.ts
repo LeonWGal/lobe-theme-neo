@@ -144,7 +144,18 @@ export const createSettings: StateCreator<Store, [['zustand/devtools', never]], 
     set(() => ({ themeMode }), false, 'onSetThemeMode');
   },
   setCurrentTab: () => {
-    const currentTab = get_uiCurrentTabContent()?.id;
+    let currentTab: string | undefined;
+    if (typeof (window as any).get_uiCurrentTabContent === 'function') {
+      try {
+        currentTab = (window as any).get_uiCurrentTabContent()?.id;
+      } catch {}
+    }
+    if (!currentTab) {
+      const activeEl = document.querySelector(
+        '#tabs > .tabitem[style*="display: block"], #tabs > .tabitem:not([style*="display: none"]), #tabs > div[id^="tab_"]',
+      );
+      currentTab = activeEl?.id;
+    }
     consola.info('🤯 [tab] onChange', currentTab);
     if (currentTab && currentTab !== get().currentTab) {
       set({ currentTab }, false, 'setCurrentTab');

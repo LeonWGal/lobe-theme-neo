@@ -14,7 +14,7 @@ const replaceCivitaiHelper = (type: 'txt' | 'img') => {
   for (const button of findRefreshButtons(type)) {
     button.click();
 
-    const civitaiButton = button.nextSibling as HTMLButtonElement | null;
+    const civitaiButton = button.nextElementSibling as HTMLButtonElement | null;
     if (civitaiButton) {
       civitaiButton.onclick = civitaiHelperFix;
     }

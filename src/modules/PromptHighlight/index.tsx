@@ -14,43 +14,61 @@ const Index = memo<AppProps>(({ parentId }) => {
   const ref: any = useRef(null);
   const [prompt, setPrompt] = useState<string>('');
   const { styles, theme } = useStyles();
-  const nativeTextareaValue = useExternalTextareaObserver(`${parentId} label textarea`);
-  const nativeTextarea = useMemo(
-    () => gradioApp().querySelector(`${parentId} label textarea`) as HTMLTextAreaElement,
-    [parentId],
+  const textareaSelector = `${parentId} textarea, ${parentId} label textarea`;
+  const nativeTextareaValue = useExternalTextareaObserver(textareaSelector);
+
+  const getNativeTextarea = useCallback((): HTMLTextAreaElement | null => {
+    const root = (typeof gradioApp === 'function' ? gradioApp() : null) || document;
+    return root.querySelector(textareaSelector) as HTMLTextAreaElement | null;
+  }, [textareaSelector]);
+
+  const [nativeTextarea, setNativeTextarea] = useState<HTMLTextAreaElement | null>(() =>
+    getNativeTextarea(),
   );
-  const size = useSize(nativeTextarea);
-  const scroll = useScroll(nativeTextarea);
+
+  useEffect(() => {
+    const el = getNativeTextarea();
+    if (el) setNativeTextarea(el);
+  }, [getNativeTextarea]);
+
+  const size = useSize(nativeTextarea || undefined);
+  const scroll = useScroll(nativeTextarea || undefined);
 
   const handlePromptChange = useCallback((event: any) => {
     setPrompt(event.target.value);
   }, []);
 
   const handlePromptResize = useCallback(() => {
+    if (!nativeTextarea) return size?.width === undefined ? '' : size.width;
     if (nativeTextarea.clientHeight < nativeTextarea.scrollHeight) {
       return size?.width === undefined ? '' : size?.width + 6;
     } else {
       return size?.width === undefined ? '' : size?.width + 2;
     }
-  }, [nativeTextarea.clientWidth]);
+  }, [nativeTextarea, size?.width]);
 
   useEffect(() => {
-    ref.current.scroll(0, scroll?.top || 0);
+    if (ref.current) {
+      ref.current.scroll(0, scroll?.top || 0);
+    }
   }, [scroll?.top]);
 
   useEffect(() => {
+    if (!nativeTextarea) return;
+    nativeTextarea.addEventListener('input', handlePromptChange);
     nativeTextarea.addEventListener('change', handlePromptChange);
     return () => {
+      nativeTextarea.removeEventListener('input', handlePromptChange);
       nativeTextarea.removeEventListener('change', handlePromptChange);
     };
-  }, []);
+  }, [nativeTextarea, handlePromptChange]);
 
   useEffect(() => {
-    if (theme) {
+    if (theme && nativeTextarea) {
       nativeTextarea.style.color = 'transparent';
       nativeTextarea.style.caretColor = theme.colorSuccess;
     }
-  }, [theme]);
+  }, [theme, nativeTextarea]);
 
   useEffect(() => {
     setPrompt(nativeTextareaValue);
