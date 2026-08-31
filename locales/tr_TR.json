@@ -13,7 +13,10 @@
     "community": "Topluluk",
     "help": "Yardım",
     "moreProducts": "Daha Fazla Ürün",
-    "resources": "Kaynaklar"
+    "resources": "Kaynaklar",
+    "compatForge": "Forge Neo (Gradio 4) için optimize edildi",
+    "tagline": "Yapay zeka hayallerinizi güçlendirir",
+    "taglineForge": "Lobe Theme · Forge Neo uyumlu"
   },
   "header": {
     "feedback": "Geribildirim",
@@ -43,7 +46,13 @@
   "setting": {
     "button": {
       "reset": "Varsayılana Sıfırla",
-      "submit": "Uygula ve Arayüzü Yeniden Başlat"
+      "submit": "Uygula ve Arayüzü Yeniden Başlat",
+      "applySuccess": "Ayarlar uygulandı",
+      "export": "Dışa Aktar",
+      "exportSuccess": "Ayarlar dışa aktarıldı",
+      "import": "İçe Aktar",
+      "importError": "Ayarlar içe aktarılamadı",
+      "importSuccess": "Ayarlar içe aktarıldı"
     },
     "confirmPageUnload": {
       "desc": "Kaydedilmemiş veri kaybını önlemeye yardımcı olur",

@@ -13,7 +13,10 @@
     "community": "Comunidad",
     "help": "Ayuda",
     "moreProducts": "Más productos",
-    "resources": "Recursos"
+    "resources": "Recursos",
+    "compatForge": "Optimizado para Forge Neo (Gradio 4)",
+    "tagline": "Haciendo realidad tus sueños de IA",
+    "taglineForge": "Lobe Theme · Compatible con Forge Neo"
   },
   "header": {
     "feedback": "Comentarios",
@@ -43,7 +46,13 @@
   "setting": {
     "button": {
       "reset": "Volver a la configuración por defecto",
-      "submit": "Aplicar y reiniciar interfaz"
+      "submit": "Aplicar y reiniciar interfaz",
+      "applySuccess": "Configuración aplicada",
+      "export": "Exportar",
+      "exportSuccess": "Configuración exportada",
+      "import": "Importar",
+      "importError": "Error al importar la configuración",
+      "importSuccess": "Configuración importada"
     },
     "confirmPageUnload": {
       "desc": "Ayuda a prevenir la pérdida de datos no guardados",

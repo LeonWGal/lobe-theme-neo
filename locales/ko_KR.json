@@ -13,7 +13,10 @@
     "community": "커뮤니티",
     "help": "도움말",
     "moreProducts": "더 많은 제품",
-    "resources": "자료"
+    "resources": "자료",
+    "compatForge": "Forge Neo (Gradio 4)에 최적화됨",
+    "tagline": "AI 꿈을 실현하다",
+    "taglineForge": "Lobe Theme · Forge Neo 호환"
   },
   "header": {
     "feedback": "피드백",
@@ -43,7 +46,13 @@
   "setting": {
     "button": {
       "reset": "기본값으로 돌아가기",
-      "submit": "적용 및 인터페이스 재시작"
+      "submit": "적용 및 인터페이스 재시작",
+      "applySuccess": "설정이 적용되었습니다",
+      "export": "내보내기",
+      "exportSuccess": "설정을 내보냈습니다",
+      "import": "가져오기",
+      "importError": "설정 가져오기 실패",
+      "importSuccess": "설정을 가져왔습니다"
     },
     "confirmPageUnload": {
       "desc": "저장되지 않은 데이터 손실을 방지하는 데 도움이 됩니다.",

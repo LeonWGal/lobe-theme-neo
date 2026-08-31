@@ -13,7 +13,10 @@
     "community": "コミュニティ",
     "help": "ヘルプ",
     "moreProducts": "その他の製品",
-    "resources": "リソース"
+    "resources": "リソース",
+    "compatForge": "Forge Neo (Gradio 4) 向けに最適化",
+    "tagline": "AIの夢を形にする",
+    "taglineForge": "Lobe Theme · Forge Neo 対応"
   },
   "header": {
     "feedback": "フィードバック",
@@ -43,7 +46,13 @@
   "setting": {
     "button": {
       "reset": "デフォルトに戻る",
-      "submit": "適用してインターフェースを再起動"
+      "submit": "適用してインターフェースを再起動",
+      "applySuccess": "設定を適用しました",
+      "export": "エクスポート",
+      "exportSuccess": "設定をエクスポートしました",
+      "import": "インポート",
+      "importError": "設定のインポートに失敗しました",
+      "importSuccess": "設定をインポートしました"
     },
     "confirmPageUnload": {
       "desc": "未保存のデータの損失を防ぐのに役立ちます",

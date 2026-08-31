@@ -13,7 +13,10 @@
     "community": "社区",
     "help": "帮助",
     "moreProducts": "更多产品",
-    "resources": "资源"
+    "resources": "资源",
+    "compatForge": "专为 Forge Neo (Gradio 4) 深度优化",
+    "tagline": "释放 AI 创作潜能",
+    "taglineForge": "Lobe Theme · 完美兼容 Forge Neo"
   },
   "header": {
     "feedback": "反馈",
@@ -43,7 +46,13 @@
   "setting": {
     "button": {
       "reset": "恢复默认值",
-      "submit": "应用并重新启动界面"
+      "submit": "应用并重新启动界面",
+      "applySuccess": "设置已成功应用",
+      "export": "导出设置",
+      "exportSuccess": "设置已成功导出",
+      "import": "导入设置",
+      "importError": "导入设置失败",
+      "importSuccess": "设置已成功导入"
     },
     "confirmPageUnload": {
       "desc": "帮助防止未保存数据的丢失",
