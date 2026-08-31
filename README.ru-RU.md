@@ -1,46 +1,135 @@
-# Lobe Theme Neo
+# 🎨 Lobe Theme Neo
 
-Адаптация интерфейса Lobe для Forge Neo / Gradio 4 с мягким переключением light/dark, правками под Neo и поддержкой SplitView.
+<div align="center">
 
-English: [README.md](./README.md)
+**Современный Glassmorphism-интерфейс, оптимизированный для Stable Diffusion WebUI & Forge Neo (Gradio 4)**
 
-## Возможности
+[![Релиз](https://img.shields.io/github/v/release/LeonWGal/lobe-theme-neo?color=7952F5&style=flat-square)](https://github.com/LeonWGal/lobe-theme-neo/releases)
+[![Совместимость с Forge Neo](https://img.shields.io/badge/Forge_Neo-Gradio_4.x-00C7B7?style=flat-square)](https://github.com/Haoming02/sd-webui-forge-classic)
+[![Лицензия](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
+[![Поддержка языков](https://img.shields.io/badge/i18n-11_Languages-success?style=flat-square)](#-интернационализация)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/LeonWGal/lobe-theme-neo/pulls)
 
-- Заменяет стандартную оболочку Forge Neo на интерфейс Lobe Theme: шапка, сайдбары, настройки, инструменты промпта и интеграция Extra Networks.
-- Использует мягкое переключение light/dark через `classList` и `history.replaceState` без полной перезагрузки темы.
-- Определяет Forge Neo / Gradio 4 и применяет CSS, футер и DOM-логику, адаптированные под Neo.
-- Улучшает обновление Extra Networks для Neo.
-- Добавляет SplitView рядом с галереей, а при наличии `agent-scheduler-neo` учитывает размещение кнопки Enqueue.
-- Сохраняет настройки интерфейса в `localStorage` (`SD-LOBE-SETTING`) и `lobe_theme_config.json` через `/lobe/config`.
-- Содержит стили и хуки совместимости для соседних расширений: ADetailer Neo, TIPO, aspect-ratio-helper, dynamic-prompts и Booru Tags Gacha.
+[English](./README.md) · [Русский](./README.ru-RU.md) · [简体中文](./README.zh-CN.md)
 
-## Установка
+</div>
 
-1. Поместите эту папку в `extensions/` Forge Neo под именем `lobe-theme-neo`.
-2. Отключите другие расширения Lobe Theme, чтобы не было конфликтов.
-3. Полностью перезапустите WebUI.
+---
 
-## Использование
+## ✨ Ключевые возможности
 
-1. Перезапустите WebUI и откройте обычный интерфейс Forge Neo.
-2. Переключайте light/dark через элементы в шапке.
-3. Откройте панель настроек, чтобы изменить внешний вид, сайдбары, поведение Extra Networks и параметры SplitView.
-4. Если параметр меняет структуру лейаута, расширение может попросить перезагрузку.
+* 🌗 **Мгновенное переключение Dark / Light темы**: Смена темы без перезагрузки страницы через динамические CSS-классы и синхронизацию состояния URL (`history.replaceState`), исключая зависания Gradio.
+* 🧩 **Полная адаптация под Forge Neo & Gradio 4**: Собственные селекторы и безопасная работа с Shadow DOM структурой Gradio 4.
+* 📐 **SplitView (Двухколоночный режим)**: Удобное разделение параметров генерации и галереи предпросмотра с автоматическим позиционированием кнопки очереди `agent-scheduler-neo` (Enqueue).
+* 🎴 **Extra Networks Sidebar 2.0**: Выдвижная панель LoRA, Checkpoints и Embeddings с плавной регулировкой масштаба карточек, поиском и интеграцией кнопок Civitai Helper.
+* 🪄 **Prompt Studio & Formator**: Быстрое автоформатирование промптов, регулировка весов тегов, подсветка синтаксиса и очистка лишних знаков.
+* 🛡️ **Поддержка сторонних расширений**: Готовые визуальные хуки и стили для ADetailer Neo, TIPO, Booru Tags Gacha, Dynamic Prompts, Aspect Ratio Plus и TagComplete.
+* 🌐 **Многоязычность (i18n)**: Встроенная локализация на 11 языков (Русский, English, 简体中文, 繁體中文, 日本語, 한국어, Deutsch, Español, Français, Português, Turkish).
 
-## Примечания
+---
 
-- Этот пакет ориентирован на интерфейс Forge Neo, который входит в состав расширения. Режимов Studio, Editorial и Pipeline здесь нет.
-- Файл `javascript/main.js` обязателен; одних исходников недостаточно.
-- После обновления может помочь полное обновление страницы, если браузер закешировал ассеты.
-- Текущая версия пакета в `package.json`: `3.5.4-forge.neo.2`.
+## 🏛 Архитектура и интеграция
 
-## Разработка
+`lobe-theme-neo` разворачивает интерфейсный слой на React 18 / Ant Design поверх ядра Forge Neo / Gradio 4:
 
-В проекте используется Vite/React. Если вы меняете фронтенд-исходники, пересоберите бандл, чтобы `javascript/main.js` соответствовал изменениям.
+```
+┌───────────────────────────────────────────────────────────┐
+│                     Lobe Theme Neo                        │
+├─────────────────────────────┬─────────────────────────────┤
+│  Top Header (Навигация/Меню)│  QuickSettings Сайдбар      │
+├─────────────────────────────┼─────────────────────────────┤
+│  SplitView Рабочая область  │  Extra Networks Сайдбар     │
+│  - Параметры генерации (L)  │  - LoRA / Embeddings (R)    │
+│  - Галерея превью (R)       │  - Civitai Метаданные       │
+└─────────────────────────────┴─────────────────────────────┘
+                              │ (Controlled DOM Injections)
+                              ▼
+┌───────────────────────────────────────────────────────────┐
+│              Forge Neo / Gradio 4 Core Engine             │
+└───────────────────────────────────────────────────────────┘
+```
 
-Типовой сценарий:
+* **Безопасные DOM-порталы (`useInject`)**: Узлы Gradio не разрушаются, а аккуратно оборачиваются и перемещаются, сохраняя все нативные обработчики событий и состояние компонентов.
+* **Реактивные Mutation Observers**: Автоматическое отслеживание асинхронной загрузки вкладок, текстовых полей и панелей расширений.
+* **Двойная синхронизация настроек**: Параметры интерфейса сохраняются в `localStorage` браузера (`SD-LOBE-SETTING`) и дублируются на сервере в `lobe_theme_config.json` через Fast-API эндпоинты `/lobe/config`.
+
+---
+
+## 📊 Матрица совместимости
+
+| Среда / Расширение | Статус | Примечание |
+| :--- | :---: | :--- |
+| **Forge Neo (Gradio 4.x)** | 🟢 Полная | Нативная поддержка `#quicksettings`, dtype-бейджей и настроек памяти |
+| **SD WebUI (A1111 1.9+)** | 🟢 Полная | Обратная совместимость через fallback-селекторы |
+| **ADetailer Neo** | 🟢 Полная | Адаптивная верстка аккордеонов и контейнеров |
+| **Agent Scheduler Neo** | 🟢 Полная | Автоматический перенос кнопки Enqueue в SplitView |
+| **TagComplete (a1111-tac)** | 🟢 Полная | Корректный z-index приоритет поверх `PromptHighlight` |
+| **Civitai Helper** | 🟢 Полная | Авто-инъекция ссылок, триггер-слов и промптов превью |
+
+---
+
+## 🚀 Установка и быстрый старт
+
+### Способ 1: Через веб-интерфейс WebUI / Forge (Рекомендуется)
+1. Откройте интерфейс Forge Neo / WebUI.
+2. Перейдите во вкладку **Extensions** ➔ **Install from URL**.
+3. Вставьте URL репозитория:
+   ```text
+   https://github.com/LeonWGal/lobe-theme-neo.git
+   ```
+4. Нажмите **Install**.
+5. Перейдите во вкладку **Installed**, нажмите **Apply and restart UI**.
+
+### Способ 2: Через Git
+```bash
+cd extensions
+git clone https://github.com/LeonWGal/lobe-theme-neo.git
+```
+
+### Обновление
+```bash
+cd extensions/lobe-theme-neo
+git pull origin main
+```
+
+> [!IMPORTANT]
+> Во избежание визуальных конфликтов отключите другие версии Lobe Theme или Kitchen Theme перед включением `lobe-theme-neo`.
+
+---
+
+## ⚙️ Настройки и персонализация
+
+Открыть панель настроек можно кликом по иконке ⚙️ в верхней панели:
+
+| Раздел | Опции |
+| :--- | :--- |
+| **🎨 Внешний вид** | 14 акцентных цветов, нейтральные оттенки, кастомный логотип и заголовок, веб-шрифты, режим уменьшения анимаций. |
+| **📐 Раскладка и SplitView**| Двухколоночный режим галереи, отступы, отображение/скрытие футера. |
+| **⬅️ Панель QuickSettings** | Фиксированный (Fixed) или плавающий (Float) режим, состояние раскрытия, ширина по умолчанию. |
+| **➡️ Панель Extra Networks** | Фиксированный / плавающий режим, размер сетки карточек (64px - 256px), выбор вкладки по умолчанию. |
+| **🪄 Текстовые поля промптов** | Режим прокрутки или ресайза, подсветка синтаксиса, встроенный редактор Prompt Editor с тегами. |
+
+---
+
+## 🛠️ Разработка и сборка
+
+Проект построен на Vite, React 18 и TypeScript:
 
 ```bash
+# 1. Установка зависимостей
 npm install
+
+# 2. Проверка типов
+npm run type-check
+
+# 3. Сборка продакшн-бандла (компилируется в javascript/main.mjs)
 npm run build
 ```
+
+---
+
+## 📄 Лицензия и благодарности
+
+* Распространяется под лицензией [AGPL-3.0 License](./LICENSE).
+* Оригинальный дизайн: [LobeHub](https://github.com/lobehub/sd-webui-lobe-theme).
+* Адаптация, оптимизация и поддержка для Forge Neo: [LeonWGal](https://github.com/LeonWGal).
