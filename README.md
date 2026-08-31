@@ -5,6 +5,7 @@
 **Modern, Glassmorphism-inspired UI theme optimized for Stable Diffusion WebUI & Forge Neo (Gradio 4)**
 
 [![Release](https://img.shields.io/github/v/release/LeonWGal/lobe-theme-neo?color=7952F5&style=flat-square)](https://github.com/LeonWGal/lobe-theme-neo/releases)
+[![Upstream LobeHub](https://img.shields.io/badge/Upstream-lobehub%2Fsd--webui--lobe--theme-18181b?style=flat-square&logo=github)](https://github.com/lobehub/sd-webui-lobe-theme)
 [![Forge Neo Compatible](https://img.shields.io/badge/Forge_Neo-Gradio_4.x-00C7B7?style=flat-square)](https://github.com/Haoming02/sd-webui-forge-classic)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
 [![i18n Supported](https://img.shields.io/badge/i18n-11_Languages-success?style=flat-square)](#-internationalization)
@@ -128,8 +129,16 @@ npm run build
 
 ---
 
-## 📄 License & Credits
+## 💖 Acknowledgements & Upstream Credits
 
-* Distributed under the [AGPL-3.0 License](./LICENSE).
-* Originally founded by [LobeHub](https://github.com/lobehub/sd-webui-lobe-theme).
-* Adapted, maintained and modernized for Forge Neo by [LeonWGal](https://github.com/LeonWGal).
+`lobe-theme-neo` is a modernized community continuation and Forge Neo port built upon the revolutionary work of the original **[sd-webui-lobe-theme](https://github.com/lobehub/sd-webui-lobe-theme)**.
+
+* **Original Creator & Vision**: **[LobeHub](https://github.com/lobehub)** & **[CanisMinor](https://github.com/canisminor1990)** (`i@lobehub.com`).
+* **Original Repository**: [lobehub/sd-webui-lobe-theme](https://github.com/lobehub/sd-webui-lobe-theme) — Sincere gratitude to LobeHub for crafting the `@lobehub/ui` design system and setting new standards for AI web interfaces.
+* **Forge Neo Adaptation & Maintenance**: [LeonWGal](https://github.com/LeonWGal) (Gradio 4 reactivity, SplitView placement, DOM fixes, and companion extension integrations).
+
+---
+
+## 📄 License
+
+Distributed under the [AGPL-3.0 License](./LICENSE) in accordance with the upstream LobeHub project.

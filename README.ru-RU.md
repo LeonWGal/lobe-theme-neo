@@ -5,6 +5,7 @@
 **Современный Glassmorphism-интерфейс, оптимизированный для Stable Diffusion WebUI & Forge Neo (Gradio 4)**
 
 [![Релиз](https://img.shields.io/github/v/release/LeonWGal/lobe-theme-neo?color=7952F5&style=flat-square)](https://github.com/LeonWGal/lobe-theme-neo/releases)
+[![Оригинал LobeHub](https://img.shields.io/badge/Upstream-lobehub%2Fsd--webui--lobe--theme-18181b?style=flat-square&logo=github)](https://github.com/lobehub/sd-webui-lobe-theme)
 [![Совместимость с Forge Neo](https://img.shields.io/badge/Forge_Neo-Gradio_4.x-00C7B7?style=flat-square)](https://github.com/Haoming02/sd-webui-forge-classic)
 [![Лицензия](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
 [![Поддержка языков](https://img.shields.io/badge/i18n-11_Languages-success?style=flat-square)](#-интернационализация)
@@ -128,8 +129,16 @@ npm run build
 
 ---
 
-## 📄 Лицензия и благодарности
+## 💖 Благодарности и оригинальный проект
 
-* Распространяется под лицензией [AGPL-3.0 License](./LICENSE).
-* Оригинальный дизайн: [LobeHub](https://github.com/lobehub/sd-webui-lobe-theme).
-* Адаптация, оптимизация и поддержка для Forge Neo: [LeonWGal](https://github.com/LeonWGal).
+`lobe-theme-neo` является модернизированным развитием и адаптацией под Forge Neo оригинальной темы **[sd-webui-lobe-theme](https://github.com/lobehub/sd-webui-lobe-theme)**.
+
+* **Создатели и авторы оригинала**: Команда **[LobeHub](https://github.com/lobehub)** и **[CanisMinor](https://github.com/canisminor1990)** (`i@lobehub.com`).
+* **Оригинальный репозиторий**: [lobehub/sd-webui-lobe-theme](https://github.com/lobehub/sd-webui-lobe-theme) — Выражаем огромную благодарность LobeHub за инновационный UI/UX дизайн, библиотеку компонентов `@lobehub/ui` и колоссальный вклад в экосистему Stable Diffusion.
+* **Адаптация и развитие для Forge Neo**: Поддерживается [LeonWGal](https://github.com/LeonWGal) (поддержка Gradio 4, SplitView, исправление runtime-ошибок и интеграция с новыми расширениями).
+
+---
+
+## 📄 Лицензия
+
+Распространяется под лицензией [AGPL-3.0 License](./LICENSE) в соответствии с лицензией оригинального проекта LobeHub.
