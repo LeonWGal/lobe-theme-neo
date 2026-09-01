@@ -33,47 +33,13 @@
 
 ---
 
-## 📸 界面视觉展示
-
-<div align="center">
-
-### 📐 SplitView 双栏工作区与响应式参数控制
-<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo 双栏分屏" width="100%" />
-
-<br/><br/>
-
-### 🎴 Extra Networks 模型抽屉与 QuickSettings 侧栏
-<img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo 附加网络" width="100%" />
-
-<br/><br/>
-
-### 🪄 提示词工坊与生图工作流
-<img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo 生图工作流" width="100%" />
-
-</div>
-
----
-
 ## 🏛 架构与集成设计
 
-`lobe-theme-neo` 基于 React 18 与 Ant Design 构建了轻量级前端展示层，安全挂载于 Forge Neo / Gradio 4 之上：
+<div align="center">
+  <img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo 架构与侧边栏" width="100%" />
+</div>
 
-```
-┌───────────────────────────────────────────────────────────┐
-│                     Lobe Theme Neo                        │
-├─────────────────────────────┬─────────────────────────────┤
-│  顶部导航栏 (Nav + Actions) │  快捷设置侧边栏 (QuickSet)   │
-├─────────────────────────────┼─────────────────────────────┤
-│  SplitView 工作区           │  Extra Networks 抽屉面板    │
-│  - 生成参数配置 (左)        │  - LoRA / 模型卡片列表 (右) │
-│  - 结果画廊预览 (右)        │  - Civitai 元数据快捷操作   │
-└─────────────────────────────┴─────────────────────────────┘
-                              │ (受控 DOM 注入与事件代理)
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│              Forge Neo / Gradio 4 核心引擎                │
-└───────────────────────────────────────────────────────────┘
-```
+<br/>
 
 * **受控 DOM 传送门 (`useInject`)**: Gradio DOM 节点在不被卸载销毁的前提下安全包裹与移动，确保事件监听器与组件生命周期完整有效。
 * **响应式 Mutation Observer**: 自动侦听异步渲染的标签页、提示词文本域及扩展面板，防止界面元素丢失。
@@ -124,6 +90,12 @@ git pull origin main
 ---
 
 ## ⚙️ 设置与个性化定制
+
+<div align="center">
+  <img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo 设置与提示词工坊" width="100%" />
+</div>
+
+<br/>
 
 点击顶部导航栏右上角的 ⚙️ 图标即可打开设置面板：
 

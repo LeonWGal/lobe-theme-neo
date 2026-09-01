@@ -33,47 +33,13 @@
 
 ---
 
-## 📸 Галерея интерфейса
-
-<div align="center">
-
-### 📐 Двухколоночный режим SplitView и параметры генерации
-<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo SplitView" width="100%" />
-
-<br/><br/>
-
-### 🎴 Панель моделей Extra Networks и QuickSettings
-<img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo Extra Networks" width="100%" />
-
-<br/><br/>
-
-### 🪄 Управление промптами и рабочий процесс генерации
-<img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo Генерация" width="100%" />
-
-</div>
-
----
-
 ## 🏛 Архитектура и интеграция
 
-`lobe-theme-neo` разворачивает интерфейсный слой на React 18 / Ant Design поверх ядра Forge Neo / Gradio 4:
+<div align="center">
+  <img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo Архитектура и боковые панели" width="100%" />
+</div>
 
-```
-┌───────────────────────────────────────────────────────────┐
-│                     Lobe Theme Neo                        │
-├─────────────────────────────┬─────────────────────────────┤
-│  Top Header (Навигация/Меню)│  QuickSettings Сайдбар      │
-├─────────────────────────────┼─────────────────────────────┤
-│  SplitView Рабочая область  │  Extra Networks Сайдбар     │
-│  - Параметры генерации (L)  │  - LoRA / Embeddings (R)    │
-│  - Галерея превью (R)       │  - Civitai Метаданные       │
-└─────────────────────────────┴─────────────────────────────┘
-                              │ (Controlled DOM Injections)
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│              Forge Neo / Gradio 4 Core Engine             │
-└───────────────────────────────────────────────────────────┘
-```
+<br/>
 
 * **Безопасные DOM-порталы (`useInject`)**: Узлы Gradio не разрушаются, а аккуратно оборачиваются и перемещаются, сохраняя все нативные обработчики событий и состояние компонентов.
 * **Реактивные Mutation Observers**: Автоматическое отслеживание асинхронной загрузки вкладок, текстовых полей и панелей расширений.
@@ -124,6 +90,12 @@ git pull origin main
 ---
 
 ## ⚙️ Настройки и персонализация
+
+<div align="center">
+  <img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo Настройки и Prompt Studio" width="100%" />
+</div>
+
+<br/>
 
 Открыть панель настроек можно кликом по иконке ⚙️ в верхней панели:
 

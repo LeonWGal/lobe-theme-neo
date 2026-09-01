@@ -33,47 +33,13 @@
 
 ---
 
-## 📸 Visual Showcase
-
-<div align="center">
-
-### 📐 SplitView Workspace & Responsive Controls
-<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo SplitView Workspace" width="100%" />
-
-<br/><br/>
-
-### 🎴 Extra Networks Drawer & QuickSettings
-<img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo Extra Networks" width="100%" />
-
-<br/><br/>
-
-### 🪄 Generation Workflow & Prompt Tools
-<img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo Workflow" width="100%" />
-
-</div>
-
----
-
 ## 🏛 Architecture & Integration
 
-`lobe-theme-neo` runs a lightweight React 18 / Ant Design presentation layer seamlessly mounted over Forge Neo / Gradio 4:
+<div align="center">
+  <img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo Architecture & Sidebars" width="100%" />
+</div>
 
-```
-┌───────────────────────────────────────────────────────────┐
-│                     Lobe Theme Neo                        │
-├─────────────────────────────┬─────────────────────────────┤
-│  Top Header (Nav + Actions) │  QuickSettings Sidebar      │
-├─────────────────────────────┼─────────────────────────────┤
-│  SplitView Workspace        │  Extra Networks Drawer      │
-│  - Generation Controls (L)  │  - LoRA / Embeddings (R)    │
-│  - Gallery Previewer (R)    │  - Civitai Metadata Inject  │
-└─────────────────────────────┴─────────────────────────────┘
-                              │ (Controlled DOM Injections)
-                              ▼
-┌───────────────────────────────────────────────────────────┐
-│              Forge Neo / Gradio 4 Core Engine             │
-└───────────────────────────────────────────────────────────┘
-```
+<br/>
 
 * **Controlled DOM Portals (`useInject`)**: Gradio DOM nodes are safely wrapped and moved without unmounting, ensuring native event listeners and component lifecycles remain 100% intact.
 * **Resilient Mutation Observers**: Automatically detects asynchronous mounting of tabs, prompt textareas, and third-party extension accordions.
@@ -124,6 +90,12 @@ git pull origin main
 ---
 
 ## ⚙️ Settings & Customization
+
+<div align="center">
+  <img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo Settings & Prompt Studio" width="100%" />
+</div>
+
+<br/>
 
 Open the Settings modal via the ⚙️ icon in the top header:
 
