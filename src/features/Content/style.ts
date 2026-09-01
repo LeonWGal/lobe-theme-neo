@@ -169,6 +169,70 @@ export const useStyles = createStyles(
           flex-direction: column !important;
           padding: 0 !important;
           background: transparent !important;
+          width: 100% !important;
+        }
+
+        #tab_txt2img > .gradio-row,
+        #tab_img2img > .gradio-row {
+          align-items: flex-start !important;
+          gap: 16px !important;
+        }
+
+        #txt2img_results,
+        #img2img_results {
+          position: sticky !important;
+          top: 76px !important;
+          align-self: flex-start !important;
+          z-index: 30 !important;
+        }
+
+        .lobe-split-action-header {
+          display: flex !important;
+          flex-direction: row !important;
+          gap: 8px !important;
+          width: 100% !important;
+          margin-bottom: 8px !important;
+          align-items: stretch !important;
+
+          > [id$='_generate_box'] {
+            flex: 2 !important;
+            min-width: 0 !important;
+            display: flex !important;
+
+            button[id$='_generate'] {
+              width: 100% !important;
+              height: 48px !important;
+              min-height: 48px !important;
+              max-height: 48px !important;
+              font-size: 16px !important;
+              font-weight: 600 !important;
+              border-radius: ${token.borderRadius}px !important;
+            }
+          }
+
+          > [id$='_enqueue_wrapper'],
+          > div:has(button[id$='_enqueue']) {
+            flex: 1 !important;
+            min-width: 0 !important;
+            display: flex !important;
+
+            button {
+              width: 100% !important;
+              height: 48px !important;
+              min-height: 48px !important;
+              max-height: 48px !important;
+              font-size: 15px !important;
+              font-weight: 600 !important;
+              border-radius: ${token.borderRadius}px !important;
+            }
+          }
+        }
+
+        [id$='_gallery_container'] {
+          display: flex !important;
+          flex-direction: column !important;
+          width: 100% !important;
+          min-height: 420px !important;
         }
       `,
       textares: css`

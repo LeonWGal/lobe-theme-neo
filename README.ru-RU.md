@@ -13,6 +13,10 @@
 
 [English](./README.md) · [Русский](./README.ru-RU.md) · [简体中文](./README.zh-CN.md)
 
+<br/>
+
+<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo Превью" width="100%" />
+
 </div>
 
 ---
