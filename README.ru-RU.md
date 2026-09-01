@@ -33,6 +33,27 @@
 
 ---
 
+## 📸 Галерея интерфейса
+
+<div align="center">
+
+### 📐 Двухколоночный режим SplitView и параметры генерации
+<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo SplitView" width="100%" />
+
+<br/><br/>
+
+### 🎴 Панель моделей Extra Networks и QuickSettings
+<img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo Extra Networks" width="100%" />
+
+<br/><br/>
+
+### 🪄 Управление промптами и рабочий процесс генерации
+<img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo Генерация" width="100%" />
+
+</div>
+
+---
+
 ## 🏛 Архитектура и интеграция
 
 `lobe-theme-neo` разворачивает интерфейсный слой на React 18 / Ant Design поверх ядра Forge Neo / Gradio 4:

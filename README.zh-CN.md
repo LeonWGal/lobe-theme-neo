@@ -33,6 +33,27 @@
 
 ---
 
+## 📸 界面视觉展示
+
+<div align="center">
+
+### 📐 SplitView 双栏工作区与响应式参数控制
+<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo 双栏分屏" width="100%" />
+
+<br/><br/>
+
+### 🎴 Extra Networks 模型抽屉与 QuickSettings 侧栏
+<img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo 附加网络" width="100%" />
+
+<br/><br/>
+
+### 🪄 提示词工坊与生图工作流
+<img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo 生图工作流" width="100%" />
+
+</div>
+
+---
+
 ## 🏛 架构与集成设计
 
 `lobe-theme-neo` 基于 React 18 与 Ant Design 构建了轻量级前端展示层，安全挂载于 Forge Neo / Gradio 4 之上：

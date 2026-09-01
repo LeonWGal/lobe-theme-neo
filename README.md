@@ -33,6 +33,27 @@
 
 ---
 
+## 📸 Visual Showcase
+
+<div align="center">
+
+### 📐 SplitView Workspace & Responsive Controls
+<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo SplitView Workspace" width="100%" />
+
+<br/><br/>
+
+### 🎴 Extra Networks Drawer & QuickSettings
+<img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo Extra Networks" width="100%" />
+
+<br/><br/>
+
+### 🪄 Generation Workflow & Prompt Tools
+<img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo Workflow" width="100%" />
+
+</div>
+
+---
+
 ## 🏛 Architecture & Integration
 
 `lobe-theme-neo` runs a lightweight React 18 / Ant Design presentation layer seamlessly mounted over Forge Neo / Gradio 4:
