@@ -197,6 +197,7 @@
   },
   "sidebar": {
     "extraNetwork": "额外网络",
+    "moduleSearch": "搜索并添加…",
     "mode": {
       "fixed": "固定",
       "float": "浮动"

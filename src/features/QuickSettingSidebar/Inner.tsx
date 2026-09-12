@@ -22,6 +22,12 @@ const Inner = memo<DivProps>(() => {
 
   useInject(sidebarReference, '#quicksettings', {
     debug: '[layout] inject - QuickSettingSidebar',
+    onSuccess: (element) => {
+      const input = element.querySelector<HTMLInputElement>('#setting_sd_modules input');
+      if (input && !input.placeholder) {
+        input.placeholder = t('sidebar.moduleSearch', { defaultValue: 'Search and add…' });
+      }
+    },
   });
 
   return (

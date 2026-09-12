@@ -1,14 +1,13 @@
 import { createStyles } from 'antd-style';
 
 export const useStyles = createStyles(
-  ({ css }, { headerHeight = 64, width }: { headerHeight?: number; width: number }) => ({
+  ({ css }, { headerHeight = 64 }: { headerHeight?: number; width: number }) => ({
     container: css`
       height: calc(100vh - ${headerHeight}px);
 
-      ul.options {
-        > li {
-          max-width: ${width - 48}px;
-        }
+      /* Model names follow the actual sidebar width, including while resizing. */
+      ul.options > li {
+        max-width: 100% !important;
       }
 
       #quicksettings {
@@ -54,8 +53,7 @@ export const useStyles = createStyles(
         /* Only truncate label/info text — never icon-wrap / caret spans */
         .label-wrap > span,
         span[data-testid='block-info'],
-        .single-select,
-        .token-remove + span {
+        .single-select {
           overflow: hidden;
           max-width: 100%;
           text-overflow: ellipsis;
