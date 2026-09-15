@@ -34,10 +34,33 @@ export default (token: Theme) => css`
       min-width: 0 !important;
     }
 
+    /* Gradio sizes a non-searchable input to its text. Extend the native click
+       target beneath the decorative caret so the whole field opens the menu. */
+    .secondary-wrap > input {
+      box-sizing: border-box;
+      flex: 1 1 0%;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding-right: 24px;
+    }
+
     .token {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
       overflow: hidden;
+      min-width: 0;
       max-width: 100%;
-      text-overflow: ellipsis;
+
+      > span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        white-space: normal !important;
+      }
+
+      .token-remove {
+        flex-shrink: 0;
+      }
     }
 
     .icon-wrap {
@@ -85,8 +108,13 @@ export default (token: Theme) => css`
     margin: 0 !important;
   }
 
-  ul.options {
+  ul.options,
+  #quicksettings .gradio-dropdown ul.options {
     /* Gradio only mounts this when open — style it, don't force display forever */
+    min-width: 0 !important;
+    max-width: calc(100vw - 32px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto;
     margin: 0 !important;
     padding: 4px !important;
     border: 1px solid ${token.colorBorder} !important;
@@ -96,15 +124,28 @@ export default (token: Theme) => css`
     box-shadow: ${token.boxShadow};
 
     li {
-      overflow: hidden;
-      display: block !important;
+      box-sizing: border-box;
+      overflow: hidden !important;
+      display: flex !important;
+      align-items: flex-start;
+      gap: 8px;
 
-      padding: 4px 8px !important;
+      width: 100% !important;
+      min-width: 0;
+      max-width: 100% !important;
+
+      padding: 6px 8px !important;
       border-radius: ${token.borderRadiusSM}px !important;
 
-      line-height: 1 !important;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      line-height: 1.4 !important;
+      text-overflow: clip;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      white-space: normal !important;
+
+      .inner-item {
+        flex: 0 0 1em;
+      }
 
       &.selected {
         color: ${token.colorText} !important;

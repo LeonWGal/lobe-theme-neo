@@ -51,6 +51,93 @@ export default (token: Theme) => css`
       .gradio-dropdown {
         overflow: visible !important;
       }
+
+      /* Keep selected modules in normal flow instead of Forge's 40px strip. */
+      #setting_sd_modules {
+        flex: 0 0 auto;
+
+        div.wrap-inner {
+          display: flex;
+          flex-direction: column;
+          flex-wrap: nowrap;
+          align-items: stretch;
+          gap: 6px !important;
+
+          height: auto !important;
+          min-height: 40px;
+          padding: 8px !important;
+        }
+
+        div.token {
+          box-sizing: border-box;
+          flex: 0 0 auto;
+          align-items: center;
+          gap: 8px;
+
+          width: 100%;
+          height: auto !important;
+          min-height: 36px;
+          margin: 0 !important;
+          padding: 6px 8px;
+          border: 1px solid ${token.colorBorderSecondary};
+          border-radius: ${token.borderRadiusSM}px;
+
+          background: ${token.colorFillTertiary};
+
+          > span {
+            flex: 1;
+            min-width: 0;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+            white-space: normal !important;
+          }
+
+          .token-remove {
+            display: flex;
+            flex: 0 0 24px;
+            align-items: center;
+            justify-content: center;
+
+            width: 24px;
+            height: 24px;
+            margin: 0;
+            border-radius: ${token.borderRadiusSM}px;
+
+            &:hover {
+              background: ${token.colorFillSecondary};
+            }
+
+            svg {
+              width: 14px;
+              height: 14px;
+            }
+          }
+        }
+
+        .secondary-wrap {
+          flex: 0 0 auto;
+          width: 100%;
+          min-height: 32px;
+
+          > input {
+            height: 32px;
+            margin: 0;
+            padding: 4px 64px 4px 8px;
+            line-height: 1.4 !important;
+          }
+
+          .remove-all {
+            position: absolute;
+            top: 50%;
+            right: 32px;
+            transform: translateY(-50%);
+
+            width: 24px;
+            height: 24px;
+            margin: 0;
+          }
+        }
+      }
     }
 
     /* —— ForgeCanvas —— */
