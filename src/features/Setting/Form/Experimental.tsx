@@ -32,6 +32,13 @@ const SettingForm = memo(() => {
       children: [
         {
           children: <Switch />,
+          desc: t('setting.aspectRatio.desc'),
+          label: t('setting.aspectRatio.title'),
+          name: 'enableAspectRatio',
+          valuePropName: 'checked',
+        },
+        {
+          children: <Switch />,
           desc: t('setting.imageInfo.desc'),
           label: t('setting.imageInfo.title'),
           name: 'enableImageInfo',

@@ -104,6 +104,10 @@
       "desc": "テーマのフッターを非表示にし、Stable Diffusion WebUI のデフォルトフッターのみを表示",
       "title": "フッターを非表示"
     },
+    "aspectRatio": {
+      "desc": "Ergonomic SDXL aspect ratio panel and streamlined generation parameters layout",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "生成された画像でより良い画像情報を表示します",
       "title": "画像情報の代替"

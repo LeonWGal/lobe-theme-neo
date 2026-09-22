@@ -104,6 +104,10 @@
       "desc": "隱藏主題頁腳，僅顯示 Stable Diffusion webui 的默認頁腳",
       "title": "隱藏頁腳"
     },
+    "aspectRatio": {
+      "desc": "Ergonomic SDXL aspect ratio panel and streamlined generation parameters layout",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "在生成的圖片中顯示更好的圖片資訊",
       "title": "替代圖片資訊"

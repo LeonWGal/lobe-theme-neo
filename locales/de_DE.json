@@ -104,6 +104,10 @@
       "desc": "Blenden Sie die Themenfußzeile aus und zeigen Sie nur die Standardfußzeile von Stable Diffusion WebUI an",
       "title": "Fußzeile ausblenden"
     },
+    "aspectRatio": {
+      "desc": "Ergonomic SDXL aspect ratio panel and streamlined generation parameters layout",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "Zeigt bessere Bildinformationen im generierten Bild an",
       "title": "Alternative Bildinformationen"

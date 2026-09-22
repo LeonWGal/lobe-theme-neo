@@ -104,6 +104,16 @@
       "desc": "隐藏主题页脚，仅显示 Stable Diffusion webui 的默认页脚",
       "title": "隐藏页脚"
     },
+    "aspectRatio": {
+      "buttons": "按钮",
+      "desc": "符合人体工程学的宽高比控制面板、浮动尺寸预设菜单与优化参数布局",
+      "dimensionPresets": "尺寸预设",
+      "landscape": "横向",
+      "list": "列表",
+      "portrait": "竖向",
+      "square": "方形",
+      "title": "宽高比面板"
+    },
     "imageInfo": {
       "desc": "在生成的图像中显示更好的图像信息",
       "title": "图像信息替代"

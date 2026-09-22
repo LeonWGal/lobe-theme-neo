@@ -1,5 +1,6 @@
 {
   "confirmPageUnload": false,
+  "enableAspectRatio": true,
   "enableExtraNetworkSidebar": true,
   "enableHighlight": false,
   "enableImageInfo": true,

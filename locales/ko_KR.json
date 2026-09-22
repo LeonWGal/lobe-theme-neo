@@ -104,6 +104,10 @@
       "desc": "테마 푸터를 숨기고 Stable Diffusion 웹UI의 기본 푸터만 표시",
       "title": "푸터 숨기기"
     },
+    "aspectRatio": {
+      "desc": "Ergonomic SDXL aspect ratio panel and streamlined generation parameters layout",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "생성된 이미지에서 더 나은 이미지 정보 표시",
       "title": "대체 이미지 정보"

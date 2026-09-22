@@ -104,6 +104,10 @@
       "desc": "Tema altbilgisini gizle ve sadece stable diffusion webui'nin varsayılan altbilgisini göster",
       "title": "Altbilgiyi Gizle"
     },
+    "aspectRatio": {
+      "desc": "Ergonomic SDXL aspect ratio panel and streamlined generation parameters layout",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "Oluşturulan görüntüde daha iyi görüntü bilgisi göster",
       "title": "Görüntü Bilgisi Alternatifi"

@@ -104,6 +104,16 @@
       "desc": "Hide the theme footer and only display the default footer of stable diffusion webui",
       "title": "Hide Footer"
     },
+    "aspectRatio": {
+      "buttons": "Buttons",
+      "desc": "Ergonomic SDXL aspect ratio panel, floating dimension presets popover, and streamlined generation parameters layout",
+      "dimensionPresets": "Dimension Presets",
+      "landscape": "Landscape",
+      "list": "List",
+      "portrait": "Portrait",
+      "square": "Square",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "Display better image information in the generated image",
       "title": "Image Info Alternative"

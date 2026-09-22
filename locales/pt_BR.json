@@ -104,6 +104,10 @@
       "desc": "Ocultar o rodapé do tema e exibir apenas o rodapé padrão do stable diffusion webui",
       "title": "Ocultar Rodapé"
     },
+    "aspectRatio": {
+      "desc": "Ergonomic SDXL aspect ratio panel and streamlined generation parameters layout",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "Exibir informações melhores da imagem na imagem gerada",
       "title": "Informações da Imagem Alternativas"

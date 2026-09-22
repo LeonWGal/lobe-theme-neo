@@ -104,6 +104,10 @@
       "desc": "Masquer le pied de page du thème et afficher uniquement le pied de page par défaut de stable diffusion webui",
       "title": "Masquer le pied de page"
     },
+    "aspectRatio": {
+      "desc": "Ergonomic SDXL aspect ratio panel and streamlined generation parameters layout",
+      "title": "Aspect Ratio Panel"
+    },
     "imageInfo": {
       "desc": "Afficher de meilleures informations sur l'image dans l'image générée",
       "title": "Informations sur l'image alternatives"

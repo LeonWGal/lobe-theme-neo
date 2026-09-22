@@ -6,6 +6,7 @@ import type { I18n } from '@/types';
 
 export interface WebuiSetting {
   confirmPageUnload: boolean;
+  enableAspectRatio: boolean;
   enableExtraNetworkSidebar: boolean;
   enableHighlight: boolean;
   enableImageInfo: boolean;
@@ -36,6 +37,7 @@ export type WebuiSettingKeys = keyof WebuiSetting;
 
 export const DEFAULT_SETTING: WebuiSetting = {
   confirmPageUnload: false,
+  enableAspectRatio: true,
   enableExtraNetworkSidebar: true,
   enableHighlight: false,
   enableImageInfo: true,
