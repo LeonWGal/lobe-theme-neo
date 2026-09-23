@@ -180,6 +180,15 @@
     }
 
     function isAspectRatioEnabled() {
+        if (typeof opts !== "undefined") {
+            if (typeof opts.lobe_enable_aspect_ratio !== "undefined") {
+                return Boolean(opts.lobe_enable_aspect_ratio);
+            }
+            if (typeof opts.enable_aspect_ratio !== "undefined") {
+                return Boolean(opts.enable_aspect_ratio);
+            }
+        }
+
         try {
             const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING");
             if (raw) {
@@ -199,14 +208,97 @@
     }
 
     function setNativeVal(input, val) {
-        if (!input) return;
+        if (!input) return false;
         const numVal = parseInt(val, 10);
-        if (isNaN(numVal)) return;
-        if (parseInt(input.value, 10) === numVal) return;
+        if (isNaN(numVal)) return false;
 
-        input.value = numVal;
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        input.dispatchEvent(new Event("change", { bubbles: true }));
+        const sliderContainer = input.closest(".gradio-slider") ||
+                                input.closest(".form") ||
+                                input.closest(".gradio-row") ||
+                                input.parentElement?.parentElement ||
+                                input.parentElement;
+        const rangeInput = sliderContainer ? sliderContainer.querySelector("input[type=range]") : null;
+
+        let changed = false;
+
+        // 1. Update number input
+        if (parseInt(input.value, 10) !== numVal) {
+            input.value = numVal;
+            if (typeof updateInput === "function") {
+                updateInput(input);
+            } else {
+                const ev = new Event("input", { bubbles: true });
+                Object.defineProperty(ev, "target", { value: input });
+                input.dispatchEvent(ev);
+            }
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            input.dispatchEvent(new Event("blur", { bubbles: true }));
+            try {
+                input.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+            } catch (e) {
+                input.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+            }
+            changed = true;
+        }
+
+        // 2. Update range slider input (needed for Gradio reactive store & aspectRatioOverlay.js)
+        if (rangeInput && parseInt(rangeInput.value, 10) !== numVal) {
+            rangeInput.value = numVal;
+            if (typeof updateInput === "function") {
+                updateInput(rangeInput);
+            } else {
+                const ev = new Event("input", { bubbles: true });
+                Object.defineProperty(ev, "target", { value: rangeInput });
+                rangeInput.dispatchEvent(ev);
+            }
+            rangeInput.dispatchEvent(new Event("change", { bubbles: true }));
+            try {
+                rangeInput.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+            } catch (e) {
+                rangeInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+            }
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    function syncBoundsFromNative(nativeInput, customNum, customSlider, fallbackMin, fallbackMax, fallbackStep) {
+        if (!nativeInput) return { min: fallbackMin, max: fallbackMax, step: fallbackStep };
+        const sliderContainer = nativeInput.closest(".gradio-slider") ||
+                                nativeInput.closest(".form") ||
+                                nativeInput.closest(".gradio-row") ||
+                                nativeInput.parentElement?.parentElement ||
+                                nativeInput.parentElement;
+        const rangeInput = sliderContainer ? sliderContainer.querySelector("input[type=range]") : null;
+
+        const min = parseFloat(nativeInput.min || rangeInput?.min) || fallbackMin;
+        const max = parseFloat(nativeInput.max || rangeInput?.max) || fallbackMax;
+        const step = parseFloat(nativeInput.step || rangeInput?.step) || fallbackStep;
+
+        if (customNum) {
+            if (parseFloat(customNum.min) !== min) customNum.min = min;
+            if (parseFloat(customNum.max) !== max) customNum.max = max;
+            if (parseFloat(customNum.step) !== step) customNum.step = step;
+        }
+        if (customSlider) {
+            if (parseFloat(customSlider.min) !== min) customSlider.min = min;
+            if (parseFloat(customSlider.max) !== max) customSlider.max = max;
+            if (parseFloat(customSlider.step) !== step) customSlider.step = step;
+        }
+
+        return { min, max, step };
+    }
+
+    function clampToInput(val, input, fallbackMin, fallbackMax, fallbackStep) {
+        const min = parseFloat(input?.min) || fallbackMin;
+        const max = parseFloat(input?.max) || fallbackMax;
+        const step = parseFloat(input?.step) || fallbackStep;
+        let num = Math.max(min, Math.min(max, parseInt(val, 10) || min));
+        if (step > 1) {
+            num = Math.round((num - min) / step) * step + min;
+        }
+        return Math.max(min, Math.min(max, num));
     }
 
     function updateSliderTrack(slider) {
@@ -224,23 +316,38 @@
 
     function calculateApproxRatio(w, h) {
         if (!w || !h) return "1:1";
+        const val = w / h;
+
+        // Check common aspect ratios first with small tolerance
+        const standardRatios = [
+            { label: "1:1", val: 1 },
+            { label: "4:5", val: 4 / 5 },
+            { label: "5:4", val: 5 / 4 },
+            { label: "3:4", val: 3 / 4 },
+            { label: "4:3", val: 4 / 3 },
+            { label: "2:3", val: 2 / 3 },
+            { label: "3:2", val: 3 / 2 },
+            { label: "9:16", val: 9 / 16 },
+            { label: "16:9", val: 16 / 9 },
+            { label: "9:21", val: 9 / 21 },
+            { label: "21:9", val: 21 / 9 },
+            { label: "2:1", val: 2 },
+            { label: "1:2", val: 0.5 },
+        ];
+        for (const r of standardRatios) {
+            if (Math.abs(val - r.val) < 0.035) {
+                return r.label;
+            }
+        }
+
         const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
         const divisor = gcd(w, h);
         const rw = Math.round(w / divisor);
         const rh = Math.round(h / divisor);
-        if (rw <= 21 && rh <= 21) {
+        if (rw <= 16 && rh <= 16) {
             return `${rw}:${rh}`;
         }
-        const val = w / h;
-        if (Math.abs(val - 1) < 0.05) return "1:1";
-        if (Math.abs(val - 16 / 9) < 0.05) return "16:9";
-        if (Math.abs(val - 9 / 16) < 0.05) return "9:16";
-        if (Math.abs(val - 4 / 3) < 0.05) return "4:3";
-        if (Math.abs(val - 3 / 4) < 0.05) return "3:4";
-        if (Math.abs(val - 3 / 2) < 0.05) return "3:2";
-        if (Math.abs(val - 2 / 3) < 0.05) return "2:3";
-        if (Math.abs(val - 21 / 9) < 0.05) return "21:9";
-        if (Math.abs(val - 9 / 21) < 0.05) return "9:21";
+
         return val > 1 ? `${val.toFixed(2)}:1` : `1:${(1 / val).toFixed(2)}`;
     }
 
@@ -250,7 +357,7 @@
         document.querySelectorAll(".sd-ar-popover").forEach((pop) => {
             pop.style.display = "none";
         });
-        document.querySelectorAll(".sd-ar-trigger").forEach((trig) => {
+        document.querySelectorAll(".sd-ar-trigger, .sd-ar-ratio-display").forEach((trig) => {
             trig.classList.remove("active");
         });
         activePopoverTab = null;
@@ -480,17 +587,6 @@
         }
     }
 
-    function setNativeVal(input, val) {
-        if (!input) return;
-        const numVal = parseInt(val, 10);
-        if (isNaN(numVal)) return;
-        if (parseInt(input.value, 10) === numVal) return;
-
-        input.value = numVal;
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        input.dispatchEvent(new Event("change", { bubbles: true }));
-    }
-
     function initTabControls(tabName) {
         const root = gradioApp();
         if (!root) return false;
@@ -550,19 +646,34 @@
         const bsizeSlider = panel.querySelector(`#${tabName}_ar_bsize_slider`);
         const popoverBtns = popover.querySelectorAll(".sd-ar-popover-btn");
 
+        // Inherit dynamic bounds (min, max, step) directly from WebUI native elements / ui-config.json
+        function syncAllBounds() {
+            syncBoundsFromNative(nativeWidthInput, widthNum, widthSlider, 64, 2048, 8);
+            syncBoundsFromNative(nativeHeightInput, heightNum, heightSlider, 64, 2048, 8);
+            syncBoundsFromNative(nativeBatchCountInput, bcountNum, bcountSlider, 1, 128, 1);
+            syncBoundsFromNative(nativeBatchSizeInput, bsizeNum, bsizeSlider, 1, 8, 1);
+        }
+        syncAllBounds();
+
+        const togglePopover = (e) => {
+            e.stopPropagation();
+            if (popover.style.display === "block" && activePopoverTab === tabName) {
+                closeAllPopovers();
+            } else {
+                closeAllPopovers();
+                activePopoverTab = tabName;
+                popover.style.display = "block";
+                triggerBtn.classList.add("active");
+                if (ratioBtn) ratioBtn.classList.add("active");
+                positionPopover(triggerBtn, popover);
+            }
+        };
+
         if (triggerBtn) {
-            triggerBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (popover.style.display === "block" && activePopoverTab === tabName) {
-                    closeAllPopovers();
-                } else {
-                    closeAllPopovers();
-                    activePopoverTab = tabName;
-                    popover.style.display = "block";
-                    triggerBtn.classList.add("active");
-                    positionPopover(triggerBtn, popover);
-                }
-            });
+            triggerBtn.addEventListener("click", togglePopover);
+        }
+        if (ratioBtn) {
+            ratioBtn.addEventListener("click", togglePopover);
         }
 
         popoverBtns.forEach((btn) => {
@@ -578,16 +689,26 @@
         });
 
         function updateDimensionsUI(w, h) {
-            w = parseInt(w, 10) || 1024;
-            h = parseInt(h, 10) || 1024;
+            let numW = parseInt(w, 10);
+            let numH = parseInt(h, 10);
 
-            if (parseInt(widthSlider.value, 10) !== w) widthSlider.value = w;
-            if (parseInt(widthNum.value, 10) !== w) widthNum.value = w;
-            if (parseInt(heightSlider.value, 10) !== h) heightSlider.value = h;
-            if (parseInt(heightNum.value, 10) !== h) heightNum.value = h;
+            if (isNaN(numW) || numW <= 0) {
+                numW = parseInt(nativeWidthInput.value, 10) || parseInt(nativeWidthInput.getAttribute("value"), 10) || 1024;
+            }
+            if (isNaN(numH) || numH <= 0) {
+                numH = parseInt(nativeHeightInput.value, 10) || parseInt(nativeHeightInput.getAttribute("value"), 10) || 1024;
+            }
 
-            const matched = findMatchingPreset(w, h);
-            const ratioLabel = matched ? matched.label : calculateApproxRatio(w, h);
+            if (parseInt(widthSlider.value, 10) !== numW) widthSlider.value = numW;
+            if (parseInt(widthNum.value, 10) !== numW) widthNum.value = numW;
+            if (parseInt(heightSlider.value, 10) !== numH) heightSlider.value = numH;
+            if (parseInt(heightNum.value, 10) !== numH) heightNum.value = numH;
+
+            updateSliderTrack(widthSlider);
+            updateSliderTrack(heightSlider);
+
+            const matched = findMatchingPreset(numW, numH);
+            const ratioLabel = matched ? matched.label : calculateApproxRatio(numW, numH);
             if (ratioBtn) {
                 ratioBtn.textContent = ratioLabel;
             }
@@ -595,7 +716,7 @@
             popoverBtns.forEach((btn) => {
                 const bw = parseInt(btn.getAttribute("data-w"), 10);
                 const bh = parseInt(btn.getAttribute("data-h"), 10);
-                if (bw === w && bh === h) {
+                if (bw === numW && bh === numH) {
                     btn.classList.add("active");
                 } else {
                     btn.classList.remove("active");
@@ -604,15 +725,17 @@
         }
 
         function updateBatchCountUI(val) {
-            val = Math.max(1, Math.min(100, parseInt(val, 10) || 1));
-            if (parseInt(bcountSlider.value, 10) !== val) bcountSlider.value = val;
-            if (parseInt(bcountNum.value, 10) !== val) bcountNum.value = val;
+            const clamped = clampToInput(val, bcountSlider, 1, 128, 1);
+            if (parseInt(bcountSlider.value, 10) !== clamped) bcountSlider.value = clamped;
+            if (parseInt(bcountNum.value, 10) !== clamped) bcountNum.value = clamped;
+            updateSliderTrack(bcountSlider);
         }
 
         function updateBatchSizeUI(val) {
-            val = Math.max(1, Math.min(8, parseInt(val, 10) || 1));
-            if (parseInt(bsizeSlider.value, 10) !== val) bsizeSlider.value = val;
-            if (parseInt(bsizeNum.value, 10) !== val) bsizeNum.value = val;
+            const clamped = clampToInput(val, bsizeSlider, 1, 8, 1);
+            if (parseInt(bsizeSlider.value, 10) !== clamped) bsizeSlider.value = clamped;
+            if (parseInt(bsizeNum.value, 10) !== clamped) bsizeNum.value = clamped;
+            updateSliderTrack(bsizeSlider);
         }
 
         widthSlider.addEventListener("input", (e) => {
@@ -627,8 +750,7 @@
             if (!e.isTrusted) return;
             let w = parseInt(e.target.value, 10);
             if (!isNaN(w)) {
-                w = Math.max(64, Math.min(2048, w));
-                w = Math.round(w / 8) * 8;
+                w = clampToInput(w, widthSlider, 64, 2048, 8);
                 const h = parseInt(heightSlider.value, 10);
                 setNativeVal(nativeWidthInput, w);
                 updateDimensionsUI(w, h);
@@ -637,8 +759,7 @@
 
         widthNum.addEventListener("change", (e) => {
             if (!e.isTrusted) return;
-            let w = Math.max(64, Math.min(2048, parseInt(e.target.value, 10) || 1024));
-            w = Math.round(w / 8) * 8;
+            let w = clampToInput(e.target.value, widthSlider, 64, 2048, 8);
             const h = parseInt(heightSlider.value, 10);
             setNativeVal(nativeWidthInput, w);
             updateDimensionsUI(w, h);
@@ -656,8 +777,7 @@
             if (!e.isTrusted) return;
             let h = parseInt(e.target.value, 10);
             if (!isNaN(h)) {
-                h = Math.max(64, Math.min(2048, h));
-                h = Math.round(h / 8) * 8;
+                h = clampToInput(h, heightSlider, 64, 2048, 8);
                 const w = parseInt(widthSlider.value, 10);
                 setNativeVal(nativeHeightInput, h);
                 updateDimensionsUI(w, h);
@@ -666,8 +786,7 @@
 
         heightNum.addEventListener("change", (e) => {
             if (!e.isTrusted) return;
-            let h = Math.max(64, Math.min(2048, parseInt(e.target.value, 10) || 1024));
-            h = Math.round(h / 8) * 8;
+            let h = clampToInput(e.target.value, heightSlider, 64, 2048, 8);
             const w = parseInt(widthSlider.value, 10);
             setNativeVal(nativeHeightInput, h);
             updateDimensionsUI(w, h);
@@ -683,7 +802,7 @@
         });
 
         function setBatchCount(val) {
-            const count = Math.max(1, Math.min(100, parseInt(val, 10) || 1));
+            const count = clampToInput(val, bcountSlider, 1, 128, 1);
             if (nativeBatchCountInput) setNativeVal(nativeBatchCountInput, count);
             updateBatchCountUI(count);
         }
@@ -693,7 +812,7 @@
         bcountNum.addEventListener("change", (e) => { if (e.isTrusted) setBatchCount(e.target.value); });
 
         function setBatchSize(val) {
-            const size = Math.max(1, Math.min(8, parseInt(val, 10) || 1));
+            const size = clampToInput(val, bsizeSlider, 1, 8, 1);
             if (nativeBatchSizeInput) setNativeVal(nativeBatchSizeInput, size);
             updateBatchSizeUI(size);
         }
@@ -702,11 +821,15 @@
         bsizeNum.addEventListener("input", (e) => { if (e.isTrusted) setBatchSize(e.target.value); });
         bsizeNum.addEventListener("change", (e) => { if (e.isTrusted) setBatchSize(e.target.value); });
 
-        updateDimensionsUI(nativeWidthInput.value, nativeHeightInput.value);
+        // Initial State Sync from Gradio / WebUI Defaults
+        const initW = parseInt(nativeWidthInput.value, 10) || parseInt(nativeWidthInput.getAttribute("value"), 10) || 1024;
+        const initH = parseInt(nativeHeightInput.value, 10) || parseInt(nativeHeightInput.getAttribute("value"), 10) || 1024;
+        updateDimensionsUI(initW, initH);
         if (nativeBatchCountInput) updateBatchCountUI(nativeBatchCountInput.value);
         if (nativeBatchSizeInput) updateBatchSizeUI(nativeBatchSizeInput.value);
 
         const syncFromNative = () => {
+            syncAllBounds();
             const w = parseInt(nativeWidthInput.value, 10);
             const h = parseInt(nativeHeightInput.value, 10);
             if (w && h && (w !== parseInt(widthSlider.value, 10) || h !== parseInt(heightSlider.value, 10))) {
@@ -740,6 +863,9 @@
         }
 
         setInterval(syncFromNative, 500);
+        if (typeof onAfterUiUpdate === "function") {
+            onAfterUiUpdate(syncFromNative);
+        }
         return true;
     }
 
@@ -832,6 +958,13 @@
             updateAllTexts();
         }
     });
+
+    if (typeof onOptionsChanged === "function") {
+        onOptionsChanged(() => {
+            applyEnabledState(isAspectRatioEnabled());
+            updateAllTexts();
+        });
+    }
 
     let initialized = false;
     function initAll() {
