@@ -419,7 +419,11 @@
         const max = parseFloat(slider.max) || 100;
         const val = parseFloat(slider.value) || 0;
         const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
-        slider.style.background = `linear-gradient(to right, var(--color-accent, var(--colorPrimary, #52c41a)) 0%, var(--color-accent, var(--colorPrimary, #52c41a)) ${pct}%, var(--neutral-700, var(--colorFillTertiary, #333333)) ${pct}%, var(--neutral-700, var(--colorFillTertiary, #333333)) 100%)`;
+        slider.style.setProperty(
+            "background",
+            `linear-gradient(to right, var(--gf-primary, #52c41a) 0%, var(--gf-primary, #52c41a) ${pct}%, var(--gf-slider-unfilled, rgba(128, 128, 128, 0.2)) ${pct}%, var(--gf-slider-unfilled, rgba(128, 128, 128, 0.2)) 100%)`,
+            "important"
+        );
     }
 
     function findMatchingPreset(w, h) {
@@ -595,26 +599,30 @@
                 <div class="sd-ar-filter-row">
                     <div class="sd-ar-filter-bar">
                         <button type="button" class="sd-ar-filter-btn active" data-filter="all">
+                            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><circle cx="8" cy="8" r="5.5"></circle></svg>
                             <span data-i18n="filterAll">${t("filterAll")}</span> (${PRESETS.length})
                         </button>
                         <button type="button" class="sd-ar-filter-btn" data-filter="square">
-                            ▢ <span data-i18n="filterSquare">${t("filterSquare")}</span> (${squarePresets.length})
+                            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"></rect></svg>
+                            <span data-i18n="filterSquare">${t("filterSquare")}</span> (${squarePresets.length})
                         </button>
                         <button type="button" class="sd-ar-filter-btn" data-filter="portrait">
-                            ▯ <span data-i18n="filterPortrait">${t("filterPortrait")}</span> (${portraitPresets.length})
+                            <svg viewBox="0 0 16 16" width="9" height="12" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><rect x="3" y="1.5" width="10" height="13" rx="1.5"></rect></svg>
+                            <span data-i18n="filterPortrait">${t("filterPortrait")}</span> (${portraitPresets.length})
                         </button>
                         <button type="button" class="sd-ar-filter-btn" data-filter="landscape">
-                            ▭ <span data-i18n="filterLandscape">${t("filterLandscape")}</span> (${landscapePresets.length})
+                            <svg viewBox="0 0 16 16" width="12" height="9" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"></rect></svg>
+                            <span data-i18n="filterLandscape">${t("filterLandscape")}</span> (${landscapePresets.length})
                         </button>
                     </div>
                 </div>
                 <div class="sd-ar-grid" id="${tabName}_ar_grid">
                     ${PRESETS.map((p, idx) => `
-                        <button type="button" class="sd-ar-btn" data-w="${p.w}" data-h="${p.h}" data-idx="${idx}" data-group="${p.group}" title="${p.label} (${p.w}×${p.h}) — ${p.desc}">
+                        <button type="button" class="sd-ar-btn" data-w="${p.w}" data-h="${p.h}" data-idx="${idx}" data-group="${p.group}" title="${p.label} (${p.w} × ${p.h}) — ${p.desc}">
                             <div class="sd-ar-btn-icon">${renderRatioSvg(p.group)}</div>
                             <div class="sd-ar-btn-info">
                                 <span class="sd-ar-btn-ratio">${p.label}</span>
-                                <span class="sd-ar-btn-res">${p.w}x${p.h}</span>
+                                <span class="sd-ar-btn-res">${p.w} × ${p.h}</span>
                             </div>
                         </button>
                     `).join("")}
@@ -689,6 +697,7 @@
         const isEnabled = isAspectRatioEnabled();
         const samplerContainer = root.querySelector(`#sampler_selection_${tabName}`);
         const formTarget = samplerContainer ? (samplerContainer.querySelector(".form") || samplerContainer) : null;
+        const steps = root.querySelector(`#${tabName}_steps`);
         const cfgScale = root.querySelector(`#${tabName}_cfg_scale`);
         const distilledCfg = root.querySelector(`#${tabName}_distilled_cfg_scale`);
 
@@ -697,6 +706,13 @@
         if (isEnabled) {
             samplerContainer.classList.add("sd-ar-enhanced-sampler");
             if (formTarget) formTarget.classList.add("sd-ar-enhanced-form");
+
+            // Ensure steps is inside formTarget so all 4 elements are direct children of the grid
+            if (steps && formTarget && !formTarget.contains(steps)) {
+                if (!steps._origParent) steps._origParent = steps.parentElement;
+                if (!steps._origNextSibling) steps._origNextSibling = steps.nextSibling;
+                formTarget.appendChild(steps);
+            }
 
             if (cfgScale && formTarget && !formTarget.contains(cfgScale)) {
                 if (!cfgScale._origParent) cfgScale._origParent = cfgScale.parentElement;
@@ -736,6 +752,13 @@
             if (formTarget) formTarget.classList.remove("sd-ar-enhanced-form");
             samplerContainer.classList.remove("has-distilled-cfg");
 
+            if (steps && steps._origParent && formTarget && formTarget.contains(steps)) {
+                if (steps._origNextSibling && steps._origNextSibling.parentNode === steps._origParent) {
+                    steps._origParent.insertBefore(steps, steps._origNextSibling);
+                } else {
+                    steps._origParent.appendChild(steps);
+                }
+            }
             if (cfgScale && cfgScale._origParent && formTarget && formTarget.contains(cfgScale)) {
                 cfgScale._origParent.appendChild(cfgScale);
                 cfgScale._origParent.style.display = "";
