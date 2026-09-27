@@ -110,6 +110,8 @@
       "dimensionPresets": "Dimension Presets",
       "landscape": "Landscape",
       "list": "List",
+      "mode": "Aspect Ratio View Mode",
+      "modeDesc": "Choose between compact popover dropdown or full buttons grid with filter tabs",
       "portrait": "Portrait",
       "square": "Square",
       "title": "Aspect Ratio Panel"

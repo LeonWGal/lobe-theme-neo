@@ -1,44 +1,43 @@
 /**
- * Lobe Theme Neo - Aspect Ratio & Generation Controls v3.0
+ * Lobe Theme Neo - Aspect Ratio & Generation Controls v3.2
  * 
  * Features:
  * - Native Lobe Theme Styling: Fully unified with Ant Design / LobeHub UI tokens.
- * - Floating Popover Presets Menu (matches media_1789598318907.png exactly):
- *   - Sleek Ant Design Select Trigger: [ ⊞ 832 × 1216 (2:3) ▾ ]
- *   - Floating Popover Card with Portrait, Landscape, and Square 2-column grids.
- *   - Active preset highlighted with solid theme accent color and high contrast text.
- *   - Close button (✕), outside click, and Escape key dismissal.
- * - Grid View (Buttons mode) & Popover View (Dropdown mode) toggle.
- * - Trilingual Localization: English (en_US), Russian (ru_RU), and Chinese (zh_CN).
- *   - Dynamic locale detection and live text updates upon setting change.
- * - Width & Height sliders and number inputs with Up/Down Swap button (⇅).
- * - Batch Count & Batch Size sliders and number inputs.
- * - Seamless 2x2 Generation Layout:
- *   Row 1: [ Sampling Method ] [ Schedule Type ] (50% / 50%)
- *   Row 2: [ Sampling Steps  ] [ CFG Scale     ] (50% / 50%)
- * - Live On/Off switching in Theme Settings without page reload.
+ * - Dual View Modes (Configurable in Experimental Settings & on-panel toggle):
+ *   1. "dropdown": Compact header pill [ ⊞ 832 × 1216 (2:3) ▾ ] with floating popover presets.
+ *   2. "buttons": Original full grid view with filter tabs [ Все ] [ ▯ Портрет & Квадрат ] [ ▭ Пейзаж ].
+ * - Perfectly Sorted Presets:
+ *   - Square: 1024×1024 (SDXL/Flux), 768×768 (SD 2.x), 512×512 (SD 1.5).
+ *   - Portrait: 4:5 (896×1152), 3:4 (896×1216), 2:3 (832×1216), 9:16 (768×1344), 9:21 (640×1536).
+ *   - Landscape: 5:4 (1152×896), 4:3 (1216×896), 3:2 (1216×832), 16:9 (1344×768), 2:1 (1408×704), 21:9 (1536×640).
+ * - Floating Popover Presets Menu with Square section on top and high-contrast ratio badges.
+ * - Full WebUI Defaults (ui-config.json) 2-Way Sync for Resolution, Batch Count & Batch Size.
+ * - Width & Height sliders and number inputs with Swap button (⇅).
+ * - Symmetrical 2x2 Sampler & CFG Scale generation layout.
  */
 
 (function () {
-    // Official Stability AI SDXL Training Bucket Resolutions (divisible by 64, ~1MP)
+    // Standard Resolution Presets (divisible by 64 / 8, logically ordered)
     const PRESETS = [
-        // Square
-        { label: "1:1", w: 1024, h: 1024, group: "square" },
+        // Square (Квадрат — базовые стандарты)
+        { label: "1:1", w: 1024, h: 1024, group: "square", desc: "SDXL / Flux 1024×1024" },
+        { label: "1:1", w: 768, h: 768, group: "square", desc: "SD 2.x 768×768" },
+        { label: "1:1", w: 512, h: 512, group: "square", desc: "SD 1.5 512×512" },
 
-        // Portrait
-        { label: "4:5", w: 896, h: 1152, group: "portrait" },
-        { label: "3:4", w: 896, h: 1216, group: "portrait" },
-        { label: "2:3", w: 832, h: 1216, group: "portrait" },
-        { label: "9:16", w: 768, h: 1344, group: "portrait" },
-        { label: "9:21", w: 640, h: 1536, group: "portrait" },
+        // Portrait (Портретные — от близких к квадрату до самых узких)
+        { label: "4:5", w: 896, h: 1152, group: "portrait", desc: "Фото / Инста 4:5" },
+        { label: "3:4", w: 896, h: 1216, group: "portrait", desc: "Портрет 3:4" },
+        { label: "2:3", w: 832, h: 1216, group: "portrait", desc: "Классический 35мм 2:3" },
+        { label: "9:16", w: 768, h: 1344, group: "portrait", desc: "Мобильный / Stories 9:16" },
+        { label: "9:21", w: 640, h: 1536, group: "portrait", desc: "Вытянутый кино 9:21" },
 
-        // Landscape
-        { label: "5:4", w: 1152, h: 896, group: "landscape" },
-        { label: "4:3", w: 1216, h: 896, group: "landscape" },
-        { label: "3:2", w: 1216, h: 832, group: "landscape" },
-        { label: "16:9", w: 1344, h: 768, group: "landscape" },
-        { label: "21:9", w: 1536, h: 640, group: "landscape" },
-        { label: "2:1", w: 1408, h: 704, group: "landscape" },
+        // Landscape (Альбомные / Пейзажные — от близких к квадрату до ультрашироких)
+        { label: "5:4", w: 1152, h: 896, group: "landscape", desc: "Пейзаж 5:4" },
+        { label: "4:3", w: 1216, h: 896, group: "landscape", desc: "Монитор 4:3" },
+        { label: "3:2", w: 1216, h: 832, group: "landscape", desc: "Классический 35мм 3:2" },
+        { label: "16:9", w: 1344, h: 768, group: "landscape", desc: "Широкоформатный 16:9" },
+        { label: "2:1", w: 1408, h: 704, group: "landscape", desc: "Панорама 2:1" },
+        { label: "21:9", w: 1536, h: 640, group: "landscape", desc: "Кинематографичный 21:9" },
     ];
 
     const I18N = {
@@ -46,9 +45,13 @@
             title: "Dimension Presets",
             aspectRatio: "Aspect Ratio",
             buttonsView: "Buttons",
-            dropdownView: "List",
-            buttonsViewTip: "Buttons view",
-            dropdownViewTip: "Dropdown presets view",
+            dropdownView: "Dropdown",
+            buttonsViewTip: "Switch to full buttons grid view",
+            dropdownViewTip: "Switch to compact dropdown popover view",
+            filterAll: "All",
+            filterSquare: "Square",
+            filterPortrait: "Portrait",
+            filterLandscape: "Landscape",
             resPreviewTip: "Current Resolution (Width × Height)",
             selectPreset: "Select preset...",
             customRes: "Custom",
@@ -80,8 +83,12 @@
             aspectRatio: "Соотношение сторон",
             buttonsView: "Кнопки",
             dropdownView: "Список",
-            buttonsViewTip: "Режим кнопок",
-            dropdownViewTip: "Режим выпадающего списка",
+            buttonsViewTip: "Переключить на сетку кнопок",
+            dropdownViewTip: "Переключить на компактный выпадающий список",
+            filterAll: "Все",
+            filterSquare: "Квадрат",
+            filterPortrait: "Портрет",
+            filterLandscape: "Пейзаж",
             resPreviewTip: "Текущее разрешение (Ширина × Высота)",
             selectPreset: "Выбрать пресет...",
             customRes: "Пользовательское",
@@ -113,8 +120,12 @@
             aspectRatio: "宽高比",
             buttonsView: "按钮",
             dropdownView: "列表",
-            buttonsViewTip: "网格视图",
-            dropdownViewTip: "下拉预设视图",
+            buttonsViewTip: "切换至按钮网格视图",
+            dropdownViewTip: "切换至紧凑下拉列表视图",
+            filterAll: "全部",
+            filterSquare: "方形",
+            filterPortrait: "竖向",
+            filterLandscape: "横向",
             resPreviewTip: "当前分辨率 (宽 × 高)",
             selectPreset: "选择预设...",
             customRes: "自定义",
@@ -139,11 +150,52 @@
             "3:2": "经典摄影 3:2",
             "16:9": "宽屏显示 16:9",
             "21:9": "超宽电影 21:9",
-            "2:1": "全景画幅 2:1",
-        },
+            "2:1": "全景 2:1",
+        }
     };
 
+    let activePopoverTab = null;
+
+    function closeAllPopovers() {
+        document.querySelectorAll(".sd-ar-popover").forEach((p) => {
+            p.style.display = "none";
+        });
+        document.querySelectorAll(".sd-ar-trigger").forEach((btn) => {
+            btn.classList.remove("active");
+        });
+        document.querySelectorAll(".sd-ar-ratio-badge").forEach((badge) => {
+            badge.classList.remove("active");
+        });
+        activePopoverTab = null;
+    }
+
+    function positionPopover(triggerBtn, popover) {
+        if (!triggerBtn || !popover) return;
+        const rect = triggerBtn.getBoundingClientRect();
+        const popoverWidth = 320;
+        let left = rect.left;
+        let top = rect.bottom + 6;
+
+        if (left + popoverWidth > window.innerWidth - 16) {
+            left = window.innerWidth - popoverWidth - 16;
+        }
+        if (left < 16) left = 16;
+
+        popover.style.position = "fixed";
+        popover.style.top = `${Math.round(top)}px`;
+        popover.style.left = `${Math.round(left)}px`;
+        popover.style.width = `${popoverWidth}px`;
+        popover.style.zIndex = "99999";
+    }
+
     function getLocale() {
+        if (typeof opts !== "undefined" && opts.localization) {
+            const loc = opts.localization.toLowerCase();
+            if (loc.startsWith("ru")) return "ru_RU";
+            if (loc.startsWith("zh")) return "zh_CN";
+            if (loc.startsWith("en")) return "en_US";
+        }
+
         try {
             const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING");
             if (raw) {
@@ -207,55 +259,118 @@
         return true;
     }
 
+    function getAspectRatioViewMode() {
+        const local = localStorage.getItem("lobe_ratio_default_view");
+        if (local === "buttons" || local === "dropdown") return local;
+
+        try {
+            const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING");
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed.aspectRatioMode) return parsed.aspectRatioMode;
+                if (parsed.aspectRatioViewMode) return parsed.aspectRatioViewMode;
+            }
+        } catch (e) {}
+
+        if (typeof opts !== "undefined") {
+            if (typeof opts.lobe_ratio_default_view !== "undefined") return opts.lobe_ratio_default_view;
+            if (typeof opts.gal_ratio_default_view !== "undefined") return opts.gal_ratio_default_view;
+        }
+
+        return "dropdown";
+    }
+
+    function setAspectRatioViewMode(mode) {
+        localStorage.setItem("lobe_ratio_default_view", mode);
+        try {
+            const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING") || "{}";
+            const parsed = JSON.parse(raw) || {};
+            parsed.aspectRatioMode = mode;
+            parsed.aspectRatioViewMode = mode;
+            const updated = JSON.stringify(parsed);
+            localStorage.setItem("SD-LOBE-SETTING", updated);
+            localStorage.setItem("SD-KITCHEN-SETTING", updated);
+        } catch (e) {}
+    }
+
+    function getSliderBlock(input) {
+        if (!input) return null;
+        return input.closest("[id^='txt2img_'], [id^='img2img_']") ||
+               input.closest(".gradio-slider") ||
+               input.parentElement?.closest("div[id]") ||
+               input.parentElement?.parentElement?.parentElement ||
+               input.parentElement?.parentElement;
+    }
+
+    function readNativeVal(nativeInput, fallback) {
+        if (!nativeInput) return fallback;
+        const block = getSliderBlock(nativeInput);
+        const num = block ? (block.querySelector("input[type=number]") || nativeInput) : nativeInput;
+        const range = block ? block.querySelector("input[type=range]") : null;
+
+        const nVal = parseInt(num?.value, 10);
+        if (!isNaN(nVal) && nVal > 0) return nVal;
+
+        const rVal = parseInt(range?.value, 10);
+        if (!isNaN(rVal) && rVal > 0) return rVal;
+
+        const attrVal = parseInt(num?.getAttribute("value"), 10);
+        if (!isNaN(attrVal) && attrVal > 0) return attrVal;
+
+        return fallback;
+    }
+
     function setNativeVal(input, val) {
         if (!input) return false;
         const numVal = parseInt(val, 10);
         if (isNaN(numVal)) return false;
 
-        const sliderContainer = input.closest(".gradio-slider") ||
-                                input.closest(".form") ||
-                                input.closest(".gradio-row") ||
-                                input.parentElement?.parentElement ||
-                                input.parentElement;
-        const rangeInput = sliderContainer ? sliderContainer.querySelector("input[type=range]") : null;
+        const block = getSliderBlock(input);
+        const numberInput = block ? (block.querySelector("input[type=number]") || input) : input;
+        const rangeInput = block ? block.querySelector("input[type=range]") : null;
 
         let changed = false;
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
 
         // 1. Update number input
-        if (parseInt(input.value, 10) !== numVal) {
-            input.value = numVal;
-            if (typeof updateInput === "function") {
-                updateInput(input);
+        if (numberInput && parseInt(numberInput.value, 10) !== numVal) {
+            if (nativeSetter) {
+                nativeSetter.call(numberInput, numVal);
             } else {
-                const ev = new Event("input", { bubbles: true });
-                Object.defineProperty(ev, "target", { value: input });
-                input.dispatchEvent(ev);
+                numberInput.value = numVal;
             }
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-            input.dispatchEvent(new Event("blur", { bubbles: true }));
+
+            if (typeof updateInput === "function") {
+                updateInput(numberInput);
+            }
+            numberInput.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+            numberInput.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+            numberInput.dispatchEvent(new Event("blur", { bubbles: true, composed: true }));
             try {
-                input.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+                numberInput.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, composed: true }));
             } catch (e) {
-                input.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+                numberInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, composed: true }));
             }
             changed = true;
         }
 
-        // 2. Update range slider input (needed for Gradio reactive store & aspectRatioOverlay.js)
+        // 2. Update range slider input (triggers Gradio reactive store & preview overlays)
         if (rangeInput && parseInt(rangeInput.value, 10) !== numVal) {
-            rangeInput.value = numVal;
+            if (nativeSetter) {
+                nativeSetter.call(rangeInput, numVal);
+            } else {
+                rangeInput.value = numVal;
+            }
+
             if (typeof updateInput === "function") {
                 updateInput(rangeInput);
-            } else {
-                const ev = new Event("input", { bubbles: true });
-                Object.defineProperty(ev, "target", { value: rangeInput });
-                rangeInput.dispatchEvent(ev);
             }
-            rangeInput.dispatchEvent(new Event("change", { bubbles: true }));
+            rangeInput.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+            rangeInput.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
             try {
-                rangeInput.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+                rangeInput.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, composed: true }));
             } catch (e) {
-                rangeInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+                rangeInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, composed: true }));
             }
             changed = true;
         }
@@ -265,16 +380,13 @@
 
     function syncBoundsFromNative(nativeInput, customNum, customSlider, fallbackMin, fallbackMax, fallbackStep) {
         if (!nativeInput) return { min: fallbackMin, max: fallbackMax, step: fallbackStep };
-        const sliderContainer = nativeInput.closest(".gradio-slider") ||
-                                nativeInput.closest(".form") ||
-                                nativeInput.closest(".gradio-row") ||
-                                nativeInput.parentElement?.parentElement ||
-                                nativeInput.parentElement;
-        const rangeInput = sliderContainer ? sliderContainer.querySelector("input[type=range]") : null;
+        const block = getSliderBlock(nativeInput);
+        const rangeInput = block ? block.querySelector("input[type=range]") : null;
+        const numberInput = block ? (block.querySelector("input[type=number]") || nativeInput) : nativeInput;
 
-        const min = parseFloat(nativeInput.min || rangeInput?.min) || fallbackMin;
-        const max = parseFloat(nativeInput.max || rangeInput?.max) || fallbackMax;
-        const step = parseFloat(nativeInput.step || rangeInput?.step) || fallbackStep;
+        const min = parseFloat(numberInput?.min || rangeInput?.min) || fallbackMin;
+        const max = parseFloat(numberInput?.max || rangeInput?.max) || fallbackMax;
+        const step = parseFloat(numberInput?.step || rangeInput?.step) || fallbackStep;
 
         if (customNum) {
             if (parseFloat(customNum.min) !== min) customNum.min = min;
@@ -318,7 +430,6 @@
         if (!w || !h) return "1:1";
         const val = w / h;
 
-        // Check common aspect ratios first with small tolerance
         const standardRatios = [
             { label: "1:1", val: 1 },
             { label: "4:5", val: 4 / 5 },
@@ -340,52 +451,16 @@
             }
         }
 
-        const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
-        const divisor = gcd(w, h);
-        const rw = Math.round(w / divisor);
-        const rh = Math.round(h / divisor);
-        if (rw <= 16 && rh <= 16) {
-            return `${rw}:${rh}`;
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
         }
-
-        return val > 1 ? `${val.toFixed(2)}:1` : `1:${(1 / val).toFixed(2)}`;
-    }
-
-    let activePopoverTab = null;
-
-    function closeAllPopovers() {
-        document.querySelectorAll(".sd-ar-popover").forEach((pop) => {
-            pop.style.display = "none";
-        });
-        document.querySelectorAll(".sd-ar-trigger, .sd-ar-ratio-display").forEach((trig) => {
-            trig.classList.remove("active");
-        });
-        activePopoverTab = null;
-    }
-
-    function positionPopover(trigger, popover) {
-        if (!trigger || !popover) return;
-        const rect = trigger.getBoundingClientRect();
-        const popWidth = 328;
-        const margin = 8;
-
-        let left = rect.right + 12; // Default to right of the button stack
-        if (left + popWidth > window.innerWidth - margin) {
-            left = rect.left - popWidth - 12; // Fallback to left
+        const divisor = gcd(Math.round(w), Math.round(h));
+        const simW = Math.round(w / divisor);
+        const simH = Math.round(h / divisor);
+        if (simW <= 32 && simH <= 32) {
+            return `${simW}:${simH}`;
         }
-        if (left < margin) left = margin;
-
-        let top = rect.top;
-        const popHeight = popover.offsetHeight || 360;
-        if (top + popHeight > window.innerHeight && rect.bottom > popHeight) {
-            top = rect.bottom - popHeight;
-        }
-
-        popover.style.position = "fixed";
-        popover.style.top = `${top}px`;
-        popover.style.left = `${left}px`;
-        popover.style.width = `${popWidth}px`;
-        popover.style.zIndex = "10050";
+        return `${(val).toFixed(2)}:1`;
     }
 
     function createPopoverElement(tabName) {
@@ -397,20 +472,14 @@
         popover.id = `${tabName}_ar_popover`;
         popover.style.display = "none";
 
+        const squarePresets = PRESETS.filter((p) => p.group === "square");
         const portraitPresets = PRESETS.filter((p) => p.group === "portrait");
         const landscapePresets = PRESETS.filter((p) => p.group === "landscape");
-        const squarePresets = PRESETS.filter((p) => p.group === "square");
 
         popover.innerHTML = `
             <div class="sd-ar-popover-header">
                 <span class="sd-ar-popover-title" data-i18n="title">${t("title")}</span>
                 <div class="sd-ar-popover-actions">
-                    <button type="button" class="sd-ar-popover-iconbtn" title="${t("settingsTip")}">
-                        <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
-                            <path d="M8 4.75a3.25 3.25 0 1 0 0 6.5 3.25 3.25 0 0 0 0-6.5zM9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
-                            <path d="M14.07 6.45l-.94-.28a5.18 5.18 0 0 0-.46-1.12l.53-.84a.6.6 0 0 0-.14-.77l-1.46-1.46a.6.6 0 0 0-.77-.14l-.84.53c-.35-.19-.73-.34-1.12-.46L9.5 1.93A.6.6 0 0 0 8.9 1.4h-1.8a.6.6 0 0 0-.6.53l-.28.94a5.18 5.18 0 0 0-1.12.46l-.84-.53a.6.6 0 0 0-.77.14L2.03 4.4a.6.6 0 0 0-.14.77l.53.84c-.19.35-.34.73-.46 1.12l-.94.28a.6.6 0 0 0-.53.6v1.8c0 .3.22.56.53.6l.94.28c.12.39.27.77.46 1.12l-.53.84a.6.6 0 0 0 .14.77l1.46 1.46c.22.22.58.26.77.14l.84-.53c.35.19.73.34 1.12.46l.28.94c.05.31.3.53.6.53h1.8c.3 0 .56-.22.6-.53l.28-.94c.39-.12.77-.27 1.12-.46l.84.53c.2.12.55.08.77-.14l1.46-1.46a.6.6 0 0 0 .14-.77l-.53-.84c.19-.35.34-.73.46-1.12l.94-.28a.6.6 0 0 0 .53-.6v-1.8a.6.6 0 0 0-.53-.6z"/>
-                        </svg>
-                    </button>
                     <button type="button" class="sd-ar-popover-iconbtn sd-ar-popover-close" title="${t("closeTip")}">
                         <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
                             <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06z"/>
@@ -420,32 +489,35 @@
             </div>
             
             <div class="sd-ar-popover-content">
-                <!-- Portrait Section -->
-                <div class="sd-ar-popover-sectitle" data-i18n="portrait">${t("portrait")}</div>
-                <div class="sd-ar-popover-grid">
-                    ${portraitPresets.map((p) => `
-                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)})">
-                            ${p.w} × ${p.h}
-                        </button>
-                    `).join("")}
-                </div>
-
-                <!-- Landscape Section -->
-                <div class="sd-ar-popover-sectitle" data-i18n="landscape">${t("landscape")}</div>
-                <div class="sd-ar-popover-grid">
-                    ${landscapePresets.map((p) => `
-                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)})">
-                            ${p.w} × ${p.h}
-                        </button>
-                    `).join("")}
-                </div>
-
-                <!-- Square Section -->
+                <!-- Square Section First (Baseline) -->
                 <div class="sd-ar-popover-sectitle" data-i18n="square">${t("square")}</div>
                 <div class="sd-ar-popover-grid">
                     ${squarePresets.map((p) => `
-                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)})">
-                            ${p.w} × ${p.h}
+                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) — ${p.desc}">
+                            <span class="sd-ar-pop-ratio">${p.label}</span>
+                            <span class="sd-ar-pop-res">${p.w} × ${p.h}</span>
+                        </button>
+                    `).join("")}
+                </div>
+
+                <!-- Portrait Section (From closest to square to narrowest) -->
+                <div class="sd-ar-popover-sectitle" data-i18n="portrait">${t("portrait")}</div>
+                <div class="sd-ar-popover-grid">
+                    ${portraitPresets.map((p) => `
+                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) — ${p.desc}">
+                            <span class="sd-ar-pop-ratio">${p.label}</span>
+                            <span class="sd-ar-pop-res">${p.w} × ${p.h}</span>
+                        </button>
+                    `).join("")}
+                </div>
+
+                <!-- Landscape Section (From closest to square to ultrawide) -->
+                <div class="sd-ar-popover-sectitle" data-i18n="landscape">${t("landscape")}</div>
+                <div class="sd-ar-popover-grid">
+                    ${landscapePresets.map((p) => `
+                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) — ${p.desc}">
+                            <span class="sd-ar-pop-ratio">${p.label}</span>
+                            <span class="sd-ar-pop-res">${p.w} × ${p.h}</span>
                         </button>
                     `).join("")}
                 </div>
@@ -465,54 +537,126 @@
         panel.className = "sd-ar-panel-compact";
         panel.id = `${tabName}_ar_panel`;
 
+        const squarePresets = PRESETS.filter((p) => p.group === "square");
+        const portraitPresets = PRESETS.filter((p) => p.group === "portrait");
+        const landscapePresets = PRESETS.filter((p) => p.group === "landscape");
+
         panel.innerHTML = `
-            <!-- Left: Dimensions & Buttons -->
-            <div class="sd-ar-dims-column">
-                <div class="sd-ar-dims-inputs">
-                    <div class="sd-ar-slider-cell compact">
-                        <input type="number" class="sd-ar-compact-num" id="${tabName}_ar_width_num" min="64" max="2048" step="8" />
-                        <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_width_slider" min="64" max="2048" step="8" />
-                    </div>
-                    <div class="sd-ar-slider-cell compact">
-                        <input type="number" class="sd-ar-compact-num" id="${tabName}_ar_height_num" min="64" max="2048" step="8" />
-                        <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_height_slider" min="64" max="2048" step="8" />
-                    </div>
-                </div>
-                
-                <div class="sd-ar-actions-stack">
-                    <button type="button" class="sd-ar-btn-stack sd-ar-ratio-display" id="${tabName}_ar_ratio_btn" title="${t("aspectRatio")}">1:1</button>
-                    <button type="button" class="sd-ar-btn-stack sd-ar-trigger" id="${tabName}_ar_trigger_btn" title="${t("title")}">
-                        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+            <!-- Top Toolbar: Preset Trigger Pill, Mode Toggle, and Swap Button -->
+            <div class="sd-ar-card-header">
+                <div class="sd-ar-header-left">
+                    <button type="button" class="sd-ar-trigger" id="${tabName}_ar_trigger_btn" title="${t("title")}">
+                        <svg class="sd-ar-icon-grid" viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
                             <rect x="2" y="2" width="5" height="5" rx="1"></rect>
                             <rect x="9" y="2" width="5" height="5" rx="1"></rect>
                             <rect x="2" y="9" width="5" height="5" rx="1"></rect>
                             <rect x="9" y="9" width="5" height="5" rx="1"></rect>
                         </svg>
+                        <span class="sd-ar-trigger-res" id="${tabName}_ar_trigger_res">1024 × 1024</span>
+                        <span class="sd-ar-ratio-badge" id="${tabName}_ar_ratio_btn">1:1</span>
+                        <svg class="sd-ar-icon-chevron" viewBox="0 0 12 12" width="10" height="10" fill="currentColor">
+                            <path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </button>
-                    <button type="button" class="sd-ar-btn-stack" id="${tabName}_ar_swap_btn" title="${t("swapTip")}">
-                        <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+                </div>
+                <div class="sd-ar-header-actions">
+                    <!-- View Mode Toggle: [ ⊞ Кнопки ] [ ▾ Список ] -->
+                    <div class="sd-ar-view-toggle">
+                        <button type="button" class="sd-ar-toggle-btn" id="${tabName}_ar_view_buttons" data-view="buttons" title="${t("buttonsViewTip")}">
+                            <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor">
+                                <rect x="2" y="2" width="5" height="5" rx="1"></rect>
+                                <rect x="9" y="2" width="5" height="5" rx="1"></rect>
+                                <rect x="2" y="9" width="5" height="5" rx="1"></rect>
+                                <rect x="9" y="9" width="5" height="5" rx="1"></rect>
+                            </svg>
+                            <span data-i18n="buttonsView">${t("buttonsView")}</span>
+                        </button>
+                        <button type="button" class="sd-ar-toggle-btn" id="${tabName}_ar_view_dropdown" data-view="dropdown" title="${t("dropdownViewTip")}">
+                            <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor">
+                                <rect x="2" y="3" width="12" height="2" rx="0.5"></rect>
+                                <rect x="2" y="7" width="12" height="2" rx="0.5"></rect>
+                                <rect x="2" y="11" width="12" height="2" rx="0.5"></rect>
+                            </svg>
+                            <span data-i18n="dropdownView">${t("dropdownView")}</span>
+                        </button>
+                    </div>
+
+                    <!-- Orientation Swap Button -->
+                    <button type="button" class="sd-ar-icon-action-btn" id="${tabName}_ar_swap_btn" title="${t("swapTip")}">
+                        <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
                             <path d="M4.5 2a.5.5 0 0 1 .5.5v9.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L4 12.293V2.5a.5.5 0 0 1 .5-.5zm7 12a.5.5 0 0 1-.5-.5V3.707l-2.146 2.147a.5.5 0 0 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L12 3.707V13.5a.5.5 0 0 1-.5.5z"/>
                         </svg>
                     </button>
                 </div>
             </div>
 
-            <!-- Right: Batch -->
-            <div class="sd-ar-batch-column">
-                <div class="sd-ar-slider-cell">
-                    <div class="sd-ar-slider-label-row">
-                        <span class="sd-ar-label-name" data-i18n="batchCount">${t("batchCount")}</span>
-                        <input type="number" class="sd-ar-batch-num" id="${tabName}_ar_bcount_num" min="1" max="100" step="1" />
+            <!-- Original Buttons Grid View (Activated when mode === "buttons") -->
+            <div class="sd-ar-buttons-wrap" id="${tabName}_ar_buttons_wrap" style="display: none;">
+                <div class="sd-ar-filter-row">
+                    <div class="sd-ar-filter-bar">
+                        <button type="button" class="sd-ar-filter-btn active" data-filter="all">
+                            <span data-i18n="filterAll">${t("filterAll")}</span> (${PRESETS.length})
+                        </button>
+                        <button type="button" class="sd-ar-filter-btn" data-filter="square">
+                            ▢ <span data-i18n="filterSquare">${t("filterSquare")}</span> (${squarePresets.length})
+                        </button>
+                        <button type="button" class="sd-ar-filter-btn" data-filter="portrait">
+                            ▯ <span data-i18n="filterPortrait">${t("filterPortrait")}</span> (${portraitPresets.length})
+                        </button>
+                        <button type="button" class="sd-ar-filter-btn" data-filter="landscape">
+                            ▭ <span data-i18n="filterLandscape">${t("filterLandscape")}</span> (${landscapePresets.length})
+                        </button>
                     </div>
-                    <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_bcount_slider" min="1" max="100" step="1" />
+                </div>
+                <div class="sd-ar-grid" id="${tabName}_ar_grid">
+                    ${PRESETS.map((p, idx) => `
+                        <button type="button" class="sd-ar-btn" data-w="${p.w}" data-h="${p.h}" data-idx="${idx}" data-group="${p.group}" title="${p.label} (${p.w}×${p.h}) — ${p.desc}">
+                            <div class="sd-ar-btn-icon">${renderRatioSvg(p.group)}</div>
+                            <div class="sd-ar-btn-info">
+                                <span class="sd-ar-btn-ratio">${p.label}</span>
+                                <span class="sd-ar-btn-res">${p.w}x${p.h}</span>
+                            </div>
+                        </button>
+                    `).join("")}
+                </div>
+            </div>
+
+            <!-- Body: Symmetrical 2 Columns -->
+            <div class="sd-ar-card-body">
+                <!-- Left: Dimensions (Width & Height) -->
+                <div class="sd-ar-col">
+                    <div class="sd-ar-slider-cell">
+                        <div class="sd-ar-slider-label-row">
+                            <span class="sd-ar-label-name" data-i18n="width">${t("width")}</span>
+                            <input type="number" class="sd-ar-compact-num" id="${tabName}_ar_width_num" min="64" max="2048" step="8" />
+                        </div>
+                        <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_width_slider" min="64" max="2048" step="8" />
+                    </div>
+                    <div class="sd-ar-slider-cell">
+                        <div class="sd-ar-slider-label-row">
+                            <span class="sd-ar-label-name" data-i18n="height">${t("height")}</span>
+                            <input type="number" class="sd-ar-compact-num" id="${tabName}_ar_height_num" min="64" max="2048" step="8" />
+                        </div>
+                        <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_height_slider" min="64" max="2048" step="8" />
+                    </div>
                 </div>
 
-                <div class="sd-ar-slider-cell">
-                    <div class="sd-ar-slider-label-row">
-                        <span class="sd-ar-label-name" data-i18n="batchSize">${t("batchSize")}</span>
-                        <input type="number" class="sd-ar-batch-num" id="${tabName}_ar_bsize_num" min="1" max="8" step="1" />
+                <!-- Right: Batch (Count & Size) -->
+                <div class="sd-ar-col">
+                    <div class="sd-ar-slider-cell">
+                        <div class="sd-ar-slider-label-row">
+                            <span class="sd-ar-label-name" data-i18n="batchCount">${t("batchCount")}</span>
+                            <input type="number" class="sd-ar-compact-num" id="${tabName}_ar_bcount_num" min="1" max="128" step="1" />
+                        </div>
+                        <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_bcount_slider" min="1" max="128" step="1" />
                     </div>
-                    <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_bsize_slider" min="1" max="8" step="1" />
+                    <div class="sd-ar-slider-cell">
+                        <div class="sd-ar-slider-label-row">
+                            <span class="sd-ar-label-name" data-i18n="batchSize">${t("batchSize")}</span>
+                            <input type="number" class="sd-ar-compact-num" id="${tabName}_ar_bsize_num" min="1" max="8" step="1" />
+                        </div>
+                        <input type="range" class="sd-ar-compact-slider" id="${tabName}_ar_bsize_slider" min="1" max="8" step="1" />
+                    </div>
                 </div>
             </div>
         `;
@@ -527,7 +671,7 @@
             }
         });
 
-        document.querySelectorAll(".sd-ar-swap-btn").forEach((btn) => {
+        document.querySelectorAll(".sd-ar-icon-action-btn").forEach((btn) => {
             btn.title = t("swapTip");
         });
         document.querySelectorAll(".sd-ar-trigger").forEach((btn) => {
@@ -559,17 +703,33 @@
                 formTarget.appendChild(cfgScale);
             }
 
-            const isDistilledVisible = distilledCfg && distilledCfg.offsetParent !== null;
-            if (distilledCfg && isDistilledVisible && formTarget && !formTarget.contains(distilledCfg)) {
-                if (!distilledCfg._origParent) distilledCfg._origParent = distilledCfg.parentElement;
-                formTarget.appendChild(distilledCfg);
+            const isDistilledVisible = Boolean(
+                distilledCfg &&
+                distilledCfg.offsetParent !== null &&
+                !distilledCfg.style.display?.includes("none") &&
+                !distilledCfg.classList.contains("hide")
+            );
+
+            if (isDistilledVisible) {
+                if (formTarget && !formTarget.contains(distilledCfg)) {
+                    if (!distilledCfg._origParent) distilledCfg._origParent = distilledCfg.parentElement;
+                    formTarget.appendChild(distilledCfg);
+                }
+                samplerContainer.classList.add("has-distilled-cfg");
+            } else {
+                if (distilledCfg && distilledCfg._origParent && formTarget && formTarget.contains(distilledCfg)) {
+                    distilledCfg._origParent.appendChild(distilledCfg);
+                }
+                samplerContainer.classList.remove("has-distilled-cfg");
             }
-            samplerContainer.classList.toggle("has-distilled-cfg", Boolean(isDistilledVisible));
 
             const cfgWrapper = (cfgScale && cfgScale._origParent) || root.querySelector(`#${tabName}_settings > div:has(#${tabName}_cfg_scale)`);
             if (cfgWrapper && cfgWrapper !== samplerContainer && cfgWrapper !== formTarget) {
                 cfgWrapper.classList.add("sd-ar-orig-cfg-container");
                 cfgWrapper.style.setProperty("display", "none", "important");
+                if (cfgWrapper.parentElement && cfgWrapper.parentElement.children.length === 1) {
+                    cfgWrapper.parentElement.style.setProperty("display", "none", "important");
+                }
             }
         } else {
             samplerContainer.classList.remove("sd-ar-enhanced-sampler");
@@ -596,10 +756,10 @@
             return true;
         }
 
-        const nativeWidthInput = root.querySelector(`#${tabName}_width input[type=number]`);
-        const nativeHeightInput = root.querySelector(`#${tabName}_height input[type=number]`);
-        const nativeBatchCountInput = root.querySelector(`#${tabName}_batch_count input[type=number]`);
-        const nativeBatchSizeInput = root.querySelector(`#${tabName}_batch_size input[type=number]`);
+        const nativeWidthInput = root.querySelector(`#${tabName}_width input[type=number]`) || root.querySelector(`#${tabName}_width input`);
+        const nativeHeightInput = root.querySelector(`#${tabName}_height input[type=number]`) || root.querySelector(`#${tabName}_height input`);
+        const nativeBatchCountInput = root.querySelector(`#${tabName}_batch_count input[type=number]`) || root.querySelector(`#${tabName}_batch_count input`);
+        const nativeBatchSizeInput = root.querySelector(`#${tabName}_batch_size input[type=number]`) || root.querySelector(`#${tabName}_batch_size input`);
 
         if (!nativeWidthInput || !nativeHeightInput) return false;
 
@@ -616,7 +776,12 @@
         origDimensionsRow.classList.add("sd-ar-orig-dimensions-row");
 
         const panel = createAspectRatioPanel(tabName);
-        origDimensionsRow.parentElement.insertBefore(panel, origDimensionsRow);
+        const samplerContainer = root.querySelector(`#sampler_selection_${tabName}`);
+        if (samplerContainer && samplerContainer.parentElement) {
+            samplerContainer.parentElement.insertBefore(panel, samplerContainer.nextSibling);
+        } else {
+            origDimensionsRow.parentElement.insertBefore(panel, origDimensionsRow);
+        }
         
         const popover = createPopoverElement(tabName);
         organizeGenerationParams(tabName);
@@ -625,10 +790,14 @@
         if (isEnabled) {
             root.classList.add("sd-ar-hide-original");
             origDimensionsRow.style.setProperty("display", "none", "important");
+            if (origDimensionsRow.parentElement && origDimensionsRow.parentElement.children.length === 1) {
+                origDimensionsRow.parentElement.style.setProperty("display", "none", "important");
+            }
             panel.style.display = "flex";
         } else {
             root.classList.remove("sd-ar-hide-original");
             origDimensionsRow.style.display = "";
+            if (origDimensionsRow.parentElement) origDimensionsRow.parentElement.style.display = "";
             panel.style.display = "none";
         }
 
@@ -644,9 +813,83 @@
         const bcountSlider = panel.querySelector(`#${tabName}_ar_bcount_slider`);
         const bsizeNum = panel.querySelector(`#${tabName}_ar_bsize_num`);
         const bsizeSlider = panel.querySelector(`#${tabName}_ar_bsize_slider`);
+        
         const popoverBtns = popover.querySelectorAll(".sd-ar-popover-btn");
+        const gridBtns = panel.querySelectorAll(".sd-ar-btn");
+        const filterBtns = panel.querySelectorAll(".sd-ar-filter-btn");
 
-        // Inherit dynamic bounds (min, max, step) directly from WebUI native elements / ui-config.json
+        const viewButtonsBtn = panel.querySelector(`#${tabName}_ar_view_buttons`);
+        const viewDropdownBtn = panel.querySelector(`#${tabName}_ar_view_dropdown`);
+        const buttonsWrap = panel.querySelector(`#${tabName}_ar_buttons_wrap`);
+
+        // Apply View Mode (Buttons vs Dropdown)
+        function applyViewMode(mode) {
+            if (mode === "buttons") {
+                if (buttonsWrap) {
+                    buttonsWrap.classList.remove("sd-ar-hidden");
+                    buttonsWrap.style.setProperty("display", "flex", "important");
+                }
+                if (viewButtonsBtn) viewButtonsBtn.classList.add("active");
+                if (viewDropdownBtn) viewDropdownBtn.classList.remove("active");
+                closeAllPopovers();
+            } else {
+                if (buttonsWrap) {
+                    buttonsWrap.classList.add("sd-ar-hidden");
+                    buttonsWrap.style.setProperty("display", "none", "important");
+                }
+                if (viewButtonsBtn) viewButtonsBtn.classList.remove("active");
+                if (viewDropdownBtn) viewDropdownBtn.classList.add("active");
+            }
+        }
+
+        const initialMode = getAspectRatioViewMode();
+        applyViewMode(initialMode);
+
+        if (viewButtonsBtn) {
+            viewButtonsBtn.addEventListener("click", () => {
+                setAspectRatioViewMode("buttons");
+                applyViewMode("buttons");
+            });
+        }
+        if (viewDropdownBtn) {
+            viewDropdownBtn.addEventListener("click", () => {
+                setAspectRatioViewMode("dropdown");
+                applyViewMode("dropdown");
+            });
+        }
+
+        // Filter tabs in buttons mode
+        filterBtns.forEach((fbtn) => {
+            fbtn.addEventListener("click", () => {
+                filterBtns.forEach((b) => b.classList.remove("active"));
+                fbtn.classList.add("active");
+                const filter = fbtn.getAttribute("data-filter");
+
+                gridBtns.forEach((btn) => {
+                    const group = btn.getAttribute("data-group");
+                    let show = false;
+                    if (filter === "all") {
+                        show = true;
+                    } else if (filter === "square") {
+                        show = (group === "square");
+                    } else if (filter === "portrait") {
+                        show = (group === "portrait");
+                    } else if (filter === "landscape") {
+                        show = (group === "landscape");
+                    }
+
+                    if (show) {
+                        btn.classList.remove("sd-ar-hidden");
+                        btn.style.setProperty("display", "flex", "important");
+                    } else {
+                        btn.classList.add("sd-ar-hidden");
+                        btn.style.setProperty("display", "none", "important");
+                    }
+                });
+            });
+        });
+
+        // Inherit dynamic bounds directly from WebUI native elements / ui-config.json
         function syncAllBounds() {
             syncBoundsFromNative(nativeWidthInput, widthNum, widthSlider, 64, 2048, 8);
             syncBoundsFromNative(nativeHeightInput, heightNum, heightSlider, 64, 2048, 8);
@@ -676,15 +919,28 @@
             ratioBtn.addEventListener("click", togglePopover);
         }
 
+        function applyResolution(w, h) {
+            setNativeVal(nativeWidthInput, w);
+            setNativeVal(nativeHeightInput, h);
+            updateDimensionsUI(w, h);
+        }
+
         popoverBtns.forEach((btn) => {
             btn.addEventListener("click", (e) => {
                 if (e && !e.isTrusted) return;
                 const w = parseInt(btn.getAttribute("data-w"), 10);
                 const h = parseInt(btn.getAttribute("data-h"), 10);
-                setNativeVal(nativeWidthInput, w);
-                setNativeVal(nativeHeightInput, h);
-                updateDimensionsUI(w, h);
+                applyResolution(w, h);
                 closeAllPopovers();
+            });
+        });
+
+        gridBtns.forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+                if (e && !e.isTrusted) return;
+                const w = parseInt(btn.getAttribute("data-w"), 10);
+                const h = parseInt(btn.getAttribute("data-h"), 10);
+                applyResolution(w, h);
             });
         });
 
@@ -712,8 +968,23 @@
             if (ratioBtn) {
                 ratioBtn.textContent = ratioLabel;
             }
+            const triggerRes = panel.querySelector(`#${tabName}_ar_trigger_res`);
+            if (triggerRes) {
+                triggerRes.textContent = `${numW} × ${numH}`;
+            }
 
+            // Sync active state across both Popover buttons and Grid buttons
             popoverBtns.forEach((btn) => {
+                const bw = parseInt(btn.getAttribute("data-w"), 10);
+                const bh = parseInt(btn.getAttribute("data-h"), 10);
+                if (bw === numW && bh === numH) {
+                    btn.classList.add("active");
+                } else {
+                    btn.classList.remove("active");
+                }
+            });
+
+            gridBtns.forEach((btn) => {
                 const bw = parseInt(btn.getAttribute("data-w"), 10);
                 const bh = parseInt(btn.getAttribute("data-h"), 10);
                 if (bw === numW && bh === numH) {
@@ -799,6 +1070,14 @@
             setNativeVal(nativeWidthInput, currentH);
             setNativeVal(nativeHeightInput, currentW);
             updateDimensionsUI(currentH, currentW);
+
+            // Auto-switch filter in buttons view if active preset is hidden
+            const activeBtn = panel.querySelector(".sd-ar-btn.active");
+            if (activeBtn && (activeBtn.classList.contains("sd-ar-hidden") || activeBtn.style.display === "none")) {
+                const activeGroup = activeBtn.getAttribute("data-group");
+                const targetFilterBtn = panel.querySelector(`.sd-ar-filter-btn[data-filter="${activeGroup}"]`) || panel.querySelector('.sd-ar-filter-btn[data-filter="all"]');
+                if (targetFilterBtn) targetFilterBtn.click();
+            }
         });
 
         function setBatchCount(val) {
@@ -822,45 +1101,49 @@
         bsizeNum.addEventListener("change", (e) => { if (e.isTrusted) setBatchSize(e.target.value); });
 
         // Initial State Sync from Gradio / WebUI Defaults
-        const initW = parseInt(nativeWidthInput.value, 10) || parseInt(nativeWidthInput.getAttribute("value"), 10) || 1024;
-        const initH = parseInt(nativeHeightInput.value, 10) || parseInt(nativeHeightInput.getAttribute("value"), 10) || 1024;
+        const initW = readNativeVal(nativeWidthInput, 1024);
+        const initH = readNativeVal(nativeHeightInput, 1024);
         updateDimensionsUI(initW, initH);
-        if (nativeBatchCountInput) updateBatchCountUI(nativeBatchCountInput.value);
-        if (nativeBatchSizeInput) updateBatchSizeUI(nativeBatchSizeInput.value);
+        if (nativeBatchCountInput) updateBatchCountUI(readNativeVal(nativeBatchCountInput, 1));
+        if (nativeBatchSizeInput) updateBatchSizeUI(readNativeVal(nativeBatchSizeInput, 1));
 
         const syncFromNative = () => {
             syncAllBounds();
-            const w = parseInt(nativeWidthInput.value, 10);
-            const h = parseInt(nativeHeightInput.value, 10);
+            const w = readNativeVal(nativeWidthInput, null);
+            const h = readNativeVal(nativeHeightInput, null);
             if (w && h && (w !== parseInt(widthSlider.value, 10) || h !== parseInt(heightSlider.value, 10))) {
                 updateDimensionsUI(w, h);
             }
             if (nativeBatchCountInput) {
-                const bc = parseInt(nativeBatchCountInput.value, 10);
+                const bc = readNativeVal(nativeBatchCountInput, null);
                 if (bc && bc !== parseInt(bcountNum.value, 10)) {
                     updateBatchCountUI(bc);
                 }
             }
             if (nativeBatchSizeInput) {
-                const bs = parseInt(nativeBatchSizeInput.value, 10);
+                const bs = readNativeVal(nativeBatchSizeInput, null);
                 if (bs && bs !== parseInt(bsizeNum.value, 10)) {
                     updateBatchSizeUI(bs);
                 }
             }
         };
 
-        nativeWidthInput.addEventListener("input", syncFromNative);
-        nativeWidthInput.addEventListener("change", syncFromNative);
-        nativeHeightInput.addEventListener("input", syncFromNative);
-        nativeHeightInput.addEventListener("change", syncFromNative);
-        if (nativeBatchCountInput) {
-            nativeBatchCountInput.addEventListener("input", syncFromNative);
-            nativeBatchCountInput.addEventListener("change", syncFromNative);
-        }
-        if (nativeBatchSizeInput) {
-            nativeBatchSizeInput.addEventListener("input", syncFromNative);
-            nativeBatchSizeInput.addEventListener("change", syncFromNative);
-        }
+        const attachListeners = (input) => {
+            if (!input) return;
+            input.addEventListener("input", syncFromNative);
+            input.addEventListener("change", syncFromNative);
+            const block = getSliderBlock(input);
+            const range = block ? block.querySelector("input[type=range]") : null;
+            if (range && range !== input) {
+                range.addEventListener("input", syncFromNative);
+                range.addEventListener("change", syncFromNative);
+            }
+        };
+
+        attachListeners(nativeWidthInput);
+        attachListeners(nativeHeightInput);
+        attachListeners(nativeBatchCountInput);
+        attachListeners(nativeBatchSizeInput);
 
         setInterval(syncFromNative, 500);
         if (typeof onAfterUiUpdate === "function") {
@@ -873,6 +1156,7 @@
      * Live on/off toggling of the Aspect Ratio controls without reload
      */
     let lastEnabledState = null;
+    let lastViewModeState = null;
 
     // Global document listeners for popover dismissal
     document.addEventListener("click", (e) => {
@@ -940,38 +1224,63 @@
         }
     }
 
+    function checkLiveSettings() {
+        applyEnabledState(isAspectRatioEnabled());
+        const currentMode = getAspectRatioViewMode();
+        if (lastViewModeState !== currentMode) {
+            lastViewModeState = currentMode;
+            ["txt2img", "img2img"].forEach((tab) => {
+                const bwrap = document.querySelector(`#${tab}_ar_buttons_wrap`);
+                const vbtn = document.querySelector(`#${tab}_ar_view_buttons`);
+                const vdbtn = document.querySelector(`#${tab}_ar_view_dropdown`);
+                if (bwrap) {
+                    if (currentMode === "buttons") {
+                        bwrap.classList.remove("sd-ar-hidden");
+                        bwrap.style.setProperty("display", "flex", "important");
+                    } else {
+                        bwrap.classList.add("sd-ar-hidden");
+                        bwrap.style.setProperty("display", "none", "important");
+                    }
+                }
+                if (vbtn) {
+                    if (currentMode === "buttons") vbtn.classList.add("active");
+                    else vbtn.classList.remove("active");
+                }
+                if (vdbtn) {
+                    if (currentMode === "dropdown") vdbtn.classList.add("active");
+                    else vdbtn.classList.remove("active");
+                }
+            });
+        }
+        updateAllTexts();
+    }
+
     // Intercept localStorage.setItem in the same window so changes apply instantly
     const originalSetItem = localStorage.setItem.bind(localStorage);
     localStorage.setItem = function (key, value) {
         originalSetItem(key, value);
-        if (key === "SD-LOBE-SETTING" || key === "SD-KITCHEN-SETTING" || key === "lobe_enable_aspect_ratio") {
+        if (key === "SD-LOBE-SETTING" || key === "SD-KITCHEN-SETTING" || key === "lobe_enable_aspect_ratio" || key === "lobe_ratio_default_view") {
             try {
-                applyEnabledState(isAspectRatioEnabled());
-                updateAllTexts();
+                checkLiveSettings();
             } catch (e) {}
         }
     };
 
     window.addEventListener("storage", (e) => {
-        if (e.key === "SD-LOBE-SETTING" || e.key === "SD-KITCHEN-SETTING" || e.key === "lobe_enable_aspect_ratio") {
-            applyEnabledState(isAspectRatioEnabled());
-            updateAllTexts();
+        if (e.key === "SD-LOBE-SETTING" || e.key === "SD-KITCHEN-SETTING" || e.key === "lobe_enable_aspect_ratio" || e.key === "lobe_ratio_default_view") {
+            checkLiveSettings();
         }
     });
 
     if (typeof onOptionsChanged === "function") {
-        onOptionsChanged(() => {
-            applyEnabledState(isAspectRatioEnabled());
-            updateAllTexts();
-        });
+        onOptionsChanged(checkLiveSettings);
     }
 
     let initialized = false;
     function initAll() {
         const txtOk = initTabControls("txt2img");
         const imgOk = initTabControls("img2img");
-        applyEnabledState(isAspectRatioEnabled());
-        updateAllTexts();
+        checkLiveSettings();
         if (txtOk && imgOk) {
             initialized = true;
         }
@@ -986,9 +1295,7 @@
         initAll();
         if (initialized) {
             clearInterval(interval);
-            setInterval(() => {
-                applyEnabledState(isAspectRatioEnabled());
-            }, 400);
+            setInterval(checkLiveSettings, 400);
         }
     }, 500);
 })();

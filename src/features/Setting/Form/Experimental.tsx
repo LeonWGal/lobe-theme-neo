@@ -1,5 +1,5 @@
 import { Form } from '@lobehub/ui';
-import { Switch, message } from 'antd';
+import { Segmented, Switch, message } from 'antd';
 import isEqual from 'fast-deep-equal';
 import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +36,19 @@ const SettingForm = memo(() => {
           label: t('setting.aspectRatio.title'),
           name: 'enableAspectRatio',
           valuePropName: 'checked',
+        },
+        {
+          children: (
+            <Segmented
+              options={[
+                { label: t('setting.aspectRatio.list'), value: 'dropdown' },
+                { label: t('setting.aspectRatio.buttons'), value: 'buttons' },
+              ]}
+            />
+          ),
+          desc: t('setting.aspectRatio.modeDesc'),
+          label: t('setting.aspectRatio.mode'),
+          name: 'aspectRatioMode',
         },
         {
           children: <Switch />,

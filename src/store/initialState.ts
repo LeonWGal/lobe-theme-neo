@@ -7,6 +7,7 @@ import type { I18n } from '@/types';
 export interface WebuiSetting {
   confirmPageUnload: boolean;
   enableAspectRatio: boolean;
+  aspectRatioMode: 'dropdown' | 'buttons';
   enableExtraNetworkSidebar: boolean;
   enableHighlight: boolean;
   enableImageInfo: boolean;
@@ -38,6 +39,7 @@ export type WebuiSettingKeys = keyof WebuiSetting;
 export const DEFAULT_SETTING: WebuiSetting = {
   confirmPageUnload: false,
   enableAspectRatio: true,
+  aspectRatioMode: 'dropdown',
   enableExtraNetworkSidebar: true,
   enableHighlight: false,
   enableImageInfo: true,
