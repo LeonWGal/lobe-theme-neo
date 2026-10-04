@@ -58,7 +58,7 @@ export default (token: Theme) => css`
         }
       }
 
-      &:not(.tool, .svelte-1p4r00v) {
+      &:not(.tool) {
         &.primary,
         &.secondary {
           &.lg {

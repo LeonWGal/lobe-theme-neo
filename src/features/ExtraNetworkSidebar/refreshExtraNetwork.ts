@@ -32,7 +32,8 @@ export const refreshExtraNetwork = (type: 'txt' | 'img') => {
   const rootSelector = `#${type}2img_extra_tabs`;
 
   const run = () => {
-    const root = document.querySelector(rootSelector);
+    const app = typeof (window as any).gradioApp === 'function' ? (window as any).gradioApp() : null;
+    const root = app?.querySelector(rootSelector) || document.querySelector(rootSelector);
     if (!root) return;
 
     const tabNav = root.querySelector(':scope > .tab-nav');

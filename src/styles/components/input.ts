@@ -83,6 +83,27 @@ export default (token: Theme) => {
         }
       }
 
+      &[type='radio'] {
+        --ring-color: transparent;
+
+        position: relative;
+
+        border: 1px solid ${token.colorBorder} !important;
+        border-radius: 50% !important;
+
+        line-height: var(--line-sm);
+
+        background-color: ${token.colorFillTertiary} !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+
+        &:checked {
+          border-color: ${token.colorPrimaryBorder} !important;
+          background-color: ${token.colorPrimary} !important;
+          background-image: var(--radio-circle) !important;
+        }
+      }
+
       &[type='number'] {
         height: var(--button-lg-tool-height) !important;
         border-radius: ${token.borderRadius}px;

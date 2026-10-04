@@ -395,5 +395,34 @@ export default (token: Theme) => css`
       gap: 8px;
       color: ${token.colorTextDescription};
     }
+
+    /* Forge Canvas fullscreen */
+    .forge-container.fullscreen,
+    .forge-container:fullscreen {
+      border-radius: 0 !important;
+      z-index: 10000 !important;
+    }
+
+    /* Gradio 4 Accordion native <details> support */
+    details.accordion,
+    details.gradio-accordion {
+      border: 1px solid ${token.colorBorderSecondary} !important;
+      border-radius: ${token.borderRadius}px !important;
+      background: ${token.colorFillQuaternary} !important;
+      margin: 8px 0 !important;
+      padding: 0 !important;
+
+      > summary {
+        cursor: pointer;
+        padding: 10px 14px !important;
+        font-weight: 600;
+        list-style: none;
+        user-select: none;
+      }
+
+      &[open] > summary {
+        border-bottom: 1px dashed ${token.colorBorderSecondary} !important;
+      }
+    }
   }
 `;

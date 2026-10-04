@@ -76,7 +76,11 @@ const replaceIcon = (element: HTMLElement, emoji: string[], svg: string, size: n
 const isInExtraNetworkCard = (element: HTMLElement) => !!element.closest('.extra-network-cards');
 
 export default () => {
-  for (const button of document.querySelectorAll('button')) {
+  const root =
+    (typeof (window as any).gradioApp === 'function' ? (window as any).gradioApp() : null) ||
+    document;
+
+  for (const button of root.querySelectorAll('button')) {
     if (isInExtraNetworkCard(button)) continue;
     replaceIcon(button, ['🖌️'], SquarePen, 16);
     replaceIcon(button, ['🗃️'], FileArchive, 16);
@@ -111,7 +115,7 @@ export default () => {
     replaceIcon(button, ['✨'], Scaling, 16);
   }
 
-  for (const span of document.querySelectorAll('span')) {
+  for (const span of root.querySelectorAll('span')) {
     if (isInExtraNetworkCard(span)) continue;
     const text = span.textContent?.trim();
     if (text === '⤡') replaceIcon(span, ['⤡'], Maximize, 18);
@@ -129,7 +133,7 @@ export default () => {
     }
   }
 
-  for (const a of document.querySelectorAll('a')) {
+  for (const a of root.querySelectorAll('a')) {
     if (isInExtraNetworkCard(a)) continue;
     const text = a.textContent?.trim();
     if (text === '❮') replaceIcon(a, ['❮'], ArrowLeft, 18);

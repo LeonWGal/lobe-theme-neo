@@ -29,7 +29,8 @@ export default (token: Theme) => {
         }
       }
 
-      &.open {
+      &.open,
+      details[open] > & {
         padding-bottom: 16px;
         border-bottom: 1px dashed ${token.colorBorderSecondary};
 

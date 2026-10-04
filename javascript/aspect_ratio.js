@@ -25,17 +25,23 @@
         { label: "1:1", w: 512, h: 512, group: "square", desc: "SD 1.5 512×512" },
 
         // Portrait (Портретные — от близких к квадрату до самых узких)
-        { label: "4:5", w: 896, h: 1152, group: "portrait", desc: "Фото / Инста 4:5" },
-        { label: "3:4", w: 896, h: 1216, group: "portrait", desc: "Портрет 3:4" },
-        { label: "2:3", w: 832, h: 1216, group: "portrait", desc: "Классический 35мм 2:3" },
-        { label: "9:16", w: 768, h: 1344, group: "portrait", desc: "Мобильный / Stories 9:16" },
+        { label: "4:5", w: 896, h: 1152, group: "portrait", desc: "Фото / Инста 4:5 (SDXL/Flux)" },
+        { label: "3:4", w: 896, h: 1216, group: "portrait", desc: "Портрет 3:4 (SDXL/Flux)" },
+        { label: "2:3", w: 832, h: 1216, group: "portrait", desc: "Классический 35мм 2:3 (SDXL/Flux)" },
+        { label: "2:3", w: 512, h: 768, group: "portrait", desc: "SD 1.5 Портрет 512×768" },
+        { label: "9:16", w: 768, h: 1344, group: "portrait", desc: "Мобильный / Stories 9:16 (SDXL/Flux)" },
+        { label: "9:16", w: 512, h: 896, group: "portrait", desc: "SD 1.5 Мобильный 512×896" },
+        { label: "9:16", w: 480, h: 832, group: "portrait", desc: "Wan Video 480×832" },
         { label: "9:21", w: 640, h: 1536, group: "portrait", desc: "Вытянутый кино 9:21" },
 
         // Landscape (Альбомные / Пейзажные — от близких к квадрату до ультрашироких)
-        { label: "5:4", w: 1152, h: 896, group: "landscape", desc: "Пейзаж 5:4" },
-        { label: "4:3", w: 1216, h: 896, group: "landscape", desc: "Монитор 4:3" },
-        { label: "3:2", w: 1216, h: 832, group: "landscape", desc: "Классический 35мм 3:2" },
-        { label: "16:9", w: 1344, h: 768, group: "landscape", desc: "Широкоформатный 16:9" },
+        { label: "5:4", w: 1152, h: 896, group: "landscape", desc: "Пейзаж 5:4 (SDXL/Flux)" },
+        { label: "4:3", w: 1216, h: 896, group: "landscape", desc: "Монитор 4:3 (SDXL/Flux)" },
+        { label: "3:2", w: 1216, h: 832, group: "landscape", desc: "Классический 35мм 3:2 (SDXL/Flux)" },
+        { label: "3:2", w: 768, h: 512, group: "landscape", desc: "SD 1.5 Пейзаж 768×512" },
+        { label: "16:9", w: 1344, h: 768, group: "landscape", desc: "Широкоформатный 16:9 (SDXL/Flux)" },
+        { label: "16:9", w: 896, h: 512, group: "landscape", desc: "SD 1.5 Широкий 896×512" },
+        { label: "16:9", w: 832, h: 480, group: "landscape", desc: "Wan Video 832×480" },
         { label: "2:1", w: 1408, h: 704, group: "landscape", desc: "Панорама 2:1" },
         { label: "21:9", w: 1536, h: 640, group: "landscape", desc: "Кинематографичный 21:9" },
     ];
@@ -1247,8 +1253,44 @@
         }
     }
 
+    let lastDistilledState = { txt2img: null, img2img: null };
+    function checkDynamicLayoutState() {
+        const root = gradioApp();
+        if (!root) return;
+        ["txt2img", "img2img"].forEach((tab) => {
+            const distilledCfg = root.querySelector(`#${tab}_distilled_cfg_scale`);
+            const isVis = Boolean(
+                distilledCfg &&
+                distilledCfg.offsetParent !== null &&
+                !distilledCfg.style.display?.includes("none") &&
+                !distilledCfg.classList.contains("hide")
+            );
+            if (lastDistilledState[tab] !== isVis) {
+                lastDistilledState[tab] = isVis;
+                organizeGenerationParams(tab);
+            }
+        });
+    }
+
+    function attachPresetListener() {
+        const root = gradioApp();
+        if (!root) return;
+        const presetEl = root.querySelector("#forge_ui_preset input") || root.querySelector("#forge_ui_preset select") || root.querySelector("#forge_ui_preset");
+        if (presetEl && !presetEl._hasLobeListener) {
+            presetEl._hasLobeListener = true;
+            const onPreset = () => {
+                setTimeout(checkDynamicLayoutState, 150);
+                setTimeout(checkDynamicLayoutState, 500);
+            };
+            presetEl.addEventListener("change", onPreset);
+            presetEl.addEventListener("input", onPreset);
+        }
+    }
+
     function checkLiveSettings() {
         applyEnabledState(isAspectRatioEnabled());
+        checkDynamicLayoutState();
+        attachPresetListener();
         const currentMode = getAspectRatioViewMode();
         if (lastViewModeState !== currentMode) {
             lastViewModeState = currentMode;

@@ -4,8 +4,7 @@ import { HEADER_HEIGHT } from '../../app/index';
 
 export default (token: Theme) => {
   return css`
-    #root {
-      /* sd-webui-prompt-all-in-one */
+    /* sd-webui-prompt-all-in-one */
       .physton-highlight-prompt {
         color: ${token.colorPrimary} !important;
 
@@ -74,19 +73,40 @@ export default (token: Theme) => {
         }
       }
 
-      /* ControlNet */
+      /* ControlNet (Forge Built-in & classic) */
+      .controlnet,
       [id$='img_controlnet'] {
-        .cnet-badge.primary {
+        .cnet-badge.primary,
+        .cnet-badge {
           font-size: var(--text-xs);
           line-height: 1.3;
-          color: var(--body-background-fill);
-          background-color: ${token.colorSuccess};
+          color: #ffffff !important;
+          background-color: ${token.colorSuccess} !important;
+          border-radius: ${token.borderRadiusSM}px !important;
         }
 
         .tab-nav button {
           &.cnet-unit-active,
           &.selected.cnet-unit-active {
             color: ${token.colorSuccess} !important;
+            font-weight: 600 !important;
+          }
+        }
+
+        .cnet-upload-pose,
+        .cnet-download-pose,
+        .cnet-close-preview,
+        .cnet-download-preview {
+          border: 1px solid ${token.colorBorderSecondary} !important;
+          border-radius: ${token.borderRadiusSM}px !important;
+          background: ${token.colorFillTertiary} !important;
+          color: ${token.colorText} !important;
+          transition: all 0.2s ease !important;
+
+          &:hover {
+            border-color: ${token.colorPrimary} !important;
+            background: ${token.colorFillSecondary} !important;
+            color: ${token.colorPrimary} !important;
           }
         }
 
@@ -224,6 +244,5 @@ export default (token: Theme) => {
         pointer-events: none;
         z-index: 0;
       }
-    }
   `;
 };

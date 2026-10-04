@@ -151,7 +151,10 @@ export const createSettings: StateCreator<Store, [['zustand/devtools', never]], 
       } catch {}
     }
     if (!currentTab) {
-      const activeEl = document.querySelector(
+      const root =
+        (typeof (window as any).gradioApp === 'function' ? (window as any).gradioApp() : null) ||
+        document;
+      const activeEl = root.querySelector(
         '#tabs > .tabitem[style*="display: block"], #tabs > .tabitem:not([style*="display: none"]), #tabs > div[id^="tab_"]',
       );
       currentTab = activeEl?.id;

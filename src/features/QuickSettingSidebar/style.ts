@@ -18,7 +18,7 @@ export const useStyles = createStyles(
 
         width: 100%;
 
-        > * {
+        > *:not(#forge_refresh_checkpoint) {
           flex: 1;
 
           width: 100% !important;
@@ -26,6 +26,16 @@ export const useStyles = createStyles(
           max-width: unset !important;
           margin: 0;
           padding: 0;
+        }
+
+        #forge_refresh_checkpoint {
+          flex: none !important;
+          width: var(--button-lg-tool-height) !important;
+          min-width: var(--button-lg-tool-height) !important;
+          max-width: var(--button-lg-tool-height) !important;
+          height: var(--button-lg-tool-height) !important;
+          align-self: flex-start;
+          margin: 4px 0 !important;
         }
 
         .head > label {
