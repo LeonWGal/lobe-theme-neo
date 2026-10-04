@@ -1254,4 +1254,330 @@ div.block.ad-preview-status {
     opacity: 0.8 !important;
 }
 
+/* ==========================================================================
+   Unified UI & UX Design System (Lobe Theme Neo + Aspect Ratio Harmonization)
+   ========================================================================== */
+
+/* 1. Quick Settings Sidebar & Floating Drawer Harmonization */
+[class*="draggable-panel"],
+[class*="DraggablePanel"],
+aside[class*="LayoutSidebar"],
+.ant-layout-sider {
+    background: var(--gf-bg-card) !important;
+    border-right: 1px solid var(--gf-border) !important;
+    box-shadow: var(--gf-popover-shadow) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Sidebar Top Header & Action Buttons */
+[class*="draggable-panel"] > div > div:first-child,
+div[class*="XMA"] {
+    border-bottom: 1px solid var(--gf-border) !important;
+    padding: 10px 14px !important;
+}
+
+/* Segmented Tabs inside Sidebar (Настройки / Промпты) */
+.ant-segmented {
+    background: var(--gf-bg-card-secondary) !important;
+    border: 1px solid var(--gf-border) !important;
+    border-radius: var(--gf-radius-sm, 6px) !important;
+    padding: 2px !important;
+    gap: 2px !important;
+}
+
+.ant-segmented-group {
+    gap: 2px !important;
+}
+
+.ant-segmented-item {
+    border-radius: 4px !important;
+    color: var(--gf-text-secondary) !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    transition: all 0.15s ease !important;
+    white-space: nowrap !important;
+    padding: 2px 8px !important;
+}
+
+.ant-segmented-item:hover:not(.ant-segmented-item-selected) {
+    color: var(--gf-text-primary) !important;
+    background: rgba(128, 128, 128, 0.08) !important;
+}
+
+.ant-segmented-item-selected {
+    background: var(--gf-bg-card) !important;
+    color: var(--gf-primary) !important;
+    font-weight: 600 !important;
+    border: 1px solid var(--gf-border) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Quick Settings Form Controls (#quicksettings) */
+#quicksettings {
+    padding: 6px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    background: transparent !important;
+}
+
+#quicksettings > div,
+#quicksettings > fieldset,
+#quicksettings .gradio-dropdown,
+#quicksettings .gradio-textbox {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+#quicksettings label > span,
+#quicksettings .block-label {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: var(--gf-text-secondary) !important;
+    margin-bottom: 4px !important;
+    letter-spacing: 0.2px !important;
+}
+
+#quicksettings input,
+#quicksettings select,
+#quicksettings textarea,
+#quicksettings .wrap,
+#quicksettings .single-select,
+#quicksettings [data-testid*="dropdown"] {
+    background: var(--gf-bg-card-secondary) !important;
+    border: 1px solid var(--gf-border) !important;
+    border-radius: var(--gf-radius-sm, 6px) !important;
+    color: var(--gf-text-primary) !important;
+    font-size: 12.5px !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    transition: all 0.15s ease !important;
+    box-sizing: border-box !important;
+}
+
+#quicksettings input:hover,
+#quicksettings select:hover,
+#quicksettings .wrap:hover {
+    border-color: var(--gf-primary) !important;
+    background: var(--gf-bg-card) !important;
+}
+
+#quicksettings input:focus,
+#quicksettings select:focus,
+#quicksettings .wrap:focus-within {
+    border-color: var(--gf-primary) !important;
+    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2) !important;
+    background: var(--gf-bg-card) !important;
+}
+
+/* Refresh Checkpoint Button - Sleek inline tool button */
+#forge_refresh_checkpoint {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    background: var(--gf-bg-card-secondary) !important;
+    border: 1px solid var(--gf-border) !important;
+    border-radius: var(--gf-radius-sm, 6px) !important;
+    color: var(--gf-text-secondary) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    padding: 0 !important;
+    margin: 4px 0 !important;
+}
+
+#forge_refresh_checkpoint:hover {
+    border-color: var(--gf-primary) !important;
+    color: var(--gf-primary) !important;
+    background: var(--gf-badge-bg) !important;
+    transform: rotate(45deg);
+}
+
+/* 2. Universal Gradio Slider & Numeric Input UX */
+.gradio-slider input[type="range"],
+input[type="range"].gradio-slider {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 100% !important;
+    height: 4px !important;
+    background: var(--gf-slider-unfilled, rgba(128, 128, 128, 0.2)) !important;
+    border-radius: 2px !important;
+    outline: none !important;
+    cursor: pointer !important;
+    border: none !important;
+    box-sizing: border-box !important;
+    margin: 4px 0 !important;
+}
+
+.gradio-slider input[type="range"]::-webkit-slider-thumb,
+input[type="range"].gradio-slider::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background: var(--gf-primary, #52c41a) !important;
+    border: 2px solid var(--gf-primary, #52c41a) !important;
+    cursor: pointer !important;
+    box-shadow: 0 0 0 1px var(--gf-bg-card, #ffffff), 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+    transition: transform 0.12s ease, border-color 0.15s ease !important;
+}
+
+.gradio-slider input[type="range"]::-webkit-slider-thumb:hover,
+input[type="range"].gradio-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.18) !important;
+    background: var(--gf-primary-hover, #73d13d) !important;
+    border-color: var(--gf-primary-hover, #73d13d) !important;
+}
+
+.gradio-slider input[type="range"]::-webkit-slider-thumb:active,
+input[type="range"].gradio-slider::-webkit-slider-thumb:active {
+    transform: scale(1.05) !important;
+}
+
+.gradio-slider input[type="range"]::-moz-range-thumb,
+input[type="range"].gradio-slider::-moz-range-thumb {
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    background: var(--gf-primary, #52c41a) !important;
+    border: 2px solid var(--gf-primary, #52c41a) !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+    transition: transform 0.12s ease, border-color 0.15s ease !important;
+}
+
+.gradio-slider input[type="number"],
+.gradio-slider input.compact-num {
+    height: 28px !important;
+    min-height: 28px !important;
+    width: 62px !important;
+    border-radius: var(--gf-radius-sm, 6px) !important;
+    border: 1px solid var(--gf-input-border, var(--gf-border)) !important;
+    background: var(--gf-input-bg, var(--gf-bg-card)) !important;
+    color: var(--gf-text-primary) !important;
+    font-family: var(--gf-font-mono, monospace) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: all 0.15s ease !important;
+    -moz-appearance: textfield !important;
+}
+
+.gradio-slider input[type="number"]:focus {
+    border-color: var(--gf-primary) !important;
+    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2) !important;
+}
+
+.gradio-slider input[type="number"]::-webkit-inner-spin-button,
+.gradio-slider input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+/* 3. Universal Accordion Harmonization */
+.gradio-accordion {
+    background: var(--gf-bg-card) !important;
+    border: 1px solid var(--gf-border) !important;
+    border-radius: var(--gf-radius, 8px) !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    margin-bottom: 8px !important;
+}
+
+.gradio-accordion:hover {
+    border-color: var(--gf-border-hover) !important;
+}
+
+.gradio-accordion > .label-wrap {
+    padding: 10px 14px !important;
+    border-radius: var(--gf-radius, 8px) !important;
+    background: transparent !important;
+    border: none !important;
+    transition: all 0.15s ease !important;
+}
+
+.gradio-accordion > .label-wrap > span:not(.icon) {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--gf-text-primary) !important;
+    letter-spacing: 0.1px !important;
+}
+
+.gradio-accordion > .label-wrap.open {
+    border-bottom: 1px solid var(--gf-border) !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+/* 4. Universal Buttons & Inputs Across Main Panels */
+button.primary.gradio-button,
+#txt2img_generate,
+#img2img_generate {
+    background: var(--gf-primary) !important;
+    color: #121214 !important;
+    font-weight: 700 !important;
+    border: 1px solid var(--gf-primary) !important;
+    border-radius: var(--gf-radius, 8px) !important;
+    transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    box-shadow: 0 2px 8px rgba(82, 196, 26, 0.25) !important;
+}
+
+button.primary.gradio-button:hover,
+#txt2img_generate:hover,
+#img2img_generate:hover {
+    background: var(--gf-primary-hover) !important;
+    border-color: var(--gf-primary-hover) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(82, 196, 26, 0.38) !important;
+}
+
+button.secondary.gradio-button {
+    background: var(--gf-bg-card-secondary) !important;
+    border: 1px solid var(--gf-border) !important;
+    border-radius: var(--gf-radius-sm, 6px) !important;
+    color: var(--gf-text-primary) !important;
+    font-weight: 500 !important;
+    transition: all 0.15s ease !important;
+}
+
+button.secondary.gradio-button:hover:not(:disabled) {
+    background: var(--gf-bg-card) !important;
+    border-color: var(--gf-primary) !important;
+    color: var(--gf-primary) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 5. Smooth Scrollbars */
+::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gf-text-tertiary, #a1a1aa) !important;
+    border-radius: 3px !important;
+    opacity: 0.5 !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--gf-text-secondary, #71717a) !important;
+}
+
 
