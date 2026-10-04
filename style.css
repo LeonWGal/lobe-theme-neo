@@ -6,8 +6,8 @@
 :root,
 body:not(.dark) {
     --gf-bg-card: var(--block-background-fill, var(--colorBgContainer, #ffffff));
-    --gf-bg-card-secondary: var(--colorFillQuaternary, var(--neutral-800, #f4f4f5));
-    --gf-bg-elevated: var(--colorBgElevated, var(--neutral-900, #ffffff));
+    --gf-bg-card-secondary: var(--colorFillQuaternary, #f4f4f6);
+    --gf-bg-elevated: var(--colorBgElevated, #ffffff);
     --gf-border: var(--block-border-color, var(--colorBorderSecondary, #e4e4e7));
     --gf-border-hover: var(--colorPrimaryHover, #52c41a);
     --gf-primary: var(--colorPrimary, var(--color-accent, #52c41a));
@@ -30,8 +30,8 @@ body:not(.dark) {
 body.dark,
 .dark {
     --gf-bg-card: var(--block-background-fill, var(--colorBgContainer, #1f1f23));
-    --gf-bg-card-secondary: var(--colorFillQuaternary, var(--neutral-800, #26262a));
-    --gf-bg-elevated: var(--colorBgElevated, var(--neutral-900, #18181c));
+    --gf-bg-card-secondary: var(--colorFillQuaternary, #26262a);
+    --gf-bg-elevated: var(--colorBgElevated, #18181c);
     --gf-border: var(--block-border-color, var(--colorBorderSecondary, #333338));
     --gf-border-hover: var(--colorPrimaryHover, #52c41a);
     --gf-primary: var(--colorPrimary, var(--color-accent, #52c41a));
@@ -996,16 +996,16 @@ div[id*="adetailer_ad_main_accordion"] .gr-group {
 div[id*="adetailer_ad_main_accordion"] .gradio-accordion {
     margin: 8px 0 !important;
     padding: 12px 14px !important;
-    border: 1px solid var(--gf-border, var(--colorBorderSecondary, rgba(255, 255, 255, 0.08))) !important;
+    border: 1px solid var(--gf-border) !important;
     border-radius: var(--gf-radius, 8px) !important;
-    background: var(--gf-bg-card-secondary, var(--colorFillQuaternary, rgba(255, 255, 255, 0.02))) !important;
+    background: var(--gf-bg-card-secondary) !important;
     box-shadow: none !important;
     box-sizing: border-box !important;
     transition: border-color 0.2s ease !important;
 }
 
 div[id*="adetailer_ad_main_accordion"] .gradio-accordion:hover {
-    border-color: var(--gf-border-hover, var(--colorPrimaryHover, rgba(255, 255, 255, 0.2))) !important;
+    border-color: var(--gf-border-hover) !important;
 }
 
 div[id*="adetailer_ad_main_accordion"] .gradio-accordion .label-wrap {
@@ -1016,13 +1016,13 @@ div[id*="adetailer_ad_main_accordion"] .gradio-accordion .label-wrap {
 div[id*="adetailer_ad_main_accordion"] .gradio-accordion .label-wrap.open {
     padding-bottom: 10px !important;
     margin-bottom: 10px !important;
-    border-bottom: 1px dashed var(--gf-border, var(--colorBorderSecondary, rgba(255, 255, 255, 0.1))) !important;
+    border-bottom: 1px dashed var(--gf-border) !important;
 }
 
 div[id*="adetailer_ad_main_accordion"] .gradio-accordion .label-wrap > span:not(.icon) {
     font-size: var(--text-sm, 13px) !important;
     font-weight: 600 !important;
-    color: var(--gf-text-primary, var(--colorText, #ffffff)) !important;
+    color: var(--gf-text-primary) !important;
 }
 
 /* Button height & style normalization */
@@ -1041,10 +1041,10 @@ button[id*="adetailer_ad_preset_import_btn"] {
     height: var(--button-lg-tool-height, 36px) !important;
     min-height: var(--button-lg-tool-height, 36px) !important;
     max-height: var(--button-lg-tool-height, 36px) !important;
-    border-radius: var(--gf-radius-sm, var(--borderRadiusSM, 6px)) !important;
-    border: 1px solid var(--gf-border, var(--colorBorderSecondary, rgba(255, 255, 255, 0.1))) !important;
-    background: var(--gf-bg-card-secondary, var(--colorFillTertiary, #26262a)) !important;
-    color: var(--gf-text-primary, var(--colorText, #ffffff)) !important;
+    border-radius: var(--gf-radius-sm, 6px) !important;
+    border: 1px solid var(--gf-border) !important;
+    background: var(--gf-bg-card-secondary) !important;
+    color: var(--gf-text-primary) !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     padding: 0 12px !important;
@@ -1066,25 +1066,25 @@ button[id*="adetailer_ad_preset_rename"]:hover:not(:disabled),
 button[id*="adetailer_ad_preset_save"]:hover:not(:disabled),
 button[id*="adetailer_ad_preset_export_btn"]:hover:not(:disabled),
 button[id*="adetailer_ad_preset_import_btn"]:hover:not(:disabled) {
-    background: var(--colorFillSecondary, #333338) !important;
-    border-color: var(--gf-primary, var(--colorPrimary, #f5c57a)) !important;
-    color: var(--gf-primary, var(--colorPrimary, #f5c57a)) !important;
+    background: var(--gf-bg-card) !important;
+    border-color: var(--gf-primary) !important;
+    color: var(--gf-primary) !important;
 }
 
 /* Primary actions: Run detection preview & Run ADetailer */
 button[id*="adetailer_ad_preview_btn"],
 button[id*="adetailer_ad_apply_btn"] {
-    background: var(--gf-primary, var(--colorPrimary, #f5c57a)) !important;
-    border-color: var(--gf-primary, var(--colorPrimary, #f5c57a)) !important;
-    color: #121214 !important;
+    background: var(--gf-primary) !important;
+    border-color: var(--gf-primary) !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
 }
 
 button[id*="adetailer_ad_preview_btn"]:hover:not(:disabled),
 button[id*="adetailer_ad_apply_btn"]:hover:not(:disabled) {
-    background: var(--gf-primary-hover, var(--colorPrimaryHover, #ffd591)) !important;
-    border-color: var(--gf-primary-hover, var(--colorPrimaryHover, #ffd591)) !important;
-    color: #121214 !important;
+    background: var(--gf-primary-hover) !important;
+    border-color: var(--gf-primary-hover) !important;
+    color: #ffffff !important;
     transform: translateY(-1px);
 }
 
@@ -1194,24 +1194,24 @@ div.block.ad-preview-status {
     margin: 6px 0 !important;
     padding: 8px 12px !important;
     font-size: 12px !important;
-    border-left: 3px solid var(--gf-primary, var(--colorPrimary, #f5c57a)) !important;
-    background: var(--gf-bg-card-secondary, var(--colorFillQuaternary, rgba(255, 255, 255, 0.03))) !important;
+    border-left: 3px solid var(--gf-primary) !important;
+    background: var(--gf-bg-card-secondary) !important;
     border-radius: var(--gf-radius-sm, 4px) !important;
-    color: var(--gf-text-secondary, var(--colorTextSecondary, #a1a1aa)) !important;
+    color: var(--gf-text-secondary) !important;
 }
 
 .ad-preset-preview code {
     font-size: 11px !important;
     padding: 2px 6px !important;
     border-radius: var(--gf-radius-sm, 4px) !important;
-    background: var(--colorFillTertiary, rgba(255, 255, 255, 0.08)) !important;
-    color: var(--gf-text-primary, var(--colorText, #ffffff)) !important;
+    background: var(--gf-bg-card) !important;
+    color: var(--gf-text-primary) !important;
 }
 
 /* ControlNet row */
 .ad-cn-row {
-    background: var(--gf-bg-card-secondary, var(--colorFillQuaternary, rgba(255, 255, 255, 0.02))) !important;
-    border: 1px solid var(--gf-border, var(--colorBorderSecondary, rgba(255, 255, 255, 0.08))) !important;
+    background: var(--gf-bg-card-secondary) !important;
+    border: 1px solid var(--gf-border) !important;
     border-radius: var(--gf-radius, 8px) !important;
     padding: 12px 14px !important;
     gap: 16px !important;
@@ -1224,17 +1224,17 @@ div.block.ad-preview-status {
     max-width: 960px !important;
     margin: 0 auto !important;
     padding: 24px !important;
-    background: var(--gf-bg-card, var(--colorBgContainer, #1f1f23)) !important;
-    border: 1px solid var(--gf-border, var(--colorBorderSecondary, rgba(255, 255, 255, 0.08))) !important;
+    background: var(--gf-bg-card) !important;
+    border: 1px solid var(--gf-border) !important;
     border-radius: var(--gf-radius, 8px) !important;
-    color: var(--gf-text-primary, var(--colorText, #ffffff)) !important;
+    color: var(--gf-text-primary) !important;
 }
 
 .ad-guide h3 {
     margin: 1em 0 0.4em !important;
     font-size: 14px !important;
-    color: var(--gf-primary, var(--colorPrimary, #f5c57a)) !important;
-    border-bottom: 1px solid var(--gf-border, var(--colorBorderSecondary, rgba(255, 255, 255, 0.08)));
+    color: var(--gf-primary) !important;
+    border-bottom: 1px solid var(--gf-border);
     padding-bottom: 4px;
 }
 
@@ -1243,8 +1243,8 @@ div.block.ad-preview-status {
     font-family: var(--gf-font-mono, monospace) !important;
     padding: 2px 6px !important;
     border-radius: 4px !important;
-    background: var(--colorFillTertiary, rgba(255, 255, 255, 0.08)) !important;
-    color: var(--gf-text-primary, var(--colorText, #ffffff)) !important;
+    background: var(--gf-bg-card-secondary) !important;
+    color: var(--gf-text-primary) !important;
 }
 
 .ad-guide-pointer {
