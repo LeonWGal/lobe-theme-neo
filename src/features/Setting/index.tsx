@@ -43,7 +43,7 @@ const Setting = memo<SettingProps>(({ open, onCancel }) => {
           padding: 0,
           paddingBlock: 0,
         },
-        content: {
+        root: {
           background: mobile ? theme.colorBgContainer : undefined,
           border: 'none',
           boxShadow: `0 0 0 1px ${theme.colorBorderSecondary}`,

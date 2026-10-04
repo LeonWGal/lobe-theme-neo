@@ -1,5 +1,6 @@
 import { Icon } from '@lobehub/ui';
-import { Bug, FileClock, GitFork, Github, Heart } from 'lucide-react';
+import { GithubIcon as Github } from '@lobehub/ui/icons';
+import { Bug, FileClock, GitFork, Heart } from 'lucide-react';
 
 import { FORGE_NEO_URL, GITHUB_REPO_URL } from '@/const/url';
 

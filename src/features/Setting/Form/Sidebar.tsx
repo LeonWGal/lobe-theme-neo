@@ -147,7 +147,7 @@ const SettingForm = memo(() => {
       onFinish={onFinish}
       onValuesChange={(_, v) => setRawSetting(v)}
       style={{ flex: 1 }}
-      variant={'pure'}
+      variant={'borderless'}
     />
   );
 });

@@ -1,7 +1,8 @@
 import { ActionIcon } from '@lobehub/ui';
+import { GithubIcon as Github } from '@lobehub/ui/icons';
 import { Space } from 'antd';
 import { useResponsive } from 'antd-style';
-import { Github, LayoutGrid, LucideIcon, Moon, Settings, Sun } from 'lucide-react';
+import { LayoutGrid, LucideIcon, Moon, Settings, Sun } from 'lucide-react';
 import qs from 'query-string';
 import { memo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';

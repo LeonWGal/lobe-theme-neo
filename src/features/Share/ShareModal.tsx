@@ -115,7 +115,6 @@ const ShareModal = memo<ShareModalProps>(({ open, onCancel, type }) => {
           {t('shareModal.download')}
         </Button>
       }
-      maxHeight={false}
       onCancel={onCancel}
       open={open}
       title={t('share')}

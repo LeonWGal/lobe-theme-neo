@@ -27,7 +27,7 @@ const moveGenerateWithEnqueue = (
   }
 };
 
-const setupSplitView = (root: Element | Document) => {
+const setupSplitView = (root: Element | Document | DocumentFragment) => {
   try {
     // tab_txt2img
     const txt2imgToprow = root.querySelector('#txt2img_toprow') as HTMLDivElement | null;

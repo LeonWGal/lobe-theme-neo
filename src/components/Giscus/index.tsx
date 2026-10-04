@@ -1,15 +1,14 @@
 import {
-  DiscordIcon,
-  Giscus as G,
-  GradientButton,
   Icon,
   Modal,
   type ModalProps,
 } from '@lobehub/ui';
+import { Giscus as G, GradientButton } from '@lobehub/ui/awesome';
+import { DiscordIcon, GithubIcon as Github } from '@lobehub/ui/icons';
 import { Button } from 'antd';
 import { useTheme } from 'antd-style';
 import isEqual from 'fast-deep-equal';
-import { Github, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';

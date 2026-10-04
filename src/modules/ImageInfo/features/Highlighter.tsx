@@ -97,17 +97,16 @@ export const Highlighter = memo<HighlighterProps>(
           <ActionIcon
             icon={expand ? ChevronDown : ChevronRight}
             onClick={() => setExpand(!expand)}
-            size={{ blockSize: 24, fontSize: 14, strokeWidth: 3 }}
+            size={{ blockSize: 24, size: 14, strokeWidth: 3 }}
           />
 
-          <ActionIcon size={{ blockSize: 24 }} style={{ width: 'unset' }}>
+          <span style={{ fontSize: 13, fontWeight: 500 }}>
             {title}
-          </ActionIcon>
+          </span>
           {showCopy ? (
             <CopyButton
               content={children}
-              placement="left"
-              size={{ blockSize: 24, fontSize: 14, strokeWidth: 2 }}
+              size={{ blockSize: 24, size: 14, strokeWidth: 2 }}
             />
           ) : (
             <div />

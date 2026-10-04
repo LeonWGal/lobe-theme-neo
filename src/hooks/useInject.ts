@@ -12,7 +12,7 @@ interface InjectOptions {
 }
 
 export const useInject = (
-  ref: RefObject<HTMLDivElement>,
+  ref: RefObject<HTMLDivElement | null>,
   selectors: string,
   { onSuccess, onError, debug, id, onStart, parent, inverse }: InjectOptions = {},
 ) => {

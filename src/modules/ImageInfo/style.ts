@@ -1,4 +1,4 @@
-import { colors as colorScales } from '@lobehub/ui';
+import { colors as colorScales } from '@lobehub/ui/color';
 import { createStyles } from 'antd-style';
 
 export const useStyles = createStyles(({ css, token, isDarkMode }) => {

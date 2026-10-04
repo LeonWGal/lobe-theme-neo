@@ -12,14 +12,14 @@ export const primaryColors = {
   ...ps,
 };
 
-export const primaryColorsSwatches = [primaryColors.kitchen, ...pcs];
+export const primaryColorsSwatches = [primaryColors.kitchen, ...pcs].map((color) => ({ color }));
 
 export const neutralColors = {
   kitchen: kitchenNeutral.dark.colorNeutral,
   ...nc,
 };
 
-export const neutralColorsSwatches = [neutralColors.kitchen, ...ncs];
+export const neutralColorsSwatches = [neutralColors.kitchen, ...ncs].map((color) => ({ color }));
 
 export const findCustomThemeName = (type: 'primary' | 'neutral', value?: string): any => {
   if (!value) return '';

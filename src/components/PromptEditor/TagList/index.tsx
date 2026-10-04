@@ -1,6 +1,6 @@
 import { consola } from 'consola';
 import { type FC, memo, useCallback, useEffect, useState } from 'react';
-import { WithContext, ReactTagsProps as WithContextProps } from 'react-tag-input';
+import { WithContext } from 'react-tag-input';
 
 import { genTagType } from '../utils';
 import { useStyles } from './style';
@@ -13,13 +13,8 @@ export interface TagItem {
 
 export type PromptType = 'positive' | 'negative';
 
-interface ReactTagsProps extends WithContextProps {
-  editable?: boolean;
-  onTagUpdate?: (editIndex: number, tag: TagItem) => void;
-}
-
 // @ts-ignore
-const ReactTags: FC<ReactTagsProps> = WithContext;
+const ReactTags: FC<any> = WithContext;
 
 const KeyCodes = {
   comma: 188,

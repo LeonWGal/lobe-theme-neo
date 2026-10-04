@@ -1,4 +1,4 @@
-import { Logo } from '@lobehub/ui';
+import { LobeHub as Logo } from '@lobehub/ui/brand';
 import { PropsWithChildren, memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 

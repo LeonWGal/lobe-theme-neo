@@ -1,4 +1,4 @@
-import { Logo } from '@lobehub/ui';
+import { LobeHub as Logo } from '@lobehub/ui/brand';
 import { createStyles, useThemeMode } from 'antd-style';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';

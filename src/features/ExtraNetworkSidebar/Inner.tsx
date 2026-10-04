@@ -56,7 +56,7 @@ const Inner = memo(() => {
         <ActionIcon
           icon={setting.extraNetworkCardSize < size ? ZoomOut : ZoomIn}
           onClick={() => setSize(setting.extraNetworkCardSize)}
-          size={{ blockSize: 24, fontSize: 16 }}
+          size={{ blockSize: 24, size: 16 }}
         />
         <Slider
           defaultValue={size}

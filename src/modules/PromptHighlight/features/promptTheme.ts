@@ -1,4 +1,4 @@
-import { colors as colorScales } from '@lobehub/ui';
+import { colors as colorScales } from '@lobehub/ui/color';
 import { ThemeAppearance } from 'antd-style';
 
 export const themeConfig: any = (isDarkMode: ThemeAppearance) => {

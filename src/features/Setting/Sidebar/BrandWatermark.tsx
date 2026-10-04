@@ -1,4 +1,4 @@
-import { Logo } from '@lobehub/ui';
+import { LobeHub as Logo } from '@lobehub/ui/brand';
 import { createStyles } from 'antd-style';
 import { memo } from 'react';
 import { Flexbox, FlexboxProps } from 'react-layout-kit';

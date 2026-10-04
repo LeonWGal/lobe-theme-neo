@@ -1,4 +1,4 @@
-import { Form, type ItemGroup, Swatches } from '@lobehub/ui';
+import { ColorSwatches, Form, type FormGroupItemType } from '@lobehub/ui';
 import { Button, Input, InputNumber, Segmented, Select, Switch } from 'antd';
 import isEqual from 'fast-deep-equal';
 import { Layout, Palette, PanelLeftClose, PanelRightClose, TextCursorInput } from 'lucide-react';
@@ -24,7 +24,7 @@ import {
   primaryColorsSwatches,
 } from './data';
 
-type SettingItemGroup = ItemGroup & {
+type SettingItemGroup = FormGroupItemType & {
   children: {
     name?: WebuiSettingKeys | string;
   }[];
@@ -77,10 +77,10 @@ const SettingForm = memo(() => {
         },
         {
           children: (
-            <Swatches
-              activeColor={primaryColor ? primaryColors[primaryColor] : undefined}
+            <ColorSwatches
               colors={primaryColorsSwatches}
-              onSelect={(c) => setPrimaryColor(findCustomThemeName('primary', c))}
+              onChange={(c?: string) => setPrimaryColor(findCustomThemeName('primary', c))}
+              value={primaryColor ? primaryColors[primaryColor] : undefined}
             />
           ),
           desc: t('setting.primaryColor.desc'),
@@ -88,10 +88,10 @@ const SettingForm = memo(() => {
         },
         {
           children: (
-            <Swatches
-              activeColor={neutralColor ? neutralColors[neutralColor] : undefined}
+            <ColorSwatches
               colors={neutralColorsSwatches}
-              onSelect={(c) => setNeutralColor(findCustomThemeName('neutral', c))}
+              onChange={(c?: string) => setNeutralColor(findCustomThemeName('neutral', c))}
+              value={neutralColor ? neutralColors[neutralColor] : undefined}
             />
           ),
           desc: t('setting.neutralColor.desc'),

@@ -1,4 +1,4 @@
-import react from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 import { consola } from 'consola';
 import dotenv from 'dotenv';
 import { resolve } from 'node:path';
@@ -17,7 +17,7 @@ export default defineConfig({
   base: '/dev',
   build: {
     cssMinify: true,
-    emptyOutDir: true,
+    emptyOutDir: false,
     minify: 'terser',
     outDir: './javascript',
     rollupOptions: {
@@ -36,7 +36,7 @@ export default defineConfig({
     'process.env': process.env,
   },
   plugins: [
-    react({ devTarget: 'esnext', tsDecorators: true }),
+    react(),
 
     !isProduction && {
       configureServer: (server) => {

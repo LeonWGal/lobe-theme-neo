@@ -1,4 +1,4 @@
-import { Logo as LobeLogo } from '@lobehub/ui';
+import { LobeHub as LobeLogo } from '@lobehub/ui/brand';
 import isEqual from 'fast-deep-equal';
 import { type CSSProperties, memo } from 'react';
 

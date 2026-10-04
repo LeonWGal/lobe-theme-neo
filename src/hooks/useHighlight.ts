@@ -1,4 +1,4 @@
-import { HighlighterCore, getHighlighterCore } from 'shiki/core';
+import { HighlighterCore, createHighlighterCore } from 'shiki/core';
 import getWasmInlined from 'shiki/wasm';
 import useSWR from 'swr';
 
@@ -12,7 +12,7 @@ const initHighlighter = async(): Promise<HighlighterCore> => {
 
   if (highlighter) return highlighter;
 
-  highlighter = await getHighlighterCore({
+  highlighter = await createHighlighterCore({
     // @ts-ignore
     langs: [prompt],
     loadWasm: getWasmInlined,

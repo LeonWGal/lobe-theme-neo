@@ -1,12 +1,13 @@
 import {
   type DivProps,
+  ConfigProvider,
   ThemeProvider,
-  colorScales,
   generateColorNeutralPalette,
   generateColorPalette,
-  neutralColorScales,
 } from '@lobehub/ui';
+import { colorScales, neutralColorScales } from '@lobehub/ui/color';
 import isEqual from 'fast-deep-equal';
+import { motion } from 'motion/react';
 import qs from 'query-string';
 import { memo, useCallback, useEffect } from 'react';
 
@@ -60,13 +61,15 @@ const GlobalLayout = memo<DivProps>(({ children }) => {
 
   return (
     setting && (
-      <ThemeProvider
-        customToken={genCustomToken}
-        enableWebfonts={setting.enableWebFont}
-        themeMode={themeMode}
-      >
-        {children}
-      </ThemeProvider>
+      <ConfigProvider motion={motion}>
+        <ThemeProvider
+          customToken={genCustomToken}
+          enableCustomFonts={setting.enableWebFont}
+          themeMode={themeMode}
+        >
+          {children}
+        </ThemeProvider>
+      </ConfigProvider>
     )
   );
 });
