@@ -257,6 +257,7 @@ export const useStyles = createStyles(
           }
         }
 
+        [id$='2img_prompt'] textarea,
         [id$='2img_prompt'] > label > textarea {
           color: ${token.colorSuccessTextHover};
 
@@ -265,6 +266,7 @@ export const useStyles = createStyles(
           }
         }
 
+        [id$='2img_neg_prompt'] textarea,
         [id$='2img_neg_prompt'] > label > textarea {
           color: ${token.colorErrorTextHover};
 
@@ -273,7 +275,9 @@ export const useStyles = createStyles(
           }
         }
 
-        .block.token-counter {
+        .block.token-counter,
+        [id$='_token_counter'],
+        [id$='_negative_token_counter'] {
           z-index: 10 !important;
           top: -14px;
           right: 4px;

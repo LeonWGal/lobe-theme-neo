@@ -134,11 +134,17 @@ export default (token: Theme) => css`
   }
 
   div[id^='image_buttons_'] {
+    display: flex !important;
     flex-wrap: wrap;
+    gap: 6px !important;
+    margin-top: 8px !important;
 
     button.gradio-button.tool {
-      flex: 1;
+      flex: 1 1 36px;
+      min-width: 36px !important;
       max-width: max(36px, 100%) !important;
+      height: var(--button-lg-tool-height) !important;
+      border-radius: ${token.borderRadiusSM}px !important;
       font-size: var(--text-md) !important;
     }
   }

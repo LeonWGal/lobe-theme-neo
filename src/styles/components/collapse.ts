@@ -39,5 +39,32 @@ export default (token: Theme) => {
         }
       }
     }
+
+    /* Forge Neo InputAccordion */
+    .input-accordion,
+    div.accordions > div.input-accordion {
+      min-width: fit-content !important;
+
+      .input-accordion-checkbox {
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+
+      .input-accordion-extra {
+        display: inline-flex;
+        align-items: center;
+        flex: 0 0 auto !important;
+        margin-left: auto;
+        padding-left: 12px;
+        font-size: var(--text-sm);
+        color: ${token.colorTextSecondary};
+      }
+    }
+
+    div.accordions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
   `;
 };

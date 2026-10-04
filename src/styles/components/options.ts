@@ -109,6 +109,7 @@ export default (token: Theme) => css`
   }
 
   ul.options,
+  [role='listbox'],
   #quicksettings .gradio-dropdown ul.options {
     /* Gradio only mounts this when open — style it, don't force display forever */
     min-width: 0 !important;
@@ -123,7 +124,8 @@ export default (token: Theme) => css`
     background: ${token.colorBgElevated} !important;
     box-shadow: ${token.boxShadow};
 
-    li {
+    li,
+    [role='option'] {
       box-sizing: border-box;
       overflow: hidden !important;
       display: flex !important;

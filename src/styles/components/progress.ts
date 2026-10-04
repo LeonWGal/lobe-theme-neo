@@ -27,7 +27,10 @@ export default (token: Theme) => css`
 
   .wrap:has(> .progressDiv),
   .wrap:has(> .progress-container),
-  .wrap.svelte-j1gjts:has(div) {
+  .wrap.svelte-j1gjts:has(div),
+  .gradio-progressbar,
+  div[role='progressbar'],
+  .progress-bar-wrap {
     overflow: hidden;
 
     min-height: 36px;
@@ -43,7 +46,8 @@ export default (token: Theme) => css`
     }
   }
 
-  .progressDiv {
+  .progressDiv,
+  .progress-bar-wrap {
     position: relative !important;
     top: 0 !important;
     overflow: hidden;
@@ -53,7 +57,10 @@ export default (token: Theme) => css`
       display: none !important;
     }
 
-    > .progress {
+    > .progress,
+    > .progress-bar,
+    > .progress-level-inner,
+    > div[role='progressbar'] {
       position: relative;
 
       overflow: hidden;

@@ -46,6 +46,28 @@ export default (token: Theme) => {
 
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        background: ${token.colorFillTertiary} !important;
+        border: 1px solid ${token.colorBorderSecondary} !important;
+        color: ${token.colorText};
+
+        &:focus {
+          border-color: ${token.colorPrimary} !important;
+          background: ${token.colorFillSecondary} !important;
+        }
+      }
+
+      &[type='number'] {
+        height: var(--button-lg-tool-height) !important;
+        border-radius: ${token.borderRadius}px;
+        background: ${token.colorFillTertiary} !important;
+        border: 1px solid ${token.colorBorderSecondary} !important;
+        color: ${token.colorText};
+
+        &:focus {
+          border-color: ${token.colorPrimary} !important;
+          background: ${token.colorFillSecondary} !important;
+        }
       }
 
       &[type='checkbox'],
@@ -101,12 +123,18 @@ export default (token: Theme) => {
           border-color: ${token.colorPrimaryBorder} !important;
           background-color: ${token.colorPrimary} !important;
           background-image: var(--radio-circle) !important;
-        }
       }
+    }
 
-      &[type='number'] {
-        height: var(--button-lg-tool-height) !important;
-        border-radius: ${token.borderRadius}px;
+    textarea:not(.border-none) {
+      border: 1px solid ${token.colorBorderSecondary} !important;
+      border-radius: ${token.borderRadius}px !important;
+      background: ${token.colorFillTertiary} !important;
+      color: ${token.colorText};
+
+      &:focus {
+        border-color: ${token.colorPrimary} !important;
+        background: ${token.colorFillSecondary} !important;
       }
     }
   `;

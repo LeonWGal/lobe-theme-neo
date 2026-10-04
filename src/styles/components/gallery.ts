@@ -97,5 +97,24 @@ export default (token: Theme) => {
         }
       }
     }
+
+    .gradio-gallery {
+      .preview {
+        background-color: transparent !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          max-height: 100% !important;
+          object-fit: contain !important;
+          border-radius: ${token.borderRadiusSM}px;
+        }
+      }
+
+      .button-preview {
+        border-radius: ${token.borderRadiusSM}px !important;
+      }
+    }
   `;
 };
