@@ -36,11 +36,14 @@ export default (token: Theme) => css`
 
     /* Gradio sizes a non-searchable input to its text. Extend the native click
        target beneath the decorative caret so the whole field opens the menu. */
-    .secondary-wrap > input {
+    .secondary-wrap > input,
+    #forge_ui_preset input,
+    .gradio-dropdown input {
       box-sizing: border-box;
       flex: 1 1 0%;
       width: 100% !important;
       min-width: 0 !important;
+      cursor: pointer !important;
       padding-right: 24px;
     }
 
@@ -112,6 +115,8 @@ export default (token: Theme) => css`
   [role='listbox'],
   #quicksettings .gradio-dropdown ul.options {
     /* Gradio only mounts this when open — style it, don't force display forever */
+    position: fixed !important;
+    z-index: 10000 !important;
     min-width: 0 !important;
     max-width: calc(100vw - 32px) !important;
     overflow-x: hidden !important;
@@ -145,24 +150,39 @@ export default (token: Theme) => css`
       word-break: normal;
       white-space: normal !important;
 
+      /* Prevent children from intercepting click events so dataset.index is always read */
+      > * {
+        pointer-events: none !important;
+      }
+
       .inner-item {
         flex: 0 0 1em;
+        pointer-events: none !important;
       }
 
       &.selected {
-        color: ${token.colorText} !important;
-        background: ${token.colorFill} !important;
+        color: ${token.colorPrimary} !important;
+        background-color: ${token.colorPrimaryBg} !important;
+        font-weight: 600 !important;
       }
 
       &.active:not(.selected) {
         color: ${token.colorText} !important;
-        background: ${token.colorPrimaryBg} !important;
+        background-color: ${token.colorFillSecondary} !important;
       }
 
       &:hover {
         color: ${token.colorText} !important;
-        background: ${token.colorFillSecondary} !important;
+        background-color: ${token.colorFillSecondary} !important;
       }
     }
+  }
+
+  /* Maximum specificity override for Forge Neo's style.css */
+  .gradio-dropdown ul.options li.item.selected,
+  .gradio-dropdown [role='listbox'] [role='option'].selected {
+    color: ${token.colorPrimary} !important;
+    background-color: ${token.colorPrimaryBg} !important;
+    font-weight: 600 !important;
   }
 `;

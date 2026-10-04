@@ -28,6 +28,16 @@ export const useStyles = createStyles(
           padding: 0;
         }
 
+        #forge_ui_preset {
+          width: 100% !important;
+
+          input {
+            width: 100% !important;
+            min-width: 0 !important;
+            cursor: pointer !important;
+          }
+        }
+
         #forge_refresh_checkpoint {
           flex: none !important;
           width: var(--button-lg-tool-height) !important;

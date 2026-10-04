@@ -755,15 +755,16 @@ body.dark,
     width: 14px !important;
     height: 14px !important;
     border-radius: 50% !important;
-    background: #ffffff !important;
+    background: var(--gf-primary, #52c41a) !important;
     border: 2px solid var(--gf-primary, #52c41a) !important;
     cursor: pointer !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 0 0 1px var(--gf-bg-card, #ffffff), 0 1px 4px rgba(0, 0, 0, 0.25) !important;
     transition: transform 0.12s ease, border-color 0.15s ease !important;
 }
 
 .sd-ar-compact-slider::-webkit-slider-thumb:hover {
     transform: scale(1.15) !important;
+    background: var(--gf-primary-hover, #73d13d) !important;
     border-color: var(--gf-primary-hover, #73d13d) !important;
 }
 
@@ -775,7 +776,7 @@ body.dark,
     width: 14px !important;
     height: 14px !important;
     border-radius: 50% !important;
-    background: #ffffff !important;
+    background: var(--gf-primary, #52c41a) !important;
     border: 2px solid var(--gf-primary, #52c41a) !important;
     cursor: pointer !important;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;

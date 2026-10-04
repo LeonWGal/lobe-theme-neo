@@ -40,10 +40,34 @@ export default (token: Theme) => {
       }
     }
 
-    /* Forge Neo InputAccordion */
+    /* Forge Neo InputAccordion & general accordions */
+    div.accordions > div.input-accordion,
     .input-accordion,
-    div.accordions > div.input-accordion {
+    details.input-accordion,
+    details.accordion {
       min-width: fit-content !important;
+      border: 1px solid ${token.colorBorderSecondary} !important;
+      border-radius: ${token.borderRadius}px !important;
+      background: ${token.colorFillQuaternary} !important;
+      color: ${token.colorText} !important;
+      transition: all 0.2s ease;
+
+      .label-wrap,
+      summary {
+        color: ${token.colorText} !important;
+        cursor: pointer;
+      }
+
+      &.input-accordion-open,
+      &[open] {
+        border-color: ${token.colorPrimary} !important;
+        background: ${token.colorBgContainer} !important;
+
+        .label-wrap,
+        summary {
+          color: ${token.colorText} !important;
+        }
+      }
 
       .input-accordion-checkbox {
         vertical-align: middle;
@@ -65,6 +89,23 @@ export default (token: Theme) => {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+    }
+
+    /* Selected items inside accordions in both light and dark themes */
+    .input-accordion,
+    .gradio-accordion,
+    details.accordion {
+      .tab-nav button.selected {
+        color: ${token.colorPrimary} !important;
+        background-color: ${token.colorPrimaryBg} !important;
+        border-color: ${token.colorPrimary} !important;
+      }
+
+      label.selected {
+        color: ${token.colorPrimary} !important;
+        background-color: ${token.colorPrimaryBg} !important;
+        border-color: ${token.colorPrimary} !important;
+      }
     }
   `;
 };

@@ -37,6 +37,22 @@ const Index = memo(() => {
       import('@/modules/ImageInfo/page').then(({ default: ImageInfo }) => ImageInfo());
     }
     if (setting.svgIcon) replaceIcon();
+
+    const handleDropdownWrapClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      const wrap = target.closest('.gradio-dropdown .wrap');
+      if (wrap) {
+        const input = wrap.querySelector<HTMLInputElement>('input');
+        if (input && document.activeElement !== input) {
+          input.focus();
+        }
+      }
+    };
+    document.addEventListener('click', handleDropdownWrapClick);
+    return () => {
+      document.removeEventListener('click', handleDropdownWrapClick);
+    };
   }, []);
 
   return (

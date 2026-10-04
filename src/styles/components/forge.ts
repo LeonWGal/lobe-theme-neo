@@ -8,7 +8,17 @@ export default (token: Theme) => css`
   html[data-lobe-forge='true'] {
     /* —— Quicksettings model strip —— */
     #quicksettings {
-      #forge_ui_preset,
+      #forge_ui_preset {
+        flex: 1;
+        min-width: 0;
+
+        input {
+          width: 100% !important;
+          min-width: 0 !important;
+          cursor: pointer !important;
+        }
+      }
+
       #setting_sd_model_checkpoint,
       #sd_model_checkpoint,
       #setting_sd_modules {
@@ -423,6 +433,30 @@ export default (token: Theme) => css`
       &[open] > summary {
         border-bottom: 1px dashed ${token.colorBorderSecondary} !important;
       }
+    }
+
+    /* Forge Neo Sampler toggle buttons (e.g. [-] / [+] favorite toggle) */
+    #sampler_selection_txt2img button,
+    #sampler_selection_img2img button {
+      border: 1px solid ${token.colorBorderSecondary} !important;
+      border-radius: ${token.borderRadiusSM}px !important;
+      background: ${token.colorFillTertiary} !important;
+      color: ${token.colorTextSecondary} !important;
+      min-width: 28px !important;
+      height: var(--button-lg-tool-height) !important;
+      transition: all 0.15s ease !important;
+
+      &:hover {
+        border-color: ${token.colorPrimary} !important;
+        background: ${token.colorFillSecondary} !important;
+        color: ${token.colorPrimary} !important;
+      }
+    }
+
+    /* Extension buttons inside accordions */
+    .accordions button.gradio-button,
+    [id*='_accordion'] button.gradio-button {
+      border-radius: ${token.borderRadiusSM}px !important;
     }
   }
 `;

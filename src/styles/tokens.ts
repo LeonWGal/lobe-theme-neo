@@ -27,17 +27,18 @@ export default (token: Theme) => {
       --secondary-800: ${token.geekblue9};
       --secondary-900: ${token.geekblue10};
       --secondary-950: ${token.geekblue11};
-      --neutral-50: ${token.colorText};
-      --neutral-100: ${token.colorText};
-      --neutral-200: ${token.colorTextSecondary};
-      --neutral-300: ${token.colorTextTertiary};
-      --neutral-400: ${token.colorTextQuaternary};
-      --neutral-500: ${token.colorFill};
-      --neutral-600: ${token.colorFillSecondary};
-      --neutral-700: ${token.colorFillTertiary};
-      --neutral-800: ${token.colorFillQuaternary};
-      --neutral-900: ${token.colorBgElevated};
-      --neutral-950: ${token.colorBgContainer};
+      --neutral-50: ${token.colorBgLayout};
+      --neutral-100: ${token.colorFillQuaternary};
+      --neutral-200: ${token.colorFillTertiary};
+      --neutral-300: ${token.colorFillSecondary};
+      --neutral-400: ${token.colorFill};
+      --neutral-500: ${token.colorBorder};
+      --neutral-600: ${token.colorTextQuaternary};
+      --neutral-700: ${token.colorTextTertiary};
+      --neutral-800: ${token.colorTextSecondary};
+      --neutral-900: ${token.colorText};
+      --neutral-950: ${token.colorText};
+      --layer-top: 10000;
       --spacing-xxs: ${token.paddingXXS / 4}px;
       --spacing-xs: ${token.paddingXS / 4}px;
       --spacing-sm: ${token.paddingSM / 4}px;
@@ -212,6 +213,18 @@ export default (token: Theme) => {
     }
 
     .dark {
+      --neutral-50: ${token.colorText};
+      --neutral-100: ${token.colorTextSecondary};
+      --neutral-200: ${token.colorTextTertiary};
+      --neutral-300: ${token.colorTextQuaternary};
+      --neutral-400: ${token.colorBorder};
+      --neutral-500: ${token.colorBorderSecondary};
+      --neutral-600: ${token.colorFill};
+      --neutral-700: ${token.colorFillSecondary};
+      --neutral-800: ${token.colorFillTertiary};
+      --neutral-900: ${token.colorBgElevated};
+      --neutral-950: ${token.colorBgContainer};
+      --layer-top: 10000;
       --checkbox-check: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23ffffff' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
       --radio-circle: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23ffffff' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3.5'/%3e%3c/svg%3e");
     }
