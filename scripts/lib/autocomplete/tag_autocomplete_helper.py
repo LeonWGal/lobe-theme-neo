@@ -3,6 +3,7 @@
 
 import glob
 import json
+import os
 import sqlite3
 import sys
 import threading
@@ -111,17 +112,24 @@ def get_wildcards():
     return sort_models(resolved, name_has_subpath=True)
 
 
-def get_ext_wildcards():
-    """Returns a list of all extension wildcards. Works on nested folders."""
+def get_ext_wildcards(collected_yaml=None):
+    """Returns a list of all extension wildcards. Single walk collects yaml files when provided."""
     wildcard_files = []
-    excluded_folder_names = [s.strip() for s in getattr(shared.opts, "tac_wildcardExclusionList", "").split(",")]
-    for path in WILDCARD_EXT_PATHS:
-        wildcard_files.append(path.as_posix())
-        resolved = [(w, w.relative_to(path).as_posix())
-                    for w in path.rglob("*.txt")
-                    if w.name != "put wildcards here.txt"
-                    and not any(excluded in w.parts for excluded in excluded_folder_names)
-                    and w.is_file()]
+    excluded_folder_names = {s.strip() for s in getattr(shared.opts, "tac_wildcardExclusionList", "").split(",") if s.strip()}
+    for root_path in WILDCARD_EXT_PATHS:
+        wildcard_files.append(root_path.as_posix())
+        resolved = []
+        for dirpath, dirnames, filenames in os.walk(root_path):
+            if excluded_folder_names:
+                dirnames[:] = [d for d in dirnames if d not in excluded_folder_names]
+            dir_p = Path(dirpath)
+            for fname in filenames:
+                low = fname.lower()
+                if low.endswith(".txt") and fname != "put wildcards here.txt":
+                    fp = dir_p / fname
+                    resolved.append((fp, fp.relative_to(root_path).as_posix()))
+                elif collected_yaml is not None and low.endswith((".yml", ".yaml")):
+                    collected_yaml.append(dir_p / fname)
         wildcard_files.extend(sort_models(resolved, name_has_subpath=True))
         wildcard_files.append("-----")
 
@@ -165,12 +173,16 @@ def parse_dynamic_prompt_format(yaml_wildcards, data, path):
         return
 
 
-def get_yaml_wildcards():
+def get_yaml_wildcards(yaml_files=None):
     """Returns a list of all tags found in extension YAML files found under a Tags: key."""
-    yaml_files = []
-    for path in WILDCARD_EXT_PATHS:
-        yaml_files.extend(p for p in path.rglob("*.yml") if p.is_file())
-        yaml_files.extend(p for p in path.rglob("*.yaml") if p.is_file())
+    if yaml_files is None:
+        yaml_files = []
+        for path in WILDCARD_EXT_PATHS:
+            for dirpath, _, filenames in os.walk(path):
+                dir_p = Path(dirpath)
+                for fname in filenames:
+                    if fname.lower().endswith((".yml", ".yaml")):
+                        yaml_files.append(dir_p / fname)
 
     yaml_wildcards = {}
 
@@ -318,31 +330,63 @@ def _save_lora_arch_cache(cache: dict):
         print(f"[Tag Autocomplete Neo] Warning: could not write {LORA_ARCH_CACHE}: {e}")
 
 
-def _safetensors_info(path: Path, cache: dict, seen: dict):
-    """Return (ss_output_name or None, architecture labels) for a .safetensors file.
+_MODEL_STEM_INDEX: dict[str, dict[str, Path]] = {}
+_MODEL_INDEX_LOCK = threading.Lock()
 
-    Both come from one header read (tensor data is never read). Results are
-    cached by size and modification time; the user's "sd version" is not part
-    of the cache, since it lives in a separate file the user can edit.
+
+def _safetensors_info(path: Path, cache: dict, seen: dict, has_json: bool = True):
+    """Return (ss_output_name or None, architecture labels, cached user sd version) for a .safetensors file.
+
+    Both model header metadata and optional .json sidecar "sd version" are cached by mtime_ns
+    so warm refreshes across thousands of LoRAs require zero header or JSON reads.
     """
     key = path.absolute().as_posix()
     try:
         st = path.stat()
     except OSError:
-        return None, []
+        return None, [], None
     entry = cache.get(key)
-    if not (isinstance(entry, dict) and entry.get("size") == st.st_size
-            and entry.get("mtime_ns") == st.st_mtime_ns and entry.get("version") == CLASSIFIER_VERSION):
+    header_ok = (
+        isinstance(entry, dict)
+        and entry.get("size") == st.st_size
+        and entry.get("mtime_ns") == st.st_mtime_ns
+        and entry.get("version") == CLASSIFIER_VERSION
+    )
+    if header_ok:
+        output_name, arch = entry.get("output_name"), entry.get("arch", [])
+    else:
         try:
             tensors, metadata = read_safetensors_header(path)
             output_name = metadata.get("ss_output_name") or None
             arch = sorted(classify(tensors, metadata))
         except Exception:
             output_name, arch = None, []
-        entry = {"size": st.st_size, "mtime_ns": st.st_mtime_ns, "version": CLASSIFIER_VERSION,
-                 "output_name": output_name, "arch": arch}
-    seen[key] = entry
-    return entry["output_name"], entry["arch"]
+
+    json_mtime_ns = None
+    sd_version = None
+    if has_json:
+        json_path = path.with_suffix(".json")
+        try:
+            jst = json_path.stat()
+            json_mtime_ns = jst.st_mtime_ns
+        except OSError:
+            has_json = False
+
+    if header_ok and "json_mtime_ns" in entry and entry.get("json_mtime_ns") == json_mtime_ns:
+        sd_version = entry.get("sd_version")
+    elif has_json:
+        sd_version = _user_sd_version(path)
+
+    seen[key] = {
+        "size": st.st_size,
+        "mtime_ns": st.st_mtime_ns,
+        "version": CLASSIFIER_VERSION,
+        "output_name": output_name,
+        "arch": arch,
+        "json_mtime_ns": json_mtime_ns,
+        "sd_version": sd_version,
+    }
+    return output_name, arch, sd_version
 
 
 def _user_sd_version(path: Path):
@@ -399,26 +443,35 @@ def _show_hidden_models() -> bool:
 
 
 def _scan_models(base_path: Path):
-    """Returns a list of (path, alias_or_None) tuples for all model files.
-    Always uses a filesystem scan so files appear even before a model is loaded.
-    When lora.available_loras is populated the alias already respects the user's
-    'lora_preferred_name' setting; otherwise None is returned and _model_rows()
-    resolves via safetensors header or filename stem."""
+    """Returns a list of (path, alias_or_None, has_json) tuples via a single os.walk scan."""
     alias_map = _build_alias_map(base_path)
-    paths = [
-        Path(m)
-        for m in glob.glob(
-            base_path.joinpath("**/*").as_posix(),
-            recursive=True,
-            include_hidden=_show_hidden_models(),
-        )
-    ]
-    valid = [
-        mf
-        for mf in paths
-        if mf.suffix in {".safetensors", ".ckpt", ".pt"} and mf.is_file()
-    ]
-    return [(mf, alias_map.get(mf.absolute())) for mf in valid]
+    show_hidden = _show_hidden_models()
+    stem_index: dict[str, Path | None] = {}
+    valid = []
+    for dirpath, dirnames, filenames in os.walk(base_path):
+        if not show_hidden:
+            dirnames[:] = [d for d in dirnames if not d.startswith(".")]
+        json_names = {f[:-5] for f in filenames if f.endswith(".json")}
+        dir_p = Path(dirpath)
+        for fname in filenames:
+            if not show_hidden and fname.startswith("."):
+                continue
+            dot = fname.rfind(".")
+            if dot == -1:
+                continue
+            ext = fname[dot:].lower()
+            if ext in {".safetensors", ".ckpt", ".pt"}:
+                mf = dir_p / fname
+                stem = fname[:dot]
+                # Store exact relative stem key too; mark duplicate stems as None so glob resolves unambiguously.
+                stem_index[stem] = mf if stem not in stem_index else None
+                rel_stem = mf.relative_to(base_path).with_suffix("").as_posix()
+                stem_index[rel_stem] = mf
+                has_json = stem in json_names
+                valid.append((mf, alias_map.get(mf.absolute()), has_json))
+    with _MODEL_INDEX_LOCK:
+        _MODEL_STEM_INDEX[base_path.as_posix()] = stem_index
+    return valid
 
 
 def _get_lora():
@@ -458,12 +511,14 @@ def _model_rows(entries, base_path: Path):
     seen = {}
 
     models = []
-    for m, provided_alias in entries:
-        if not m.exists() or not m.is_file() or not is_visible(m, base_path):
+    for entry in entries:
+        m, provided_alias = entry[0], entry[1]
+        has_json = entry[2] if len(entry) > 2 else True
+        if not is_visible(m, base_path):
             continue
         if m.suffix == ".safetensors":
-            output_name, arch = _safetensors_info(m, cache, seen)
-            user = user_label(_user_sd_version(m))
+            output_name, arch, sd_version = _safetensors_info(m, cache, seen, has_json=has_json)
+            user = user_label(sd_version)
             if user:
                 arch = [user]
         else:
@@ -625,13 +680,13 @@ def write_temp_files(skip_wildcard_refresh = False):
         if wildcards:
             write_to_temp_file('wc.txt', wildcards)
 
-    # Write extension wildcards to wce.txt if found
+    # Write extension wildcards and yaml wildcards in one traversal
     if WILDCARD_EXT_PATHS is not None and not skip_wildcard_refresh:
-        wildcards_ext = get_ext_wildcards()
+        yaml_files = []
+        wildcards_ext = get_ext_wildcards(collected_yaml=yaml_files)
         if wildcards_ext:
             write_to_temp_file('wce.txt', wildcards_ext)
-        # Write yaml extension wildcards to umi_tags.txt and wc_yaml.json if found
-        get_yaml_wildcards()
+        get_yaml_wildcards(yaml_files=yaml_files)
 
     if model_keyword_installed:
         try:
@@ -901,31 +956,50 @@ def api_tac(_: gr.Blocks, app: FastAPI):
         target = TEMP_PATH / name
         return FileResponse(target) if target.is_file() else Response(status_code=404)
 
-    async def get_json_info(base_path: Path, filename: str = None):
+    def _indexed_model_path(base_path: Path, filename: str):
+        with _MODEL_INDEX_LOCK:
+            hit = _MODEL_STEM_INDEX.get(base_path.as_posix(), {}).get(filename)
+        return hit if (hit and hit.is_file()) else None
+
+    def get_json_info(base_path: Path, filename: str = None):
         if base_path is None or (not base_path.exists()):
             return Response(status_code=404)
 
         try:
+            indexed = _indexed_model_path(base_path, filename)
+            if indexed:
+                json_target = indexed.with_suffix(".json")
+                if json_target.is_file():
+                    return FileResponse(json_target)
             json_candidates = glob.glob(base_path.as_posix() + f"/**/{glob.escape(filename)}.json", recursive=True, include_hidden=_show_hidden_models())
-            if json_candidates is not None and len(json_candidates) > 0 and Path(json_candidates[0]).is_file():
+            if json_candidates and Path(json_candidates[0]).is_file():
                 return FileResponse(json_candidates[0])
+            return Response(status_code=404)
         except Exception as e:
-            return JSONResponse({"error": e}, status_code=500)
+            return JSONResponse({"error": str(e)}, status_code=500)
 
-    async def get_preview_thumbnail(base_path: Path, filename: str = None, blob: bool = False):
+    def get_preview_thumbnail(base_path: Path, filename: str = None, blob: bool = False):
         if base_path is None or (not base_path.exists()):
             return Response(status_code=404)
 
         try:
+            img_exts = (".png", ".jpg", ".jpeg", ".webp", ".gif")
+            indexed = _indexed_model_path(base_path, filename)
+            if indexed:
+                parent = indexed.parent
+                for suffix in (*img_exts, *(f".preview{ext}" for ext in img_exts)):
+                    candidate = parent / f"{filename}{suffix}"
+                    if candidate.is_file():
+                        return FileResponse(candidate) if blob else JSONResponse({"url": urllib.parse.quote(str(candidate))})
             img_glob = glob.glob(base_path.as_posix() + f"/**/{glob.escape(filename)}.*", recursive=True, include_hidden=_show_hidden_models())
-            img_candidates = [img for img in img_glob if Path(img).suffix in [".png", ".jpg", ".jpeg", ".webp", ".gif"] and Path(img).is_file()]
-            if img_candidates is not None and len(img_candidates) > 0:
+            img_candidates = [img for img in img_glob if Path(img).suffix in img_exts and Path(img).is_file()]
+            if img_candidates:
                 if blob:
                     return FileResponse(img_candidates[0])
-                else:
-                    return JSONResponse({"url": urllib.parse.quote(img_candidates[0])})
+                return JSONResponse({"url": urllib.parse.quote(img_candidates[0])})
+            return Response(status_code=404)
         except Exception as e:
-            return JSONResponse({"error": e}, status_code=500)
+            return JSONResponse({"error": str(e)}, status_code=500)
 
     @app.post("/lobe/autocomplete/refresh-temp-files")
     def api_refresh_temp_files():
@@ -940,15 +1014,15 @@ def api_tac(_: gr.Blocks, app: FastAPI):
             refresh_embeddings(force=False)
 
     @app.get("/lobe/autocomplete/lora-info/{lora_name}")
-    async def get_lora_info(lora_name):
-        return await get_json_info(LORA_PATH, lora_name)
+    def get_lora_info(lora_name):
+        return get_json_info(LORA_PATH, lora_name)
 
     @app.get("/lobe/autocomplete/lyco-info/{lyco_name}")
-    async def get_lyco_info(lyco_name):
-        return await get_json_info(LYCO_PATH, lyco_name)
+    def get_lyco_info(lyco_name):
+        return get_json_info(LYCO_PATH, lyco_name)
 
     @app.get("/lobe/autocomplete/civitai-trigger-words/{lora_name}")
-    async def get_civitai_trigger_words(lora_name: str):
+    def get_civitai_trigger_words(lora_name: str):
         """Look up trigger words for a LoRA from CivitAI by-hash API.
 
         Priority:
@@ -959,19 +1033,20 @@ def api_tac(_: gr.Blocks, app: FastAPI):
         if LORA_PATH is None or not LORA_PATH.exists():
             return Response(status_code=404)
 
-        # Locate the LoRA file
-        path_glob = glob.glob(
-            LORA_PATH.as_posix() + f"/**/{glob.escape(lora_name)}.*", recursive=True,
-            include_hidden=_show_hidden_models(),
-        )
-        paths = [
-            p for p in path_glob
-            if Path(p).suffix in {".safetensors", ".ckpt", ".pt"} and Path(p).is_file()
-        ]
-        if not paths:
-            return Response(status_code=404)
-
-        lora_path = Path(paths[0])
+        # Locate the LoRA file (fast path via index)
+        lora_path = _indexed_model_path(LORA_PATH, lora_name)
+        if lora_path is None:
+            path_glob = glob.glob(
+                LORA_PATH.as_posix() + f"/**/{glob.escape(lora_name)}.*", recursive=True,
+                include_hidden=_show_hidden_models(),
+            )
+            paths = [
+                p for p in path_glob
+                if Path(p).suffix in {".safetensors", ".ckpt", ".pt"} and Path(p).is_file()
+            ]
+            if not paths:
+                return Response(status_code=404)
+            lora_path = Path(paths[0])
         json_path = lora_path.with_suffix(".json")
 
         # Compute SHA256 (uses Forge's cache, fast on repeat calls)
@@ -1052,7 +1127,7 @@ def api_tac(_: gr.Blocks, app: FastAPI):
             print(f"[Tag Autocomplete Neo] Could not save checkpoint base model cache: {e}")
 
     @app.get("/lobe/autocomplete/civitai-checkpoint-basemodel/{sha256}")
-    async def get_civitai_checkpoint_basemodel(sha256: str):
+    def get_civitai_checkpoint_basemodel(sha256: str):
         """Look up a checkpoint's CivitAI base model family by hash.
 
         Used to detect ANIMA-based checkpoints (and other base model families) so
@@ -1097,15 +1172,19 @@ def api_tac(_: gr.Blocks, app: FastAPI):
             return Response(status_code=500)
 
     @app.get("/lobe/autocomplete/lora-cached-hash/{lora_name}")
-    async def get_lora_cached_hash(lora_name: str):
-        path_glob = glob.glob(LORA_PATH.as_posix() + f"/**/{glob.escape(lora_name)}.*", recursive=True, include_hidden=_show_hidden_models())
-        paths = [lora for lora in path_glob if Path(lora).suffix in [".safetensors", ".ckpt", ".pt"] and Path(lora).is_file()]
-        if paths is not None and len(paths) > 0:
-            path = paths[0]
-            hash = hashes.sha256_from_cache(path, f"lora/{lora_name}", path.endswith(".safetensors"))
-            if hash is not None:
-                return hash
-        
+    def get_lora_cached_hash(lora_name: str):
+        indexed = _indexed_model_path(LORA_PATH, lora_name) if LORA_PATH else None
+        path = str(indexed) if indexed else None
+        if path is None and LORA_PATH:
+            path_glob = glob.glob(LORA_PATH.as_posix() + f"/**/{glob.escape(lora_name)}.*", recursive=True, include_hidden=_show_hidden_models())
+            paths = [lora for lora in path_glob if Path(lora).suffix in [".safetensors", ".ckpt", ".pt"] and Path(lora).is_file()]
+            if paths:
+                path = paths[0]
+        if path:
+            h = hashes.sha256_from_cache(path, f"lora/{lora_name}", path.endswith(".safetensors"))
+            if h is not None:
+                return h
+
         return None
 
     def get_path_for_type(type):
@@ -1119,12 +1198,12 @@ def api_tac(_: gr.Blocks, app: FastAPI):
             return None
 
     @app.get("/lobe/autocomplete/thumb-preview/{filename}")
-    async def get_thumb_preview(filename, type):
-        return await get_preview_thumbnail(get_path_for_type(type), filename, False)
+    def get_thumb_preview(filename, type):
+        return get_preview_thumbnail(get_path_for_type(type), filename, False)
 
     @app.get("/lobe/autocomplete/thumb-preview-blob/{filename}")
-    async def get_thumb_preview_blob(filename, type):
-        return await get_preview_thumbnail(get_path_for_type(type), filename, True)
+    def get_thumb_preview_blob(filename, type):
+        return get_preview_thumbnail(get_path_for_type(type), filename, True)
 
     @app.get("/lobe/autocomplete/wildcard-contents")
     def get_wildcard_contents(basepath: str, filename: str):
@@ -1136,7 +1215,7 @@ def api_tac(_: gr.Blocks, app: FastAPI):
         return FileResponse(target) if base in target.parents and target.is_file() else Response(status_code=404)
 
     @app.get("/lobe/autocomplete/refresh-styles-if-changed")
-    async def refresh_styles_if_changed():
+    def refresh_styles_if_changed():
         global last_style_mtime
         
         mtime = get_style_mtime()
@@ -1165,11 +1244,11 @@ def api_tac(_: gr.Blocks, app: FastAPI):
             return JSONResponse({"error": "Database not initialized"}, status_code=500)
 
     @app.post("/lobe/autocomplete/increase-use-count")
-    async def increase_use_count(tagname: str, ttype: int, neg: bool):
+    def increase_use_count(tagname: str, ttype: int, neg: bool):
         db_request(lambda: db.increase_tag_count(tagname, ttype, neg))
 
     @app.get("/lobe/autocomplete/get-use-count")
-    async def get_use_count(tagname: str, ttype: int, neg: bool):
+    def get_use_count(tagname: str, ttype: int, neg: bool):
         return db_request(lambda: db.get_tag_count(tagname, ttype, neg), get=True)
     
     # Small dataholder class
@@ -1199,11 +1278,11 @@ def api_tac(_: gr.Blocks, app: FastAPI):
         return db_request(lambda: count_list, get=True)
 
     @app.put("/lobe/autocomplete/reset-use-count")
-    async def reset_use_count(tagname: str, ttype: int, pos: bool, neg: bool):
+    def reset_use_count(tagname: str, ttype: int, pos: bool, neg: bool):
         db_request(lambda: db.reset_tag_count(tagname, ttype, pos, neg))
 
     @app.get("/lobe/autocomplete/get-all-use-counts")
-    async def get_all_tag_counts():
+    def get_all_tag_counts():
         return db_request(lambda: db.get_all_tags(), get=True)
 
 

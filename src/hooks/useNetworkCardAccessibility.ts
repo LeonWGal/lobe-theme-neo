@@ -56,23 +56,43 @@ export const useNetworkCardAccessibility = () => {
       key.stopPropagation();
       element.click();
     };
+    let pendingRemoved = new Set<HTMLElement>();
+    let pruneScheduled = false;
+    const flushRemoved = () => {
+      pruneScheduled = false;
+      pendingRemoved.forEach((element) => {
+        if (!element.isConnected) originals.delete(element);
+      });
+      pendingRemoved.clear();
+    };
+    const isNetworkHost = (node: HTMLElement) =>
+      node.classList.contains('card') ||
+      node.classList.contains('extra-network-cards') ||
+      node.classList.contains('extra-network-control') ||
+      Boolean(node.closest('.extra-network-cards, .extra-network-control')) ||
+      Boolean(node.querySelector('.extra-network-cards, .extra-network-control'));
     const observer = new MutationObserver((mutations) => {
-      const removed = new Set<HTMLElement>();
       for (const mutation of mutations) {
         if (isPromptOutputMutation(mutation)) continue;
+        const targetEl = mutation.target instanceof HTMLElement ? mutation.target : null;
+        if (targetEl?.closest('[id$="_results"], [id$="_settings"]')) continue;
         for (const node of mutation.removedNodes) {
           if (!(node instanceof HTMLElement) || node.isConnected) continue;
-          if (originals.has(node)) removed.add(node);
-          // Detached children no longer match the ancestor-qualified enhancement selector.
-          node.querySelectorAll<HTMLElement>('[tabindex], img').forEach((element) => {
-            if (originals.has(element)) removed.add(element);
-          });
+          if (originals.has(node)) pendingRemoved.add(node);
+          if (node.querySelector('.card, img, [tabindex]')) {
+            node.querySelectorAll<HTMLElement>('[tabindex], img').forEach((element) => {
+              if (originals.has(element)) pendingRemoved.add(element);
+            });
+          }
         }
         for (const node of mutation.addedNodes) {
-          if (node instanceof HTMLElement) enhance(node);
+          if (node instanceof HTMLElement && isNetworkHost(node)) enhance(node);
         }
       }
-      removed.forEach((element) => originals.delete(element));
+      if (pendingRemoved.size && !pruneScheduled) {
+        pruneScheduled = true;
+        queueMicrotask(flushRemoved);
+      }
     });
     observer.observe(root, { childList: true, subtree: true });
     root.addEventListener('keydown', keydown);

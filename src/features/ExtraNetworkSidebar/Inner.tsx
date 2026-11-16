@@ -2,7 +2,7 @@ import { ActionIcon, DraggablePanelBody, DraggablePanelFooter } from '@lobehub/u
 import { Slider, message } from 'antd';
 import isEqual from 'fast-deep-equal';
 import { ZoomIn } from '@/icons';
-import { memo, useDeferredValue, useEffect, useState } from 'react';
+import { type CSSProperties, memo, useDeferredValue, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useNetworkCardAccessibility } from '@/hooks/useNetworkCardAccessibility';
@@ -23,7 +23,7 @@ const Inner = memo(() => {
   const currentTab = useAppStore(selectors.currentTab);
   const [size, setSize] = useState(setting.extraNetworkCardSize);
   const deferredSize = useDeferredValue(size);
-  const { styles } = useStyles({ size: deferredSize });
+  const { styles } = useStyles();
   const save = useAppStore((state) => state.onSetSetting);
   const needsNetworks = useAppStore(
     (state) => state.setting.extraNetworkSidebarExpand || state.mobileSidebar === 'extra',
@@ -50,7 +50,10 @@ const Inner = memo(() => {
 
   return (
     <>
-      <DraggablePanelBody className={`${styles.body} lobe-extra-network-body`}>
+      <DraggablePanelBody
+        className={`${styles.body} lobe-extra-network-body`}
+        style={{ '--lobe-card-size': `${deferredSize}px` } as CSSProperties}
+      >
         <div>
           <div
             id="txt2img-extra-network-sidebar"

@@ -22,7 +22,7 @@ class LobeApi:
         register(app)
 
         @app.get("/lobe/native-locales")
-        async def native_locales():
+        def native_locales():
             from modules import extensions, localization, shared
             localization.list_localizations(shared.cmd_opts.localizations_dir)
             managed = any(ext.canonical_name == "sd-webui-language-diffusion" for ext in extensions.active())

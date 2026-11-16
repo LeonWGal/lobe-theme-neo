@@ -19,12 +19,19 @@ let retryTimer: ReturnType<typeof setTimeout> | undefined;
 let retryCount = 0;
 
 function scheduleRetry() {
-  if (retryTimer || retryCount >= 25) return;
+  if (typeof document !== 'undefined' && document.documentElement.dataset.lobeAutocompleteMode === 'off') {
+    return;
+  }
+  if (retryTimer || retryCount >= 8) return;
   retryTimer = setTimeout(() => {
     retryTimer = undefined;
     retryCount += 1;
-    for (const notify of listeners) notify();
-  }, 300);
+    if ((window as TagCompleteWindow).lobeTagComplete?.lookupTagColors) {
+      for (const notify of listeners) notify();
+    } else if (retryCount < 8) {
+      scheduleRetry();
+    }
+  }, 500);
 }
 
 if (typeof window !== 'undefined') {

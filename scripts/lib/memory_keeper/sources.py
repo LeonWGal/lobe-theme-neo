@@ -262,16 +262,19 @@ def _cached(obj):
 
 def _find_global(name):
     """A function the WebUI's builtin extensions keep at module level (they are loaded under several names).
-    Found once, then kept; not found, looked for again every half minute, not on every refresh of the card."""
+    Found once, then kept; when absent, skip re-scanning sys.modules while module count is unchanged."""
     if name in _FOUND:
         return _FOUND[name]
-    if time.time() - _MISSED.get(name, 0.0) < _LOOK_AGAIN:
+    prev = _MISSED.get(name)
+    mod_count = len(sys.modules)
+    if prev is not None and (time.time() - prev[0] < _LOOK_AGAIN or prev[1] == mod_count):
         return None
     fn = _search(name)
     if fn is None:
-        _MISSED[name] = time.time()
+        _MISSED[name] = (time.time(), mod_count)
     else:
         _FOUND[name] = fn
+        _MISSED.pop(name, None)
     return fn
 
 

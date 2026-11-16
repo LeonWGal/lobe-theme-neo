@@ -125,7 +125,11 @@ export default function replaceIcons() {
       if (host?.closest(excluded)) continue;
       const control = host?.closest(controls);
       if (control && !isThemeOwned(control)) changed.add(control);
-      for (const node of record.addedNodes) if (node instanceof Element) changed.add(node);
+      for (const node of record.addedNodes) {
+        if (node instanceof Element && !node.matches(excluded) && !node.closest(excluded)) {
+          changed.add(node);
+        }
+      }
     }
     changeControls: for (const node of changed) {
       if (!node.isConnected) continue;
@@ -135,6 +139,6 @@ export default function replaceIcons() {
       scan(node);
     }
   });
-  observer.observe(root, { characterData: true, childList: true, subtree: true });
+  observer.observe(root, { childList: true, subtree: true });
   return () => observer.disconnect();
 }

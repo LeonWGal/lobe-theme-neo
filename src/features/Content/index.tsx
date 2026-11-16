@@ -1,18 +1,18 @@
 import isEqual from 'fast-deep-equal';
-import { memo, useRef } from 'react';
+import { Suspense, lazy, memo, useRef } from 'react';
 
+import { readWorkspace, resolveWorkbenchLayout } from '@/features/Workspace/model';
 import { useImageViewer } from '@/hooks/useImageViewer';
 import { useInject } from '@/hooks/useInject';
 import { useOverlaySidebars } from '@/hooks/useOverlaySidebars';
-import { readWorkspace, resolveWorkbenchLayout } from '@/features/Workspace/model';
 import { selectors, useAppStore } from '@/store';
 import { type DivProps } from '@/types';
-
-import PromptWorkbench from '@/features/PromptWorkbench';
 
 import SplitView from './SplitView';
 import { removePromptScrollHide } from './removePromptScrollHide';
 import { useStyles } from './style';
+
+const PromptWorkbench = lazy(() => import('@/features/PromptWorkbench'));
 
 const Content = memo<DivProps>(({ className, ...props }) => {
   const mainReference = useRef<HTMLDivElement>(null);
@@ -70,7 +70,11 @@ const Content = memo<DivProps>(({ className, ...props }) => {
         workbenchImg2img={workbenchFor('img2img')}
         workbenchTxt2img={workbenchFor('txt2img')}
       />
-      {setting.enableWorkbench && <PromptWorkbench />}
+      {setting.enableWorkbench && (
+        <Suspense fallback={null}>
+          <PromptWorkbench />
+        </Suspense>
+      )}
     </>
   );
 });

@@ -51,7 +51,7 @@ export const highlightRuns = (line: string, isDarkMode: boolean): HighlightRun[]
       if (last && last.style === style && last.scope === scope) last.text += segmentText;
       else merged.push({ scope, style, text: segmentText });
     }
-    if (theme.lines.size >= 256) theme.lines.delete(theme.lines.keys().next().value!);
+    if (theme.lines.size >= 4096) theme.lines.delete(theme.lines.keys().next().value!);
     theme.lines.set(line, merged);
     return merged;
 };

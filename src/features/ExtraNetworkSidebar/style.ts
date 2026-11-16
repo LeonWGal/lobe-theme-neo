@@ -5,7 +5,7 @@ import {
 } from '@/icons/native';
 import { externalLink, messageCode, pencil, photoUp, sparkles, trashX } from '@/icons/tablerPaths';
 
-export const useStyles = createStyles(({ css, token }, { size = 112 }: { size?: number }) => ({
+export const useStyles = createStyles(({ css, token }) => ({
   body: css`
     flex: 1 1 0;
     min-height: 0;
@@ -324,7 +324,7 @@ export const useStyles = createStyles(({ css, token }, { size = 112 }: { size?: 
         display: grid;
         grid-template-columns: repeat(
           auto-fill,
-          minmax(min(100%, ${size}px), 1fr)
+          minmax(min(100%, var(--lobe-card-size, 112px)), 1fr)
         );
         flex: none !important;
         align-content: start;
@@ -388,7 +388,7 @@ export const useStyles = createStyles(({ css, token }, { size = 112 }: { size?: 
         box-sizing: border-box;
         content-visibility: auto;
         width: 100% !important;
-        height: calc(${Math.round(size * 1.04)}px + 1rem) !important;
+        height: calc(var(--lobe-card-size, 112px) * 1.04 + 1rem) !important;
         min-width: 0;
         margin: 0 !important;
         overflow: hidden;
@@ -542,8 +542,8 @@ export const useStyles = createStyles(({ css, token }, { size = 112 }: { size?: 
           .card-button {
             display: grid;
             place-items: center;
-            width: clamp(18px, ${size / 4}px, 28px);
-            height: clamp(18px, ${size / 4}px, 28px);
+            width: clamp(18px, calc(var(--lobe-card-size, 112px) / 4), 28px);
+            height: clamp(18px, calc(var(--lobe-card-size, 112px) / 4), 28px);
             padding: 0;
             color: ${token.colorTextSecondary} !important;
             border-radius: ${token.borderRadiusSM}px;

@@ -5,6 +5,7 @@ The list itself comes from the WebUI's own LoRA module (`networks`, present in
 A1111, reForge, Forge and Forge Classic), so names match the cards exactly.
 Headers are read once per file and cached by modification time.
 """
+import functools
 import json
 import os
 import re
@@ -18,8 +19,10 @@ from scripts.lib.lobe_log import LobeLog
 
 _cache: dict = {}   # filename -> (mtime, info)
 _cache_lock = threading.RLock()
+_ckpt_lock = threading.RLock()
 _cache_path = Path(__file__).parents[2] / "lobe_data" / "lora_index.json"
 _cache_loaded = False
+_ckpt_dirty = False
 
 
 def _read_header(filename: str):
@@ -61,20 +64,43 @@ _NAMED = (
 
 _WHOLE_WORDS = {"anima", "ernie", "krea", "wan", "pid", "qwen", "pony"}
 
+_COMPILED_NAMED = tuple(
+    (
+        family,
+        tuple(
+            (
+                re.compile(rf"(?<![a-z]){re.escape(word)}{'(?![a-z])' if word in _WHOLE_WORDS else ''}")
+                if len(word) <= 5
+                else word
+            )
+            for word in words
+        ),
+    )
+    for words, family in _NAMED
+)
+
+_RX_KREA_T = re.compile(r"transformer_blocks_\d+_(attn_to_gate|ff_(gate|up|down))_")
+_RX_KLEIN_FF = re.compile(r"transformer_blocks_\d+_ff(_context)?_linear_in")
+_RX_QWEN_MLP = re.compile(r"transformer_blocks_\d+_(img|txt)_(mlp|mod)")
+_RX_KREA_B = re.compile(r"blocks_\d+_attn_w[qkvo]_")
+_RX_ERNIE = re.compile(r"layers_\d+_(self_attention_to_[qkv]_|mlp_linear_fc2)")
+_RX_PID = re.compile(r"blocks_\d+_(attn_)?qkv_[xy]_")
+_RX_ANIMA = re.compile(r"blocks_\d+_((self|cross)_attn_[qkvo]_proj_|mlp_layer[12]_)")
+_RX_WAN = re.compile(r"(blocks_\d+_((self|cross)_attn_[qkvo]_|ffn_[02]_)|(?<!transformer_)blocks_\d+_attn[12]_to_[qkv]_)")
+_RX_LUMINA = re.compile(r"layers_\d+_(attention|feed_forward)_")
+_RX_FLUX_BLOCKS = re.compile(r"(?<![a-z])transformer_blocks_(\d+)_attn_(?:to|add)_")
+
 
 def _family_from_text(text: str):
     text = text.lower()
     if not text:
         return None
-    for words, family in _NAMED:
-        for word in words:
-            # short names only at the start of a word ("pid" in "rapid" is not
-            # PiD), and some only as a whole word ("animagine" is SDXL, not Anima)
-            if len(word) <= 5:
-                tail = "(?![a-z])" if word in _WHOLE_WORDS else ""
-                if re.search(rf"(?<![a-z]){re.escape(word)}{tail}", text):
+    for family, matchers in _COMPILED_NAMED:
+        for matcher in matchers:
+            if isinstance(matcher, str):
+                if matcher in text:
                     return family
-            elif word in text:
+            elif matcher.search(text):
                 return family
     return None
 
@@ -100,9 +126,14 @@ def _in_out(header: dict, key: str):
     return None
 
 
+@functools.lru_cache(maxsize=32)
+def _compile_rx(pattern: str):
+    return re.compile(pattern)
+
+
 def _layer_io(header: dict, raw_keys: list, pattern: str):
     """(in, out) of the first layer whose normalised key matches `pattern`."""
-    rx = re.compile(pattern)
+    rx = _compile_rx(pattern)
     found_in = found_out = None
     for key in raw_keys:
         if not rx.search(_norm(key)):
@@ -133,33 +164,32 @@ def _family_from_keys(header: dict):
             return "klein" if o >= 5.5 * i else "flux"      # 6h vs 4h
         return "flux"
     # diffusers layout
-    if "text_fusion_" in joined or re.search(r"transformer_blocks_\d+_(attn_to_gate|ff_(gate|up|down))_", joined):
+    if "text_fusion_" in joined or _RX_KREA_T.search(joined):
         return "krea"
-    if "to_qkv_mlp_proj" in joined or re.search(r"transformer_blocks_\d+_ff(_context)?_linear_in", joined):
+    if "to_qkv_mlp_proj" in joined or _RX_KLEIN_FF.search(joined):
         return "klein"
-    if re.search(r"transformer_blocks_\d+_(img|txt)_mlp", joined) or re.search(r"transformer_blocks_\d+_(img|txt)_mod", joined):
+    if _RX_QWEN_MLP.search(joined):
         return "qwen"
     if "single_transformer_blocks_" in joined:
         return "flux"
-    if "txtfusion_" in joined or re.search(r"blocks_\d+_attn_w[qkvo]_", joined):
+    if "txtfusion_" in joined or _RX_KREA_B.search(joined):
         return "krea"
-    if re.search(r"layers_\d+_self_attention_to_[qkv]_", joined) or re.search(r"layers_\d+_mlp_linear_fc2", joined):
+    if _RX_ERNIE.search(joined):
         return "ernie"
-    if re.search(r"blocks_\d+_(attn_)?qkv_[xy]_", joined) or "lq_proj_" in joined:
+    if "lq_proj_" in joined or _RX_PID.search(joined):
         return "pid"
-    if "llm_adapter_" in joined or re.search(r"blocks_\d+_(self|cross)_attn_[qkvo]_proj_", joined) or re.search(r"blocks_\d+_mlp_layer[12]_", joined):
+    if "llm_adapter_" in joined or _RX_ANIMA.search(joined):
         return "anima"
-    if re.search(r"blocks_\d+_(self|cross)_attn_[qkvo]_", joined) or re.search(r"blocks_\d+_ffn_[02]_", joined) \
-            or re.search(r"(?<!transformer_)blocks_\d+_attn[12]_to_[qkv]_", joined):
+    if _RX_WAN.search(joined):
         return "wan"
-    if "noise_refiner_" in joined or "context_refiner_" in joined or re.search(r"layers_\d+_(attention|feed_forward)_", joined):
+    if "noise_refiner_" in joined or "context_refiner_" in joined or _RX_LUMINA.search(joined):
         # Lumina 2 and Z-Image share the layout; the width differs (2304 / 3840)
         i, _ = _layer_io(header, raw, r"layers_\d+_(attention_(qkv|to_q)|feed_forward_w[13])_")
         return "zit" if i and i >= 3000 else "lumina"
     if "joint_blocks_" in joined:
         return "sd3"
     # diffusers double-stream blocks alone: Qwen-Image has 60, Flux.1 has 19
-    blocks = [int(n) for n in re.findall(r"(?<![a-z])transformer_blocks_(\d+)_attn_(?:to|add)_", joined)]
+    blocks = [int(n) for n in _RX_FLUX_BLOCKS.findall(joined)]
     if blocks:
         return "qwen" if max(blocks) >= 19 else "flux"
     if "lora_te2_" in joined or "lora_te1_" in joined or "input_blocks_4_1_transformer_blocks_1" in joined \
@@ -266,11 +296,12 @@ def _list_loras():
         if not cached or cached[0] != signature:
             metadata = dict(getattr(net, "metadata", {}) or {})
             user = native_user if native_user is not None else _read_json(os.path.splitext(filename)[0] + ".json")
-            header = {}
-            if _arch_from(metadata, {}, user) == "unknown" and filename.lower().endswith(".safetensors"):
-                header = _read_header(filename)
-            info = {"arch": _arch_from(metadata, header, user if isinstance(user, dict) else None),
-                    "triggerWords": _trigger_words(filename, metadata, native_user)}
+            user_dict = user if isinstance(user, dict) else None
+            arch = _arch_from(metadata, {}, user_dict)
+            if arch == "unknown" and filename.lower().endswith(".safetensors"):
+                arch = _arch_from(metadata, _read_header(filename), user_dict)
+            info = {"arch": arch,
+                    "triggerWords": _trigger_words(filename, metadata, user_dict)}
             _cache[filename] = (signature, info)
             dirty = True
         else:
@@ -401,6 +432,7 @@ def _detect_checkpoint_arch(filename: str, metadata: dict | None = None, title: 
 
 def checkpoint_arch(info) -> str:
     """Detect a CheckpointInfo's family from metadata, safetensors keys, or name, cached by mtime."""
+    global _ckpt_dirty
     filename = getattr(info, "filename", "") or ""
     title = getattr(info, "title", "") or getattr(info, "name", "") or ""
     if not filename:
@@ -409,27 +441,27 @@ def checkpoint_arch(info) -> str:
         mtime = os.path.getmtime(filename)
     except OSError:
         return _family_from_text(title or filename) or "unknown"
-    with _cache_lock:
+    with _ckpt_lock:
         _load_ckpt_cache()
         cached = _ckpt_cache.get(filename)
         if isinstance(cached, list) and len(cached) == 2 and cached[0] == mtime:
             return str(cached[1])
     arch = _detect_checkpoint_arch(filename, getattr(info, "metadata", None), title)
-    with _cache_lock:
+    with _ckpt_lock:
         _ckpt_cache[filename] = [mtime, arch]
+        _ckpt_dirty = True
     return arch
 
 
 def checkpoint_arches(titles: list[str] | None = None) -> dict[str, str]:
     """Map checkpoint tile names to their detected family and persist the cache when updated."""
+    global _ckpt_dirty
     from modules import sd_models, shared
 
     use_short = bool(getattr(shared.opts, "sd_checkpoint_dropdown_use_short", False))
     result: dict[str, str] = {}
-    before = len(_ckpt_cache)
-    with _cache_lock:
+    with _ckpt_lock:
         _load_ckpt_cache()
-    snapshot = dict(_ckpt_cache)
     if titles is None:
         items = list(sd_models.checkpoints_list.values())
     else:
@@ -439,13 +471,14 @@ def checkpoint_arches(titles: list[str] | None = None) -> dict[str, str]:
             continue
         key = info.short_title if use_short else info.title
         result[key] = checkpoint_arch(info)
-    if _ckpt_cache != snapshot or len(_ckpt_cache) != before:
-        try:
-            with _cache_lock:
+    with _ckpt_lock:
+        if _ckpt_dirty:
+            try:
                 _ckpt_cache_path.parent.mkdir(parents=True, exist_ok=True)
                 temporary = _ckpt_cache_path.with_suffix(".tmp")
                 temporary.write_text(json.dumps(_ckpt_cache, ensure_ascii=False), encoding="utf-8")
                 temporary.replace(_ckpt_cache_path)
-        except Exception as e:
-            LobeLog.debug(f"checkpoint_arches save: {e}")
+                _ckpt_dirty = False
+            except Exception as e:
+                LobeLog.debug(f"checkpoint_arches save: {e}")
     return result

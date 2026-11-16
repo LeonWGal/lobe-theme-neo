@@ -6,12 +6,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
-from scripts.lib.store import LobeStore
+from scripts.lib.store import LobeStore, _ENTRY_COLS
 
 TERMINAL = ("done", "failed", "interrupted")
 
 
 class QueueStore(LobeStore):
+    def has_pending(self):
+        with self.connect() as db:
+            return db.execute("SELECT 1 FROM history WHERE status='pending' LIMIT 1").fetchone() is not None
     def insert(self, db, tab, params, scripts=None, *, job=None, status="pending", name=None,
                checkpoint=None, vae=None, priority=None, stamp=None, bookmarked=False,
                infotext="", images=None, error=None, result=None, entry_id=None, queued=True):
@@ -33,7 +36,7 @@ class QueueStore(LobeStore):
 
     def list_queue(self):
         with self.connect() as db:
-            rows = db.execute("""SELECT * FROM history WHERE queued=1 AND status IN ('pending','running')
+            rows = db.execute(f"""SELECT {_ENTRY_COLS} FROM history WHERE queued=1 AND status IN ('pending','running')
                 ORDER BY status='running' DESC, priority, rowid""").fetchall()
         return [self.entry(row) for row in rows]
 
@@ -96,7 +99,7 @@ class QueueStore(LobeStore):
                 if field in changes:
                     db.execute(f"UPDATE history SET {field}=? WHERE id=? AND status='pending'",
                                (changes[field], entry_id))
-            row = db.execute("SELECT * FROM history WHERE id=?", (entry_id,)).fetchone()
+            row = db.execute(f"SELECT {_ENTRY_COLS} FROM history WHERE id=?", (entry_id,)).fetchone()
             return self.entry(row) if row else None
 
     def prioritize(self, entry_id):

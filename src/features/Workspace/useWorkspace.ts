@@ -66,6 +66,8 @@ export const useWorkspace = () => {
         void flushWidths();
       };
       let pointer: number | undefined;
+      let dragFrame = 0;
+      let dragClientX = 0;
       const left = () => row.dataset.lobeWorkspaceColumns === 'previewLeft';
       handle.onpointerdown = (event) => {
         if (event.button !== 0 || pointer !== undefined) return;
@@ -77,11 +79,20 @@ export const useWorkspace = () => {
       };
       handle.onpointermove = (event) => {
         if (pointer !== event.pointerId) return;
-        const box = row.getBoundingClientRect();
-        const ratio = (event.clientX - box.left - handle.offsetWidth / 2) / Math.max(1, box.width - handle.offsetWidth);
-        resize((left() ? ratio : 1 - ratio) * 100);
+        dragClientX = event.clientX;
+        if (dragFrame) return;
+        dragFrame = requestAnimationFrame(() => {
+          dragFrame = 0;
+          const box = row.getBoundingClientRect();
+          const ratio = (dragClientX - box.left - handle.offsetWidth / 2) / Math.max(1, box.width - handle.offsetWidth);
+          resize((left() ? ratio : 1 - ratio) * 100);
+        });
       };
       handle.onlostpointercapture = () => {
+        if (dragFrame) {
+          cancelAnimationFrame(dragFrame);
+          dragFrame = 0;
+        }
         if (pointer === undefined) return;
         pointer = undefined;
         delete handle.dataset.dragging;
@@ -89,6 +100,10 @@ export const useWorkspace = () => {
         save();
       };
       handle.onpointercancel = () => {
+        if (dragFrame) {
+          cancelAnimationFrame(dragFrame);
+          dragFrame = 0;
+        }
         pointer = undefined;
         delete handle.dataset.dragging;
         resize(start);

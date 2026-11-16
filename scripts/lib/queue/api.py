@@ -18,16 +18,19 @@ def prepare():
     global ready
     ready = False
     store = QueueStore()
-    old = next((ext for ext in extensions.extensions if ext.canonical_name == "agent-scheduler-neo"), None)
-    if old:
-        path = Path(getattr(shared.cmd_opts, "agent_scheduler_sqlite_file", None) or Path(old.path) / "task_scheduler.sqlite3")
-        if not path.is_absolute():
-            path = Path(old.path) / path
-        try:
-            store.migrate(path)
-        except Exception as error:
-            print(f"[Lobe queue] Migration warning (continuing with Lobe Queue): {error}")
-        old.enabled = False
+    try:
+        old = next((ext for ext in extensions.extensions if ext.canonical_name == "agent-scheduler-neo"), None)
+        if old:
+            path = Path(getattr(shared.cmd_opts, "agent_scheduler_sqlite_file", None) or Path(old.path) / "task_scheduler.sqlite3")
+            if not path.is_absolute():
+                path = Path(old.path) / path
+            try:
+                store.migrate(path)
+            except Exception as error:
+                print(f"[Lobe queue] Migration warning (continuing with Lobe Queue): {error}")
+            old.enabled = False
+    finally:
+        store.close()
     ready = True
 
 

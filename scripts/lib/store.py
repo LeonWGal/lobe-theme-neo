@@ -16,15 +16,26 @@ THUMB_NAME = re.compile(r"^[0-9a-f]{32}_\d{1,2}\.(webp|jpg|png)$")
 USERDATA_KEYS = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
 
 
+_ENTRY_COLS = (
+    "id, job, time, tab, infotext, status, priority, bookmarked, name, checkpoint, vae, error, queued, "
+    "(params IS NOT NULL AND params != '') AS replayable, images"
+)
+
+
 class LobeStore:
-    def __init__(self, folder=None):
+    def __init__(self, folder=None, *, pool=None):
         self.folder = Path(folder) if folder else DATA_FOLDER
         self.folder.mkdir(parents=True, exist_ok=True)
         self.thumbs = self.folder / "history" / "thumbs"
         self.db = self.folder / "theme.sqlite3"
         self.lock = threading.RLock()
+        self._pool = (folder is None) if pool is None else bool(pool)
+        self._local = threading.local()
+        self._conns = []
+        self._conns_lock = threading.Lock()
         with self.connect() as db:
             db.execute("PRAGMA journal_mode=WAL")
+            db.execute("PRAGMA synchronous=NORMAL")
             db.execute("CREATE TABLE IF NOT EXISTS userdata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS history (id TEXT PRIMARY KEY, time REAL NOT NULL, tab TEXT NOT NULL, infotext TEXT NOT NULL, images TEXT NOT NULL, job TEXT UNIQUE)")
             db.execute("CREATE INDEX IF NOT EXISTS history_time ON history(time DESC)")
@@ -40,12 +51,46 @@ class LobeStore:
                 if name not in fields:
                     db.execute(f"ALTER TABLE history ADD COLUMN {name} {definition}")
             db.execute("CREATE INDEX IF NOT EXISTS history_queue ON history(status, priority)")
+            db.execute("CREATE INDEX IF NOT EXISTS history_status_time ON history(status, time DESC)")
+            db.execute("CREATE INDEX IF NOT EXISTS history_tab ON history(tab, time DESC)")
+            db.execute("CREATE INDEX IF NOT EXISTS history_bookmarked ON history(bookmarked, time DESC)")
+
+    def _open_conn(self):
+        db = sqlite3.connect(self.db, timeout=5)
+        db.row_factory = sqlite3.Row
+        db.execute("PRAGMA busy_timeout=5000")
+        db.execute("PRAGMA synchronous=NORMAL")
+        db.execute("PRAGMA temp_store=MEMORY")
+        db.create_function("casefold", 1, lambda value: str(value or "").casefold(), deterministic=True)
+        return db
+
+    def close(self):
+        with self._conns_lock:
+            conns, self._conns = self._conns, []
+        self._local = threading.local()
+        for db in conns:
+            try:
+                db.close()
+            except sqlite3.Error:
+                pass
 
     @contextmanager
     def connect(self):
-        db = sqlite3.connect(self.db, timeout=5)
-        db.row_factory = sqlite3.Row
-        db.create_function("casefold", 1, lambda value: str(value or "").casefold(), deterministic=True)
+        if self._pool:
+            db = getattr(self._local, "conn", None)
+            if db is None:
+                db = self._open_conn()
+                self._local.conn = db
+                with self._conns_lock:
+                    self._conns.append(db)
+            try:
+                with db:
+                    yield db
+            except sqlite3.ProgrammingError:
+                self._local.conn = None
+                raise
+            return
+        db = self._open_conn()
         try:
             with db:
                 yield db
@@ -72,9 +117,11 @@ class LobeStore:
 
     @staticmethod
     def entry(row):
+        keys = row.keys()
+        replayable = bool(row["replayable"]) if "replayable" in keys else bool(row["params"])
         return {**{key: row[key] for key in ("id", "job", "time", "tab", "infotext", "status",
                  "priority", "bookmarked", "name", "checkpoint", "vae", "error", "queued")},
-                "replayable": bool(row["params"]), "images": json.loads(row["images"])}
+                "replayable": replayable, "images": json.loads(row["images"])}
 
     def list_history(self, offset=0, limit=200, query="", tab="", status=""):
         clauses, args = ["status NOT IN ('pending', 'running')"], []
@@ -92,7 +139,7 @@ class LobeStore:
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
         with self.connect() as db:
             total = db.execute("SELECT count(*) FROM history" + where, args).fetchone()[0]
-            rows = db.execute("SELECT * FROM history" + where + " ORDER BY time DESC,rowid DESC LIMIT ? OFFSET ?", [*args, max(1, min(limit, 200)), max(0, offset)]).fetchall()
+            rows = db.execute(f"SELECT {_ENTRY_COLS} FROM history" + where + " ORDER BY time DESC,rowid DESC LIMIT ? OFFSET ?", [*args, max(1, min(limit, 200)), max(0, offset)]).fetchall()
         return {"total": total, "items": [self.entry(row) for row in rows]}
 
     def thumb_path(self, name):
@@ -129,29 +176,36 @@ class LobeStore:
         tab = str(payload.get("tab") or "txt2img")
         if tab not in ("txt2img", "img2img"):
             raise ValueError("Invalid generation tab")
-        with self.lock, self.connect() as db:
-            if job:
-                previous = db.execute("SELECT * FROM history WHERE job=?", (job,)).fetchone()
+        if job:
+            with self.connect() as db:
+                previous = db.execute(f"SELECT {_ENTRY_COLS} FROM history WHERE job=?", (job,)).fetchone()
                 if previous:
                     return self.entry(previous)
-            entry_id = uuid.uuid4().hex
-            images = []
-            for index, image in enumerate((payload.get("images") or [])[:16]):
-                if isinstance(image, dict):
-                    images.append({"url": str(image.get("url") or "")[:2000], "thumb": self.save_thumb(entry_id, index, str(image.get("thumb") or ""))})
+        entry_id = uuid.uuid4().hex
+        images = []
+        for index, image in enumerate((payload.get("images") or [])[:16]):
+            if isinstance(image, dict):
+                images.append({"url": str(image.get("url") or "")[:2000], "thumb": self.save_thumb(entry_id, index, str(image.get("thumb") or ""))})
+        images_json = json.dumps(images)
+        with self.lock, self.connect() as db:
+            if job:
+                previous = db.execute(f"SELECT {_ENTRY_COLS} FROM history WHERE job=?", (job,)).fetchone()
+                if previous:
+                    self.remove_thumbs([{"id": entry_id, "images": images_json}])
+                    return self.entry(previous)
             db.execute("INSERT INTO history(id,time,tab,infotext,images,job) VALUES (?,?,?,?,?,?)",
-                       (entry_id, stamp, tab, text, json.dumps(images), job))
+                       (entry_id, stamp, tab, text, images_json, job))
             old = self.prune_history(db)
+            row = db.execute(f"SELECT {_ENTRY_COLS} FROM history WHERE id=?", (entry_id,)).fetchone()
         self.remove_thumbs(old)
-        with self.connect() as db:
-            row = db.execute("SELECT * FROM history WHERE id=?", (entry_id,)).fetchone()
         return self.entry(row) if row else {"id": entry_id, "time": stamp, "tab": tab, "infotext": text, "images": images}
 
     @staticmethod
     def prune_history(db):
-        old = db.execute("""SELECT * FROM history WHERE bookmarked=0 AND status NOT IN ('pending','running')
+        old = db.execute("""SELECT id, images FROM history WHERE bookmarked=0 AND status NOT IN ('pending','running')
                          ORDER BY time DESC,rowid DESC LIMIT -1 OFFSET ?""", (HISTORY_LIMIT,)).fetchall()
-        db.executemany("DELETE FROM history WHERE id=?", [(row["id"],) for row in old])
+        if old:
+            db.executemany("DELETE FROM history WHERE id=?", [(row["id"],) for row in old])
         return old
 
     def save_thumb_from_file(self, entry_id, index, path):
@@ -180,14 +234,16 @@ class LobeStore:
 
     def delete_history(self, entry_id):
         with self.lock, self.connect() as db:
-            rows = db.execute("SELECT * FROM history WHERE id=? AND status NOT IN ('pending','running')", (entry_id,)).fetchall()
-            db.executemany("DELETE FROM history WHERE id=?", [(row["id"],) for row in rows])
+            rows = db.execute("SELECT id, images FROM history WHERE id=? AND status NOT IN ('pending','running')", (entry_id,)).fetchall()
+            if rows:
+                db.executemany("DELETE FROM history WHERE id=?", [(row["id"],) for row in rows])
         self.remove_thumbs(rows)
         return len(rows)
 
     def clear_history(self):
         with self.lock, self.connect() as db:
-            rows = db.execute("SELECT * FROM history WHERE bookmarked=0 AND status NOT IN ('pending','running')").fetchall()
-            db.executemany("DELETE FROM history WHERE id=?", [(row["id"],) for row in rows])
+            rows = db.execute("SELECT id, images FROM history WHERE bookmarked=0 AND status NOT IN ('pending','running')").fetchall()
+            if rows:
+                db.executemany("DELETE FROM history WHERE id=?", [(row["id"],) for row in rows])
         self.remove_thumbs(rows)
         return len(rows)

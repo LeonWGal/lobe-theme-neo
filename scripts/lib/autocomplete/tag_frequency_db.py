@@ -1,31 +1,73 @@
 import sqlite3
+import threading
 from contextlib import contextmanager
+from pathlib import Path
 
 from .shared_paths import DATA_PATH
 
 db_file = DATA_PATH / "tag_frequency.db"
 timeout = 30
 db_ver = 1
+_thread_local = threading.local()
+_wal_ready = False
+_wal_lock = threading.Lock()
+
+
+def _open_freq_conn(db):
+    Path(db).parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db, timeout=timeout)
+    conn.isolation_level = None
+    conn.execute("PRAGMA busy_timeout=5000")
+    conn.execute("PRAGMA temp_store=MEMORY")
+    return conn
 
 
 @contextmanager
-def transaction(db=db_file):
-    """Context manager for database transactions.
-    Ensures that the connection is properly closed after the transaction.
-    """
+def transaction(db=None, readonly=False):
+    """Context manager for database transactions, reusing the default DB connection per thread."""
+    global _wal_ready
+    target_db = db_file if db is None else db
+    reuse = target_db == db_file
     conn = None  # guard against NameError in finally if connect() itself raises (#288)
+    started = False
     try:
-        conn = sqlite3.connect(db, timeout=timeout)
-        
-        conn.isolation_level = None
+        if reuse:
+            conn = getattr(_thread_local, "conn", None)
+            if conn is None:
+                conn = _open_freq_conn(target_db)
+                with _wal_lock:
+                    if not _wal_ready:
+                        conn.execute("PRAGMA journal_mode=WAL")
+                        conn.execute("PRAGMA synchronous=NORMAL")
+                        _wal_ready = True
+                _thread_local.conn = conn
+        else:
+            conn = _open_freq_conn(target_db)
         cursor = conn.cursor()
-        cursor.execute("BEGIN")
+        if not readonly:
+            cursor.execute("BEGIN")
+            started = True
         yield cursor
-        cursor.execute("COMMIT")
+        if started:
+            cursor.execute("COMMIT")
+            started = False
     except sqlite3.Error as e:
+        if conn and started:
+            try:
+                conn.execute("ROLLBACK")
+            except sqlite3.Error:
+                pass
+        if reuse:
+            _thread_local.conn = None
+            if conn:
+                try:
+                    conn.close()
+                except sqlite3.Error:
+                    pass
+                conn = None
         print("Tag Autocomplete: Frequency database error:", e)
     finally:
-        if conn:
+        if not reuse and conn:
             conn.close()
 
 
@@ -93,7 +135,7 @@ class TagFrequencyDb:
         return db_version[0] if db_version else 0
 
     def get_all_tags(self):
-        with transaction() as cursor:
+        with transaction(readonly=True) as cursor:
             cursor.execute(
                 f"""
             SELECT name, type, count_pos, count_neg, last_used
@@ -108,7 +150,7 @@ class TagFrequencyDb:
 
     def get_tag_count(self, tag, ttype, negative=False):
         count_str = "count_neg" if negative else "count_pos"
-        with transaction() as cursor:
+        with transaction(readonly=True) as cursor:
             cursor.execute(
                 f"""
             SELECT {count_str}, last_used
@@ -126,32 +168,39 @@ class TagFrequencyDb:
 
     def get_tag_counts(self, tags: list[str], ttypes: list[str], negative=False, date_limit=None):
         count_str = "count_neg" if negative else "count_pos"
-        with transaction() as cursor:
-            for tag, ttype in zip(tags, ttypes):
+        pairs = list(zip(tags, ttypes))
+        if not pairs:
+            return
+        unique_names = list(dict.fromkeys(tag for tag, _ in pairs))
+        found = {}
+        with transaction(readonly=True) as cursor:
+            for offset in range(0, len(unique_names), 400):
+                chunk = unique_names[offset : offset + 400]
+                placeholders = ",".join("?" * len(chunk))
                 if date_limit is not None:
                     cursor.execute(
-                        f"""
-                    SELECT {count_str}, last_used
-                    FROM tag_frequency
-                    WHERE name = ? AND type = ?
-                    AND last_used > datetime('now', '-' || ? || ' days')
-                    """,
-                        (tag, ttype, date_limit),
+                        f"SELECT name, type, {count_str}, last_used FROM tag_frequency "
+                        f"WHERE name IN ({placeholders}) AND last_used > datetime('now', '-' || ? || ' days')",
+                        (*chunk, date_limit),
                     )
                 else:
                     cursor.execute(
-                        f"""
-                    SELECT {count_str}, last_used
-                    FROM tag_frequency
-                    WHERE name = ? AND type = ?
-                    """,
-                        (tag, ttype),
+                        f"SELECT name, type, {count_str}, last_used FROM tag_frequency "
+                        f"WHERE name IN ({placeholders})",
+                        chunk,
                     )
-                tag_count = cursor.fetchone()
-                if tag_count:
-                    yield (tag, ttype, tag_count[0], tag_count[1]) 
-                else:
-                    yield (tag, ttype, 0, None)
+                for r_name, r_type, r_cnt, r_used in cursor.fetchall():
+                    found[(r_name, r_type)] = (r_cnt, r_used)
+        for tag, ttype in pairs:
+            try:
+                norm_type = int(ttype) if isinstance(ttype, str) else ttype
+            except ValueError:
+                norm_type = ttype
+            row = found.get((tag, norm_type))
+            if row is not None:
+                yield (tag, ttype, row[0], row[1])
+            else:
+                yield (tag, ttype, 0, None)
 
     def increase_tag_count(self, tag, ttype, negative=False):
         with transaction() as cursor:

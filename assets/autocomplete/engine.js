@@ -670,9 +670,13 @@ function addOnDemandObservers(setupFunction) {
 }
 
 const thirdPartyIds = new WeakMap();
+const textAreaIdCache = new WeakMap();
 let nextThirdPartyId = 0;
 // Get the identifier for the text area to differentiate between positive and negative
 function getTextAreaIdentifier(textArea) {
+    if (!textArea) return "";
+    const cached = textAreaIdCache.get(textArea);
+    if (cached) return cached;
     // Use descendant selectors to match Gradio 4.39+ DOM structure.
     let txt2img_p = gradioApp().querySelector('#txt2img_prompt textarea');
     let txt2img_n = gradioApp().querySelector('#txt2img_neg_prompt textarea');
@@ -705,49 +709,78 @@ function getTextAreaIdentifier(textArea) {
             modifier = `${sectionTab}.ta${thirdPartyIds.get(textArea)}`;
             break;
     }
+    textAreaIdCache.set(textArea, modifier);
     return modifier;
 }
 
 // _utils.js
 // Utility functions for tag autocomplete
 
-// Parse the CSV file into a 2D array. Doesn't use regex, so it is very lightweight.
+// Parse the CSV file into a 2D array via slice boundaries instead of per-char concatenation.
 // We are ignoring newlines in quote fields since we expect one-line entries and parsing would break for unclosed quotes otherwise
 function* parseCSVChunks(str) {
     const arr = [];
-    let quote = false;  // 'true' means we're inside a quoted field
+    let quote = false;
+    let hasQuote = false;
+    let segStart = 0;
+    let rowArr = [];
     let nextYield = 262144;
+    const n = str.length;
 
-    // Iterate over each character, keep track of current row and column (of the returned array)
-    for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+    const pushField = (end) => {
+        let val = str.slice(segStart, end);
+        if (hasQuote) {
+            let out = "";
+            let q = false;
+            let partStart = 0;
+            for (let i = 0; i < val.length; i++) {
+                if (val[i] === '"') {
+                    if (q && val[i + 1] === '"') {
+                        out += val.slice(partStart, i + 1);
+                        i++;
+                        partStart = i + 1;
+                    } else {
+                        out += val.slice(partStart, i);
+                        q = !q;
+                        partStart = i + 1;
+                    }
+                }
+            }
+            val = partStart === 0 ? val : out + val.slice(partStart);
+            hasQuote = false;
+        }
+        rowArr.push(val);
+    };
+
+    for (let c = 0; c < n; c++) {
         if (c >= nextYield) {
             yield;
             nextYield += 262144;
         }
-        let cc = str[c], nc = str[c+1];        // Current character, next character
-        arr[row] = arr[row] || [];             // Create a new row if necessary
-        arr[row][col] = arr[row][col] || '';   // Create a new column (start with empty string) if necessary
-
-        // If the current character is a quotation mark, and we're inside a
-        // quoted field, and the next character is also a quotation mark,
-        // add a quotation mark to the current column and skip the next character
-        if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
-
-        // If it's just one quotation mark, begin/end quoted field
-        if (cc == '"') { quote = !quote; continue; }
-
-        // If it's a comma and we're not in a quoted field, move on to the next column
-        if (cc == ',' && !quote) { ++col; continue; }
-
-        // If it's a newline (CRLF), skip the next character and move on to the next row and move to column 0 of that new row
-        if (cc == '\r' && nc == '\n') { ++row; col = 0; ++c; quote = false; continue; }
-
-        // If it's a newline (LF or CR) move on to the next row and move to column 0 of that new row
-        if (cc == '\n') { ++row; col = 0; quote = false; continue; }
-        if (cc == '\r') { ++row; col = 0; quote = false; continue; }
-
-        // Otherwise, append the current character to the current column
-        arr[row][col] += cc;
+        const cc = str.charCodeAt(c);
+        if (cc === 34) {
+            hasQuote = true;
+            if (quote && str.charCodeAt(c + 1) === 34) { c++; }
+            else { quote = !quote; }
+            continue;
+        }
+        if (cc === 44 && !quote) {
+            pushField(c);
+            segStart = c + 1;
+            continue;
+        }
+        if (cc === 13 || cc === 10) {
+            pushField(c);
+            arr.push(rowArr);
+            rowArr = [];
+            quote = false;
+            if (cc === 13 && str.charCodeAt(c + 1) === 10) c++;
+            segStart = c + 1;
+        }
+    }
+    if (segStart < n || rowArr.length > 0 || hasQuote) {
+        pushField(n);
+        arr.push(rowArr);
     }
     return arr;
 }
@@ -781,6 +814,16 @@ async function loadCSV(path) {
         step = parser.next();
     }
     return step.value;
+}
+
+const loraInfoCache = new Map();
+async function fetchLoraInfoCached(loraName) {
+    const now = Date.now();
+    const hit = loraInfoCache.get(loraName);
+    if (hit && now - hit.at < 5000) return hit.value;
+    const promise = fetchTacAPI(`/lobe/autocomplete/lora-info/${loraName}`);
+    loraInfoCache.set(loraName, { at: now, value: promise });
+    return promise;
 }
 
 // Fetch API
@@ -2367,7 +2410,7 @@ async function insertTextAtCursor(textArea, result, tagword, tabCompletedWithout
         let keywords = null;
         // Check built-in activation words first (.json sidecar "activation text" field)
         if (tagType === ResultType.lora || tagType === ResultType.lyco) {
-            let info = await fetchTacAPI(`/lobe/autocomplete/lora-info/${result.text}`)
+            let info = await fetchLoraInfoCached(result.text);
             if (info && info["activation text"]) {
                 keywords = info["activation text"];
             }
@@ -3563,12 +3606,10 @@ onOptionsChanged(() => {
 });
 
 async function initializeAutocomplete() {
-    if (tacLoading) return;
-    if (typeof opts === "undefined" || !opts.tac_keymap || !getTextAreas().length) return;
-    // If TAC was already initialized but the DOM was cleared (e.g. after a Forge Neo server
-    // restart where the browser reconnects without a full page reload), reset state so we
-    // can re-initialize cleanly. Fixes: no init on 2nd WebUI launch (#328).
-    if (TAC_CFG && !gradioApp().querySelector('.autocompleteParent')) {
+    if (tacLoading || typeof opts === "undefined" || !opts.tac_keymap) return;
+    // Fast-exit when already initialized and mounted without scanning third-party textareas.
+    if (TAC_CFG) {
+        if (gradioApp().querySelector('.autocompleteParent')) return;
         TAC_CFG = null;
         dictionaryWorker?.close();
         dictionaryWorker = undefined;
@@ -3580,7 +3621,7 @@ async function initializeAutocomplete() {
         loras = [];
         lycos = [];
     }
-    if (TAC_CFG) return;
+    if (!getTextAreas().length) return;
     tacLoading = true;
     try {
         await syncOptions();
@@ -3603,11 +3644,8 @@ class ChantParser extends BaseTagParser {
         let tempResults = [];
         if (tagword !== "<" && tagword !== "<c:") {
             let searchTerm = tagword.replace("<chant:", "").replace("<c:", "").replace("<", "");
-            let filterCondition = x => {
-                let regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
-                return regex.test(x.terms.toLowerCase()) || regex.test(x.name.toLowerCase());
-            };
-            tempResults = chants.filter(x => filterCondition(x)); // Filter by tagword
+            const regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
+            tempResults = chants.filter(x => regex.test(x.terms) || regex.test(x.name)); // Filter by tagword
         } else {
             tempResults = chants;
         }
@@ -3674,10 +3712,8 @@ class EmbeddingParser extends BaseTagParser {
                 searchTerm = searchTerm.slice(3);
             }
 
-            let filterCondition = x => {
-                let regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
-                return regex.test(x[0].toLowerCase()) || regex.test(x[0].toLowerCase().replaceAll(" ", "_"));
-            };
+            const regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
+            let filterCondition = x => regex.test(x[0]) || regex.test(x[0].replaceAll(" ", "_"));
 
             if (versionString)
                 tempResults = embeddings.filter(x => filterCondition(x) && x[2] && x[2].toLowerCase() === versionString.toLowerCase()); // Filter by tagword
@@ -3775,11 +3811,8 @@ class LoraParser extends BaseTagParser {
             searchTerm = "lora".startsWith(raw) ? "" : raw;
         }
         if (searchTerm.length > 0) {
-            let filterCondition = x => {
-                let regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
-                return regex.test(x.toLowerCase()) || regex.test(x.toLowerCase().replaceAll(" ", "_"));
-            };
-            tempResults = loras.filter(x => filterCondition(x[0])); // Filter by tagword
+            const regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
+            tempResults = loras.filter(x => regex.test(x[0]) || regex.test(x[0].replaceAll(" ", "_"))); // Filter by tagword
         } else {
             tempResults = loras;
         }
@@ -3844,7 +3877,7 @@ async function load() {
 async function sanitize(tagType, text) {
     if (tagType === ResultType.lora) {
         let multiplier = TAC_CFG.extraNetworksDefaultMultiplier;
-        let info = await fetchTacAPI(`/lobe/autocomplete/lora-info/${text}`)
+        let info = await fetchLoraInfoCached(text);
         if (info && info["preferred weight"]) {
             multiplier = info["preferred weight"];
         }
@@ -3886,11 +3919,8 @@ class LycoParser extends BaseTagParser {
             searchTerm = "lyco".startsWith(raw) ? "" : raw;
         }
         if (searchTerm.length > 0) {
-            let filterCondition = x => {
-                let regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
-                return regex.test(x.toLowerCase()) || regex.test(x.toLowerCase().replaceAll(" ", "_"));
-            };
-            tempResults = lycos.filter(x => filterCondition(x[0])); // Filter by tagword
+            const regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
+            tempResults = lycos.filter(x => regex.test(x[0]) || regex.test(x[0].replaceAll(" ", "_"))); // Filter by tagword
         } else {
             tempResults = lycos;
         }
@@ -4029,12 +4059,8 @@ class StyleParser extends BaseTagParser {
 
         if (tagword !== matchGroups[1]) {
             let searchTerm = tagword.replace(matchGroups[1], "");
-            
-            let filterCondition = x => {
-                let regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
-                return regex.test(x[0].toLowerCase()) || regex.test(x[0].toLowerCase().replaceAll(" ", "_"));
-            };
-            tempResults = styleNames.filter(x => filterCondition(x)); // Filter by tagword
+            const regex = new RegExp(escapeRegExp(searchTerm, true), 'i');
+            tempResults = styleNames.filter(x => regex.test(x[0]) || regex.test(x[0].replaceAll(" ", "_"))); // Filter by tagword
         } else {
             tempResults = styleNames;
         }
@@ -4340,6 +4366,7 @@ const WC_REGEX = new RegExp(/__([^,]+)__([^, ]*)/g);
 const WC_TRIGGER = () => TAC_CFG.useWildcards && [...tagword.matchAll(new RegExp(WC_REGEX.source.replaceAll("__", escapeRegExp(TAC_CFG.wcWrap)), "g"))].length > 0;
 const WC_FILE_TRIGGER = () => TAC_CFG.useWildcards && (tagword.startsWith(TAC_CFG.wcWrap) && !tagword.endsWith(TAC_CFG.wcWrap) || tagword === TAC_CFG.wcWrap);
 
+const wildcardContentCache = new Map();
 class WildcardParser extends BaseTagParser {
     async parse() {
         // Show wildcards from a file with that name
@@ -4374,10 +4401,18 @@ class WildcardParser extends BaseTagParser {
                 wildcards = wildcards.concat(getDescendantProp(yamlWildcards[basePath], fileName));
             } else {
                 const query = new URLSearchParams({ basepath: basePath, filename: fileName + ".txt" });
-                const fileContent = ((await fetchTacAPI(`/lobe/autocomplete/wildcard-contents?${query}`, false)) || "")
-                    .split("\n")
-                    .filter(x => x.trim().length > 0 && !x.startsWith('#'));  // Remove empty lines and comments
-                wildcards = wildcards.concat(fileContent);
+                const cacheKey = `${basePath}/${fileName}`;
+                const cached = wildcardContentCache.get(cacheKey);
+                let lines;
+                if (cached && Date.now() - cached.at < 30000) {
+                    lines = cached.lines;
+                } else {
+                    lines = ((await fetchTacAPI(`/lobe/autocomplete/wildcard-contents?${query}`, false, true)) || "")
+                        .split("\n")
+                        .filter(x => x.trim().length > 0 && !x.startsWith('#'));  // Remove empty lines and comments
+                    wildcardContentCache.set(cacheKey, { at: Date.now(), lines });
+                }
+                wildcards = wildcards.concat(lines);
             }
         }
 

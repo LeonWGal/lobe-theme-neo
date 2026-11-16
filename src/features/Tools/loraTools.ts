@@ -477,7 +477,10 @@ export const startLoraTools = ({
   };
   const observer = new MutationObserver((records) => {
     for (const record of records) {
-      if (record.type !== 'childList' || isPromptOutputMutation(record)) continue;
+      if (record.type !== 'childList' || !record.addedNodes.length || isPromptOutputMutation(record)) continue;
+      if (record.target instanceof HTMLElement && record.target.closest('[id$="_results"], [id$="_settings"]')) {
+        continue;
+      }
       for (const node of record.addedNodes) {
         if (
           node instanceof HTMLElement &&

@@ -1,21 +1,12 @@
 import { memo } from 'react';
 
 import VersionTag from '../../../components/VersionTag';
+import { type SettingsTabs } from '../tabs';
 import Menu from './Menu';
 import SidebarLayout from './SidebarLayout';
 import { useTabItems } from './useTabItems';
 
-export enum SettingsTabs {
-  Appearance = 'appearance',
-  Autocomplete = 'autocomplete',
-  Experimental = 'experimental',
-  Layout = 'layout',
-  Prompt = 'prompt',
-  Queue = 'queue',
-  Resolution = 'resolution',
-  Sidebar = 'sidebar',
-  Workspace = 'workspace',
-}
+export { SettingsTabs } from '../tabs';
 
 interface SidebarProps {
   setTab: (tab: SettingsTabs) => void;

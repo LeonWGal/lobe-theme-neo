@@ -33,11 +33,25 @@ def _state_file():
     return str(base / "memory_keeper.json")
 
 
+_state_cache = {"path": None, "sig": None, "data": {}}
+
+
 def _state():
+    path = _state_file()
     try:
-        with open(_state_file(), encoding="utf-8") as f:
+        st = os.stat(path)
+        sig = (st.st_mtime_ns, st.st_size)
+        with _lock:
+            if _state_cache["path"] == path and _state_cache["sig"] == sig:
+                return dict(_state_cache["data"])
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
-        return data if isinstance(data, dict) else {}
+        parsed = data if isinstance(data, dict) else {}
+        with _lock:
+            _state_cache["path"] = path
+            _state_cache["sig"] = sig
+            _state_cache["data"] = parsed
+        return dict(parsed)
     except Exception:
         return {}
 
@@ -56,6 +70,10 @@ def pin(holder_id, keep):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=1)
     os.replace(tmp, path)
+    with _lock:
+        _state_cache["path"] = path
+        _state_cache["sig"] = None
+        _state_cache["data"] = data
     return sorted(kept)
 
 
@@ -84,7 +102,7 @@ def _holders():
     return out
 
 
-def _usage(h):
+def _usage(h, by_pid=None):
     try:
         u = h["usage"]()
     except Exception as exc:
@@ -96,7 +114,8 @@ def _usage(h):
     pid = pid() if callable(pid) else None
     if pid:
         u["pid"] = pid
-        real = measure.gpu_by_pid().get(pid)
+        gpu_map = measure.gpu_by_pid() if by_pid is None else by_pid
+        real = gpu_map.get(pid)
         if real:
             u["vram"] = real  # what the driver says beats an estimate
         held = measure.process_ram(pid)
@@ -105,28 +124,30 @@ def _usage(h):
     return u
 
 
-def gauges():
+def gauges(kids=None, by_pid=None):
     g, r = measure.gpu(), measure.ram()
     out = {"gpu": g, "ram": r}
-    kids = measure.children()
+    kids = measure.children() if kids is None else kids
     if r is not None:
         r["children"] = sum(k[2] for k in kids)
     if g is not None:
-        by_pid = measure.gpu_by_pid()
-        g["children"] = sum(by_pid.get(k[0], 0) for k in kids)
+        gpu_map = (measure.gpu_by_pid() if kids else {}) if by_pid is None else by_pid
+        g["children"] = sum(gpu_map.get(k[0], 0) for k in kids)
     return out
 
 
 def status(full=False):
     from . import vram_mode
 
-    out = {"gauges": gauges(), "generating": generating(), "vram_mode": vram_mode.info()}
+    kids = measure.children()
+    by_pid = measure.gpu_by_pid() if kids else {}
+    out = {"gauges": gauges(kids=kids, by_pid=by_pid), "generating": generating(), "vram_mode": vram_mode.info()}
     if not full:
         return out
     kept = pins()
     rows, claimed = [], set()
     for h in _holders():
-        u = _usage(h)
+        u = _usage(h, by_pid=by_pid if kids else None)
         if u is None:
             continue
         if u.get("pid"):
@@ -139,12 +160,12 @@ def status(full=False):
             row["parts"] = h["parts"]()
             row["can_part_ram"] = callable(h.get("part_to_ram"))
         rows.append(row)
-    for pid, name, held in measure.children():  # started by the WebUI, and no holder says what it is
+    for pid, name, held in kids:  # started by the WebUI, and no holder says what it is
         if pid not in claimed and held > 64 * 1024 * 1024:
             llm = any(w in name.lower() for w in ("llama", "ollama", "kobold", "vllm", "lmstudio"))
             rows.append({"id": f"process:{pid}", "name": name, "category": "llm" if llm else "process", "source": "", "kind": "process",
                          "detail": f"pid {pid}, started by the WebUI; stop it where it came from",
-                         "usage": {"vram": measure.gpu_by_pid().get(pid), "ram": held, "pid": pid},
+                         "usage": {"vram": by_pid.get(pid), "ram": held, "pid": pid},
                          "pinned": False, "can_ram": False, "can_unload": False})
     order = {k: i for i, k in enumerate(sources.CATEGORY_KEYS)}
     rows.sort(key=lambda x: order.get(x["category"], len(order)))

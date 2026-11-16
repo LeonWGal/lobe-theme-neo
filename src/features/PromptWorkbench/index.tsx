@@ -288,7 +288,7 @@ const TabWorkbench = memo<{ tab: GenTab }>(({ tab }) => {
       );
 
       const tipoPromptEls = findTipoPromptElements(container);
-      setAvail({
+      const next: Availability = {
         dynamic: Boolean(dynamicEl),
         dynamicEnabled: Boolean(dynamicCheckbox?.checked),
         gacha: Boolean(gachaEl),
@@ -297,7 +297,19 @@ const TabWorkbench = memo<{ tab: GenTab }>(({ tab }) => {
         tipo: Boolean(tipoEl),
         tipoEnabled: Boolean(tipoCheckbox?.checked),
         tipoPrompt: tipoPromptEls.length > 0,
-      });
+      };
+      setAvail((prev) =>
+        prev.dynamic === next.dynamic &&
+        prev.dynamicEnabled === next.dynamicEnabled &&
+        prev.gacha === next.gacha &&
+        prev.gachaEnabled === next.gachaEnabled &&
+        prev.styles === next.styles &&
+        prev.tipo === next.tipo &&
+        prev.tipoEnabled === next.tipoEnabled &&
+        prev.tipoPrompt === next.tipoPrompt
+          ? prev
+          : next,
+      );
     };
 
     const observer = new MutationObserver((mutations) => {

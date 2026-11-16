@@ -5,7 +5,7 @@ import { Suspense, lazy, memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { GITHUB_REPO_URL } from '@/const/url';
-import { SettingsTabs } from '@/features/Setting/Sidebar';
+import { SettingsTabs } from '@/features/Setting/tabs';
 import { bus } from '@/features/Tools/bus';
 import { useQueue } from '@/features/Tools/useQueue';
 import { useOverlaySidebars } from '@/hooks/useOverlaySidebars';

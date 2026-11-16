@@ -1,10 +1,11 @@
 import { toast } from '@lobehub/ui';
 import { Button, Dropdown, Flex, Select, Space } from 'antd';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { ArrowDown, ArrowUp, Checkpoint, ChevronDown, Clock, Loader2, Pause, Pending, Play, PlaylistAdd, X } from '@/icons';
+import { isPromptOutputMutation } from '@/utils/promptMutations';
 
 import { getChoices, historyApi, queueApi, type CheckpointSelection, type HistoryEntry } from './api';
 import { bus, type ProgressInfo } from './bus';
@@ -17,7 +18,7 @@ const progressTasks = new Set<string>();
 
 type QueueWindow = Window & { lobeQueueShowResult?: (tab: Tab, job: string) => void };
 
-function QueueButton({ tab, strip }: { strip: HistoryEntry[], tab: Tab; }) {
+const QueueButton = memo(function QueueButton({ tab, strip }: { strip: HistoryEntry[], tab: Tab; }) {
   const queue = useQueue();
   const { t } = useTranslation();
   const [selection, select] = useState<CheckpointSelection>({ mode: 'current' });
@@ -82,6 +83,8 @@ function QueueButton({ tab, strip }: { strip: HistoryEntry[], tab: Tab; }) {
       setBusy(false);
     }
   };
+  const enqueueRef = useRef(enqueue);
+  enqueueRef.current = enqueue;
   useEffect(() => {
     const shortcut = (event: KeyboardEvent) => {
       if (!event.shiftKey || !(event.ctrlKey || event.metaKey) || event.key !== 'Enter' || event.repeat) return;
@@ -90,11 +93,11 @@ function QueueButton({ tab, strip }: { strip: HistoryEntry[], tab: Tab; }) {
       if (!panel?.getClientRects().length || getComputedStyle(panel).display === 'none') return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      void enqueue();
+      void enqueueRef.current();
     };
     window.addEventListener('keydown', shortcut, true);
     return () => window.removeEventListener('keydown', shortcut, true);
-  });
+  }, [tab]);
   return (
     <Flex className="lobe-inline-queue-content" gap={6} vertical>
       <Space.Compact block className="lobe-queue-actions">
@@ -163,13 +166,15 @@ function QueueButton({ tab, strip }: { strip: HistoryEntry[], tab: Tab; }) {
       </div>}
     </Flex>
   );
-}
+});
 
 export default function InlineQueue() {
   const queue = useQueue(true);
   const [hosts, setHosts] = useState<Partial<Record<Tab, HTMLElement>>>({});
   const [recent, setRecent] = useState<HistoryEntry[]>([]);
   const available = Boolean(queue);
+  const txt2imgStrip = useMemo(() => recent.filter((item) => item.tab === 'txt2img').slice(0, 7), [recent]);
+  const img2imgStrip = useMemo(() => recent.filter((item) => item.tab === 'img2img').slice(0, 7), [recent]);
   useEffect(() => {
     if (!available) return;
     const root = typeof gradioApp === 'function' ? gradioApp() : document;
@@ -189,7 +194,8 @@ export default function InlineQueue() {
       }
     };
     attach();
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((records) => {
+      if (records.every((record) => isPromptOutputMutation(record) || !record.addedNodes.length)) return;
       if (tabs.some((tab) => !attached[tab]?.isConnected)) attach();
     });
     observer.observe(root, { childList: true, subtree: true });
@@ -239,6 +245,6 @@ export default function InlineQueue() {
     }
   }, [queue]);
   return tabs.map((tab) => hosts[tab] && createPortal(
-    <QueueButton strip={recent.filter((item) => item.tab === tab).slice(0, 7)} tab={tab} />, hosts[tab], tab,
+    <QueueButton strip={tab === 'txt2img' ? txt2imgStrip : img2imgStrip} tab={tab} />, hosts[tab], tab,
   ));
 }

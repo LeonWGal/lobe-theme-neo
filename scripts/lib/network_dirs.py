@@ -5,15 +5,17 @@ import os
 
 def model_directories(page, *, hidden=False, leading_separator=False):
     directories = set()
-    roots = [os.path.abspath(root) for root in page.allowed_directories_for_previews()]
+    roots = [(root, os.path.normcase(root)) for root in (os.path.abspath(r) for r in page.allowed_directories_for_previews())]
+    unique_dirs = set()
     for item in page.items.values():
         filename = item.get("filename")
-        if not filename:
-            continue
-        folder = os.path.dirname(os.path.abspath(filename))
-        for root in roots:
+        if filename:
+            unique_dirs.add(os.path.dirname(filename))
+    for raw_folder in unique_dirs:
+        folder = os.path.abspath(raw_folder)
+        for root, norm_root in roots:
             try:
-                if os.path.normcase(os.path.commonpath([root, folder])) != os.path.normcase(root):
+                if os.path.normcase(os.path.commonpath([root, folder])) != norm_root:
                     continue
             except ValueError:  # Windows paths can be on different drives.
                 continue

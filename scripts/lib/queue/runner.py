@@ -295,7 +295,7 @@ class LobeTaskRunner:
         while not self.stopped:
             self.wakeup.clear()
             with self.lock:
-                row = None if self.paused or progress.current_task else self.store.claim()
+                row = None if (self.paused or progress.current_task or not self.store.has_pending()) else self.store.claim()
                 self.current = row["id"] if row else None
             if row is None:
                 if completed and not self.paused:

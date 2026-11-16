@@ -36,11 +36,8 @@ def register_autocomplete_settings():
 
 def init_lobe(_: Any, app: FastAPI, **kwargs):
     LobeLog.info("Initializing...")
-    # UI reload rebuilds Forge's native card metadata. Refresh the theme's
-    # data provider too, retaining its persisted index across reloads.
-    import importlib
-    importlib.reload(importlib.import_module("scripts.lib.validation"))
-    importlib.reload(importlib.import_module("scripts.lib.loras"))
+    # Keep persisted LoRA/checkpoint caches intact across UI reloads;
+    # list_loras() already revalidates file mtimes and native user_metadata.
 
     package = LobePackage()
     prompt = LobePrompt()

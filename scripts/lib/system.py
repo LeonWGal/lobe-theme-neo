@@ -18,8 +18,10 @@ except Exception:  # pragma: no cover - psutil is a WebUI requirement
 _nvml = None
 _nvml_lock = threading.Lock()
 _nvml_failed = False
+_cache_lock = threading.Lock()
 _last = {"time": 0.0, "data": None}
-_CACHE_SECONDS = 0.8     # several open tabs share one reading
+_CACHE_SECONDS = 1.0     # several open tabs share one reading
+_disk_where = None
 
 
 def _nvml_module():
@@ -83,13 +85,15 @@ def _gpus_torch():
 
 
 def _disk():
+    global _disk_where
+    if _disk_where is None:
+        try:
+            from modules import paths
+            _disk_where = paths.models_path
+        except Exception:
+            _disk_where = os.getcwd()
     try:
-        from modules import paths
-        where = paths.models_path
-    except Exception:
-        where = os.getcwd()
-    try:
-        d = psutil.disk_usage(where)
+        d = psutil.disk_usage(_disk_where)
         return {"used": int(d.used), "total": int(d.total)}
     except Exception:
         return None
@@ -97,28 +101,29 @@ def _disk():
 
 def stats():
     now = time.time()
-    if _last["data"] is not None and now - _last["time"] < _CACHE_SECONDS:
-        return _last["data"]
-    data = {"cpu": None, "ram": None, "swap": None, "gpus": [], "disk": None, "nvml": False}
-    if psutil is not None:
-        try:
-            data["cpu"] = psutil.cpu_percent(interval=None)
-            vm = psutil.virtual_memory()
-            data["ram"] = {"used": int(vm.total - vm.available), "total": int(vm.total)}
-            sw = psutil.swap_memory()
-            if sw.total:
-                data["swap"] = {"used": int(sw.used), "total": int(sw.total)}
-        except Exception:
-            pass
-        data["disk"] = _disk()
-    nv = _nvml_module()
-    if nv is not None:
-        try:
-            data["gpus"] = _gpus_nvml(nv)
-            data["nvml"] = True
-        except Exception:
-            data["gpus"] = []
-    if not data["gpus"]:
-        data["gpus"] = _gpus_torch()
-    _last.update(time=now, data=data)
-    return data
+    with _cache_lock:
+        if _last["data"] is not None and now - _last["time"] < _CACHE_SECONDS:
+            return _last["data"]
+        data = {"cpu": None, "ram": None, "swap": None, "gpus": [], "disk": None, "nvml": False}
+        if psutil is not None:
+            try:
+                data["cpu"] = psutil.cpu_percent(interval=None)
+                vm = psutil.virtual_memory()
+                data["ram"] = {"used": int(vm.total - vm.available), "total": int(vm.total)}
+                sw = psutil.swap_memory()
+                if sw.total:
+                    data["swap"] = {"used": int(sw.used), "total": int(sw.total)}
+            except Exception:
+                pass
+            data["disk"] = _disk()
+        nv = _nvml_module()
+        if nv is not None:
+            try:
+                data["gpus"] = _gpus_nvml(nv)
+                data["nvml"] = True
+            except Exception:
+                data["gpus"] = []
+        if not data["gpus"]:
+            data["gpus"] = _gpus_torch()
+        _last.update(time=time.time(), data=data)
+        return data
