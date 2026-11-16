@@ -1,15 +1,27 @@
+import componentCss from '@lobehub/ui/style.css?url';
+import themeCss from '@lobehub/ui/theme.css?url';
 import { consola } from 'consola';
 import { createRoot } from 'react-dom/client';
 
 import { applyForgeDocumentFlag } from '@/utils/forge';
+import { startPerformanceDiagnostics } from '@/utils/performanceDiagnostics';
 
 import Page from './app/page';
 
 if (window.global === undefined) window.global = window;
 
-const skipLoad = window.location.href.includes('dev') && process.env.NODE_ENV === 'production';
+const skipLoad =
+  /^\/dev(?:\/|$)/.test(window.location.pathname) && process.env.NODE_ENV === 'production';
 
 if (!skipLoad) {
+  startPerformanceDiagnostics();
+  // Forge loads the JS entry directly, without Vite's HTML stylesheet links.
+  for (const href of [themeCss, componentCss]) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.append(link);
+  }
   let isMounted = false;
 
   const mountApp = () => {
@@ -21,6 +33,7 @@ if (!skipLoad) {
 
     const root = document.createElement('div');
     root.setAttribute('id', 'root');
+    root.dataset.lobeLocalized = '';
 
     try {
       const app = typeof gradioApp === 'function' ? gradioApp() : null;

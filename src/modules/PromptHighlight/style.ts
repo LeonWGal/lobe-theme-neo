@@ -9,13 +9,14 @@ export const useStyles = createStyles(({ css, token, cx, stylish, prefixCls }) =
       position: absolute;
       z-index: 0;
 
-      overflow: hidden auto;
+      overflow: hidden;
+      box-sizing: border-box;
 
       padding: calc(8px + var(--input-border-width));
 
       pre {
         font-family: ${token.fontFamilyCode} !important;
-        font-size: 13px !important;
+        font-size: var(--lobe-prompt-font-size, 14px) !important;
         line-height: 1.5 !important;
         word-wrap: break-word !important;
         white-space: pre-wrap !important;
@@ -36,7 +37,7 @@ export const useStyles = createStyles(({ css, token, cx, stylish, prefixCls }) =
 
         height: 34px;
         padding: 0 8px;
-        border-radius: ${token.borderRadius};
+        border-radius: ${token.borderRadius}px;
 
         font-family: ${token.fontFamilyCode};
         color: ${token.colorTextTertiary};

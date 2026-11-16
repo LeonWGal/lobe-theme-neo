@@ -7,14 +7,13 @@ export const useStyles = createStyles(
     { css, token, stylish, isDarkMode, responsive },
     {
       isPromptResizable,
-      layoutSplitPreview,
-    }: { isPromptResizable: boolean; layoutSplitPreview: boolean },
+    }: { isPromptResizable: boolean },
   ) => {
     return {
       container: css`
         position: relative;
         flex: 1;
-        min-width: ${layoutSplitPreview ? '200px' : '0'};
+        min-width: 0;
 
         .app {
           padding: 0 !important;
@@ -90,7 +89,24 @@ export const useStyles = createStyles(
           }
         }
 
+        .lobe-source-hint {
+          margin: 0;
+          color: ${token.colorTextSecondary};
+          font-size: ${token.fontSize}px;
+          line-height: ${token.lineHeight};
+        }
+
+        #tab_extras > .lobe-source-hint,
+        #tab_extras .lobe-source-hint {
+          padding: 0 4px;
+        }
+
         #tab_pnginfo {
+          button[data-lobe-png-unavailable] {
+            opacity: 0.55;
+            cursor: not-allowed;
+          }
+
           #pnginfo_image {
             height: auto !important;
           }
@@ -101,10 +117,6 @@ export const useStyles = createStyles(
         }
 
         [id$='_override_settings_row']:has(div.hidden) {
-          display: none;
-        }
-
-        .gradio-group:has(.gradio-group:has(div:empty)) {
           display: none;
         }
 
@@ -164,22 +176,7 @@ export const useStyles = createStyles(
         }
       `,
       splitView: css`
-        #txt2img_toprow,
-        #img2img_toprow {
-          flex-direction: column !important;
-          padding: 0 !important;
-          background: transparent !important;
-          width: 100% !important;
-        }
-
-        #tab_txt2img > .gradio-row,
-        #tab_img2img > .gradio-row {
-          align-items: flex-start !important;
-          gap: 16px !important;
-        }
-
-        #txt2img_results,
-        #img2img_results {
+        [data-lobe-preview-mode='split'] :is(#txt2img_results, #img2img_results) {
           position: sticky !important;
           top: 76px !important;
           align-self: flex-start !important;
@@ -210,7 +207,7 @@ export const useStyles = createStyles(
             }
           }
 
-          > [id$='_enqueue_wrapper'],
+          > [id$='_enqueue_wrapper']:not(.lobe-inline-queue),
           > div:has(button[id$='_enqueue']) {
             flex: 1 !important;
             min-width: 0 !important;
@@ -228,7 +225,28 @@ export const useStyles = createStyles(
           }
         }
 
-        [id$='_gallery_container'] {
+        .lobe-split-action-header:has(> .lobe-inline-queue) {
+          flex-wrap: wrap;
+          > .lobe-inline-queue { flex: 0 0 100%; }
+        }
+
+        .lobe-split-action-header.lobe-sticky-generation {
+          position: sticky;
+          top: var(--draggable-panel-header-height, 64px);
+          z-index: 35;
+          grid-column: 1 / -1;
+          flex: 0 0 100%;
+          align-self: start;
+          order: -2;
+          box-sizing: border-box;
+          margin-bottom: 0 !important;
+          padding: 8px;
+          background: ${token.colorBgContainer};
+          border: 1px solid ${token.colorBorderSecondary};
+          border-radius: ${token.borderRadiusLG}px;
+        }
+
+        [data-lobe-preview-mode] [id$='_gallery_container']:has(> .lobe-split-action-header) {
           display: flex !important;
           flex-direction: column !important;
           width: 100% !important;
@@ -246,32 +264,32 @@ export const useStyles = createStyles(
             padding: 8px !important;
 
             font-family: ${token.fontFamilyCode} !important;
-            font-size: 13px !important;
+            font-size: var(--lobe-prompt-font-size, 14px) !important;
             line-height: 1.5 !important;
             word-wrap: break-word !important;
             white-space: pre-wrap !important;
 
             transition:
-              all 0.3s,
-              height 0s;
+              border-color 150ms,
+              background-color 150ms;
           }
         }
 
         [id$='2img_prompt'] textarea,
         [id$='2img_prompt'] > label > textarea {
-          color: ${token.colorSuccessTextHover};
+          color: ${token.colorText};
 
           &:focus {
-            color: ${token.colorSuccessText};
+            color: ${token.colorText};
           }
         }
 
         [id$='2img_neg_prompt'] textarea,
         [id$='2img_neg_prompt'] > label > textarea {
-          color: ${token.colorErrorTextHover};
+          color: ${token.colorText};
 
           &:focus {
-            color: ${token.colorError};
+            color: ${token.colorText};
           }
         }
 
@@ -337,7 +355,7 @@ export const useStyles = createStyles(
         }
 
         [id$='img_settings'],
-        .gradio-column.compact {
+        .gradio-column.compact:not([id$='_script_container'] *) {
           display: flex !important;
           flex-direction: column !important;
           gap: 12px !important;
@@ -370,64 +388,6 @@ export const useStyles = createStyles(
             background: ${token.colorFillQuaternary};
           }
 
-          [id$='_script_container'] {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-
-            * {
-              --layout-gap: 12px !important;
-            }
-
-            > div {
-              display: flex;
-              flex-direction: column;
-              gap: 12px;
-
-              > div.gr-group.gradio-group:has(.label-wrap) {
-                gap: 12px !important;
-
-                margin: 0 !important;
-                padding: 16px !important;
-                border: 1px solid ${token.colorBorderSecondary} !important;
-                border-radius: ${token.borderRadius}px !important;
-
-                background-color: ${token.colorBgContainer}!important;
-              }
-            }
-
-            .gradio-accordion:not(.hidden):has(div) {
-              padding: 0 !important;
-              border: none !important;
-            }
-
-            #script_list,
-            > .gradio-group:not(.hidden):has(div) {
-              display: flex;
-              flex-direction: column;
-
-              margin: 0;
-              padding: 16px;
-              border: 1px solid ${token.colorBorderSecondary} !important;
-              border-radius: ${token.borderRadius}px !important;
-
-              background-color: ${token.colorBgContainer} !important;
-              box-shadow: none;
-
-              > .gradio-accordion {
-                padding: 0 !important;
-                border: none !important;
-              }
-            }
-
-            #script_list {
-              padding: 8px 16px 12px !important;
-            }
-
-            #axis_options {
-              margin: 16px 0;
-            }
-          }
         }
 
         #txt2img_accordions,

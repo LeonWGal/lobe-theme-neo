@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from scripts.lib.lobe_log import LobeLog
+from scripts.lib.validation import validate_settings
 
 EXTENSION_FOLDER = Path(__file__).parent.parent.parent
 CONFIG_FILENAME = Path(EXTENSION_FOLDER, "lobe_theme_config.json")
@@ -24,8 +25,9 @@ class LobeConfig:
 
             try:
                 with open(self.config_file, 'r', encoding='utf-8') as f:
-                    self.config = json.load(f)
-            except (json.JSONDecodeError, OSError) as e:
+                    data = json.load(f)
+                    self.config = validate_settings(data, strict=False) or LobeConfig.default()
+            except (ValueError, TypeError, OSError) as e:
                 LobeLog.debug(f"Failed to load config: {e}")
                 self.config = LobeConfig.default()
         else:
@@ -33,7 +35,7 @@ class LobeConfig:
             self.config = LobeConfig.default()
 
     def is_empty(self):
-        return "empty" in self.config and self.config['empty']
+        return bool(self.config.get('empty'))
 
     def json(self):
         return json.dumps(self.config, ensure_ascii=False)
@@ -44,22 +46,19 @@ class LobeConfig:
             self.config = LobeConfig.default()
             return True
 
+        self.config = LobeConfig.default()
         return False
 
     def save(self, settings):
-        # Persist flat settings only (ignore export wrapper / empty marker)
-        if isinstance(settings, dict) and "setting" in settings and isinstance(settings["setting"], dict):
-            settings = settings["setting"]
-
-        cleaned = {k: v for k, v in settings.items() if k not in ("empty", "schemaVersion", "exportedAt")}
-        self.config = cleaned
+        cleaned = validate_settings(settings)
 
         tmp_file = Path(str(self.config_file) + ".tmp")
         try:
             with open(tmp_file, 'w', encoding='utf-8') as f:
-                json.dump(self.config, f, indent=2, ensure_ascii=False)
+                json.dump(cleaned, f, indent=2, ensure_ascii=False)
                 f.write("\n")
             os.replace(tmp_file, self.config_file)
+            self.config = cleaned
         except OSError as e:
             LobeLog.debug(f"Failed to save config: {e}")
             if tmp_file.exists():

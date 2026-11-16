@@ -1,23 +1,20 @@
 import { Button, Popconfirm, Upload, message } from 'antd';
 import { useResponsive } from 'antd-style';
-import isEqual from 'fast-deep-equal';
 import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { DEFAULT_SETTING, selectors, useAppStore } from '@/store';
+import { DEFAULT_SETTING } from '@/store';
 import { downloadSettingJson, readSettingJsonFile } from '@/utils/settingBackup';
+
+import { useSettingDraft } from '../Draft';
 
 const Footer = memo(() => {
   const { t } = useTranslation();
   const { mobile } = useResponsive();
-  const onSetSetting = useAppStore((st) => st.onSetSetting);
-  const setting = useAppStore(selectors.currentSetting, isEqual);
+  const { draft: setting, updateDraft, apply, saving, dirty } = useSettingDraft();
 
-  const onReset = useCallback(async () => {
-    await onSetSetting(DEFAULT_SETTING);
-    location.reload();
-  }, [onSetSetting]);
+  const onReset = () => updateDraft(DEFAULT_SETTING);
 
   const onExport = useCallback(() => {
     downloadSettingJson(setting);
@@ -28,21 +25,23 @@ const Footer = memo(() => {
     async (file: File) => {
       try {
         const imported = await readSettingJsonFile(file);
-        await onSetSetting(imported);
+        updateDraft(imported);
         message.success(t('setting.button.importSuccess'));
-        location.reload();
       } catch {
         message.error(t('setting.button.importError'));
       }
     },
-    [onSetSetting, t],
+    [updateDraft, t],
   );
 
   const buttonStyle = mobile ? { flex: 1 } : { margin: 0 };
 
   return (
     <Flexbox flex={1} gap={12} horizontal justify={'space-between'} wrap={'wrap'}>
-      <Flexbox gap={8} horizontal style={mobile ? { flex: 1, width: '100%' } : undefined}>
+      <span role="status" style={{ width: '100%' }}>
+        {saving ? t('setting.button.saving') : dirty ? t('setting.button.unsaved') : ''}
+      </span>
+      <Flexbox gap={8} horizontal style={mobile ? { flex: 1, width: '100%' } : undefined} wrap="wrap">
         <Button onClick={onExport} style={buttonStyle}>
           {t('setting.button.export')}
         </Button>
@@ -58,7 +57,7 @@ const Footer = memo(() => {
         </Upload>
       </Flexbox>
 
-      <Flexbox gap={8} horizontal style={mobile ? { flex: 1, width: '100%' } : undefined}>
+      <Flexbox gap={8} horizontal style={mobile ? { flex: 1, width: '100%' } : undefined} wrap="wrap">
         <Popconfirm
           cancelText={t('cancel')}
           okText={t('confirm')}
@@ -70,7 +69,7 @@ const Footer = memo(() => {
             {t('setting.button.reset')}
           </Button>
         </Popconfirm>
-        <Button form="theme_settings" htmlType="submit" style={buttonStyle} type="primary">
+        <Button loading={saving} onClick={() => void apply()} style={buttonStyle} type="primary">
           {t('setting.button.submit')}
         </Button>
       </Flexbox>

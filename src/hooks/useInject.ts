@@ -1,5 +1,6 @@
 import { consola } from 'consola';
-import { RefObject, useEffect, useRef, useState } from 'react';
+import { type RefObject, useEffect, useRef, useState } from 'react';
+import { isPromptOutputMutation } from '@/utils/promptMutations';
 
 interface InjectOptions {
   debug?: string;
@@ -14,114 +15,84 @@ interface InjectOptions {
 export const useInject = (
   ref: RefObject<HTMLDivElement | null>,
   selectors: string,
-  { onSuccess, onError, debug, id, onStart, parent, inverse }: InjectOptions = {},
+  options: InjectOptions = {},
 ) => {
-  const [isLoading, setIsLoading] = useState(true);
   const [element, setElement] = useState<HTMLDivElement>();
-  const isInject = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const callbacks = useRef(options);
+  callbacks.current = options;
+  const { id, inverse, parent } = options;
 
   useEffect(() => {
-    if (isInject.current) return;
-
     let cancelled = false;
+    let injected: HTMLDivElement | null = null;
+    let inserted: HTMLDivElement | null = null;
+    let anchor: Comment | null = null;
+    let originalId = '';
     let observer: MutationObserver | null = null;
-    let timeoutId: any = null;
-
-    const performInject = (ele: HTMLDivElement) => {
-      if (isInject.current || cancelled) return true;
+    const getRoot = () => (typeof gradioApp === 'function' ? gradioApp() : null) || document;
+    setElement(undefined);
+    setIsLoading(true);
+    const inject = () => {
+      if (cancelled || injected) return;
+      const root = parent ? getRoot().querySelector(parent) : getRoot();
+      const target = root?.querySelector<HTMLDivElement>(selectors);
+      const host = ref.current;
+      if (!target || !host) return;
       try {
-        if (id) ele.id = id;
-        onStart?.(ele);
-        if (inverse && ref.current) {
-          ele.append(ref.current);
-        } else if (ref.current) {
-          ref.current.append(ele);
+        originalId = target.id;
+        callbacks.current.onStart?.(target);
+        if (inverse) {
+          target.append(host);
+          inserted = host;
         } else {
-          return false; // Wait until ref.current is attached
+          anchor = document.createComment('lobe-original-position');
+          target.before(anchor);
+          target.dataset.lobeNativeContent = '';
+          host.append(target);
         }
-
-        // Gradio/Svelte components (esp. multiselect Dropdowns Forge Neo uses
-        // for "VAE / Text Encoder") measure layout via ResizeObserver.
+        if (id) target.id = id;
+        injected = target;
+        observer?.disconnect();
+        setElement(target);
+        setIsLoading(false);
+        callbacks.current.onSuccess?.(target);
         requestAnimationFrame(() => {
-          window.dispatchEvent(new Event('resize'));
-          requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+          if (!cancelled) window.dispatchEvent(new Event('resize'));
         });
-
-        setElement(ele);
-        onSuccess?.(ele);
-        isInject.current = true;
+      } catch (error) {
+        callbacks.current.onError?.(error as Error);
+        consola.warn(`Theme injection failed: ${selectors}`, error);
         setIsLoading(false);
-        if (debug) consola.success(`🤯 ${debug}`);
-        return true;
-      } catch (error: any) {
-        console.error(error);
-        onError?.(error);
-        setIsLoading(false);
-        if (debug) consola.error(`🤯 ${debug}`, error);
-        return true;
       }
     };
-
-    const tryFindAndInject = () => {
-      try {
-        const root = parent
-          ? ((typeof gradioApp === 'function' ? gradioApp() : document).querySelector(
-              parent,
-            ) as HTMLDivElement | null)
-          : typeof gradioApp === 'function'
-            ? gradioApp()
-            : document;
-
-        if (!root) return false;
-        const ele = root.querySelector(selectors) as HTMLDivElement | null;
-        if (ele) {
-          return performInject(ele);
-        }
-      } catch {
-        /* wait for DOM */
-      }
-      return false;
-    };
-
-    // 1. Try immediately
-    if (tryFindAndInject()) {
-      return;
-    }
-
-    // 2. Observe mutations until found
-    const appRoot = (typeof gradioApp === 'function' ? gradioApp() : null) || document.body;
-    if (appRoot) {
-      observer = new MutationObserver(() => {
-        if (tryFindAndInject() && observer) {
-          observer.disconnect();
-          observer = null;
-        }
-      });
-      observer.observe(appRoot, { childList: true, subtree: true });
-    }
-
-    // 3. Fallback timeout so isLoading never stays true indefinitely
-    timeoutId = setTimeout(() => {
-      if (!isInject.current && !cancelled) {
-        if (observer) {
-          observer.disconnect();
-          observer = null;
-        }
-        setIsLoading(false);
-        if (debug) consola.warn(`🤯 ${debug} timeout for selector: ${selectors}`);
-      }
+    observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => !isPromptOutputMutation(mutation))) inject();
+    });
+    observer.observe(getRoot(), { childList: true, subtree: true });
+    inject();
+    // Stop the spinner, but retain the observer for extensions that mount late.
+    const timeout = setTimeout(() => {
+      if (!cancelled) setIsLoading(false);
     }, 5000);
-
+    if (typeof onUiLoaded === 'function')
+      onUiLoaded(() => {
+        if (!cancelled) inject();
+      });
     return () => {
       cancelled = true;
-      if (observer) observer.disconnect();
-      if (timeoutId) clearTimeout(timeoutId);
+      observer?.disconnect();
+      clearTimeout(timeout);
+      if (inserted) inserted.remove();
+      if (injected && inverse && id) injected.id = originalId;
+      if (injected && !inverse && anchor?.parentNode) {
+        anchor.parentNode.insertBefore(injected, anchor);
+        if (id) injected.id = originalId;
+      }
+      if (injected && !inverse) delete injected.dataset.lobeNativeContent;
+      anchor?.remove();
     };
-  }, [selectors, parent, id, inverse]);
+  }, [selectors, parent, id, inverse, ref]);
 
-  return {
-    element,
-    isLoaded: !isLoading,
-    isLoading,
-  };
+  return { element, isLoaded: Boolean(element), isLoading };
 };

@@ -1,32 +1,81 @@
 import { type Theme, css } from 'antd-style';
-import { readableColor } from 'polished';
+
+import { getReadableAccent, getReadableForeground } from '@/utils/colorContrast';
 
 export default (token: Theme) => {
   return css`
+    :root { --lobe-prompt-gap: 8px; --lobe-prompt-inset: 12px; }
+    html[data-lobe-density='compact'] { --lobe-prompt-gap: 4px; --lobe-prompt-inset: 8px; }
+    body { font-family: ${token.fontFamily}; }
     :root,
     .dark {
-      --primary-50: ${token.geekblue1};
-      --primary-100: ${token.geekblue2};
-      --primary-200: ${token.geekblue3};
-      --primary-300: ${token.geekblue4};
-      --primary-400: ${token.geekblue5};
-      --primary-500: ${token.geekblue6};
-      --primary-600: ${token.geekblue7};
-      --primary-700: ${token.geekblue8};
-      --primary-800: ${token.geekblue9};
-      --primary-900: ${token.geekblue10};
-      --primary-950: ${token.geekblue11};
-      --secondary-50: ${token.geekblue1};
-      --secondary-100: ${token.geekblue2};
-      --secondary-200: ${token.geekblue3};
-      --secondary-300: ${token.geekblue4};
-      --secondary-400: ${token.geekblue5};
-      --secondary-500: ${token.geekblue6};
-      --secondary-600: ${token.geekblue7};
-      --secondary-700: ${token.geekblue8};
-      --secondary-800: ${token.geekblue9};
-      --secondary-900: ${token.geekblue10};
-      --secondary-950: ${token.geekblue11};
+      --lobe-type-meta: 0.75rem;
+      --lobe-type-ui: 0.875rem;
+      --lobe-type-group: 1rem;
+      --lobe-type-title: 1.25rem;
+      --lobe-leading-meta: 1rem;
+      --lobe-leading-ui: 1.25rem;
+      --lobe-leading-group: 1.375rem;
+      --lobe-leading-title: 1.625rem;
+      --lobe-prompt-font-size: var(--lobe-type-ui);
+      --lobe-control-padding: ${token.padding}px;
+      --lobe-surface: ${token.colorBgContainer};
+      --lobe-field: ${token.colorFillTertiary};
+      --lobe-border: ${token.colorBorderSecondary};
+      --lobe-radius: ${token.borderRadius}px;
+      --lobe-radius-sm: ${token.borderRadiusSM}px;
+      --lobe-text: ${token.colorText};
+      --lobe-text-muted: ${token.colorTextSecondary};
+      --lobe-font-family: ${token.fontFamily};
+      --lobe-font-family-code: ${token.fontFamilyCode};
+      --lobe-color-bg-layout: ${token.colorBgLayout};
+      --lobe-color-bg-container: ${token.colorBgContainer};
+      --lobe-color-bg-container-secondary: color-mix(in srgb, ${token.colorBgLayout}, ${token.colorBgContainer});
+      --lobe-color-bg-elevated: ${token.colorBgElevated};
+      --lobe-color-border: ${token.colorBorder};
+      --lobe-color-border-secondary: ${token.colorBorderSecondary};
+      --lobe-color-fill: ${token.colorFill};
+      --lobe-color-fill-secondary: ${token.colorFillSecondary};
+      --lobe-color-fill-tertiary: ${token.colorFillTertiary};
+      --lobe-color-fill-quaternary: ${token.colorFillQuaternary};
+      --lobe-color-text: ${token.colorText};
+      --lobe-color-text-heading: ${token.colorTextHeading};
+      --lobe-color-text-secondary: ${token.colorTextSecondary};
+      --lobe-color-text-tertiary: ${token.colorTextTertiary};
+      --lobe-color-text-description: ${token.colorTextDescription};
+      --lobe-color-text-label: ${token.colorTextLabel};
+      --lobe-color-text-placeholder: ${token.colorTextPlaceholder};
+      --lobe-accent-text: ${getReadableAccent(token.colorPrimary, token.colorBgContainer, 5.2)};
+      --lobe-primary-contrast: ${getReadableForeground(token.colorPrimary)};
+      --lobe-primary-active-contrast: ${getReadableForeground(token.colorPrimaryActive)};
+      --lobe-warning: ${token.colorWarning};
+      --lobe-error-surface: ${token.colorErrorBg};
+      --lobe-error-text: ${getReadableAccent(token.colorErrorText, token.colorErrorBg)};
+      --lobe-success-contrast: ${getReadableForeground(token.colorSuccess)};
+      --lobe-success-text: ${getReadableAccent(token.colorSuccess, token.colorBgContainer)};
+      --lobe-primary-hover-contrast: ${getReadableForeground(token.colorPrimaryHover)};
+      --primary-50: color-mix(in srgb, var(--color-accent) 8%, white);
+      --primary-100: color-mix(in srgb, var(--color-accent) 15%, white);
+      --primary-200: color-mix(in srgb, var(--color-accent) 30%, white);
+      --primary-300: color-mix(in srgb, var(--color-accent) 50%, white);
+      --primary-400: color-mix(in srgb, var(--color-accent) 75%, white);
+      --primary-500: var(--color-accent);
+      --primary-600: color-mix(in srgb, var(--color-accent) 85%, black);
+      --primary-700: color-mix(in srgb, var(--color-accent) 70%, black);
+      --primary-800: color-mix(in srgb, var(--color-accent) 55%, black);
+      --primary-900: color-mix(in srgb, var(--color-accent) 40%, black);
+      --primary-950: color-mix(in srgb, var(--color-accent) 25%, black);
+      --secondary-50: var(--primary-50);
+      --secondary-100: var(--primary-100);
+      --secondary-200: var(--primary-200);
+      --secondary-300: var(--primary-300);
+      --secondary-400: var(--primary-400);
+      --secondary-500: var(--primary-500);
+      --secondary-600: var(--primary-600);
+      --secondary-700: var(--primary-700);
+      --secondary-800: var(--primary-800);
+      --secondary-900: var(--primary-900);
+      --secondary-950: var(--primary-950);
       --neutral-50: ${token.colorBgLayout};
       --neutral-100: ${token.colorFillQuaternary};
       --neutral-200: ${token.colorFillTertiary};
@@ -53,13 +102,13 @@ export default (token: Theme) => {
       --radius-lg: ${token.borderRadius}px;
       --radius-xl: ${token.borderRadiusLG}px;
       --radius-xxl: ${token.borderRadiusLG}px;
-      --text-xxs: ${token.fontSizeSM}px;
-      --text-xs: ${token.fontSizeSM}px;
-      --text-sm: ${token.fontSize}px;
-      --text-md: ${token.fontSize}px;
-      --text-lg: ${token.fontSizeLG}px;
-      --text-xl: ${token.fontSizeXL}px;
-      --text-xxl: ${token.fontSizeXL}px;
+      --text-xxs: var(--lobe-type-meta);
+      --text-xs: var(--lobe-type-meta);
+      --text-sm: var(--lobe-type-ui);
+      --text-md: var(--lobe-type-ui);
+      --text-lg: var(--lobe-type-group);
+      --text-xl: var(--lobe-type-title);
+      --text-xxl: var(--lobe-type-title);
       --font: ${token.fontFamily};
       --font-mono: ${token.fontFamilyCode};
       --body-background-fill: ${token.colorBgLayout};
@@ -77,7 +126,7 @@ export default (token: Theme) => {
       --link-text-color-active: ${token.colorInfoTextActive};
       --link-text-color-hover: ${token.colorInfoTextHover};
       --link-text-color-visited: ${token.colorInfoText};
-      --body-text-color-subdued: ${token.colorTextDescription};
+      --body-text-color-subdued: ${token.colorTextSecondary};
       --shadow-drop: ${token.boxShadowSecondary};
       --shadow-drop-lg: ${token.boxShadow};
       --shadow-inset: ${token.boxShadowSecondary} inset;
@@ -155,7 +204,7 @@ export default (token: Theme) => {
       --input-border-color-hover: ${token.colorBorder};
       --input-border-width: 1px;
       --input-padding: var(--spacing-xl);
-      --input-placeholder-color: ${token.colorTextQuaternary};
+      --input-placeholder-color: ${token.colorTextPlaceholder};
       --input-radius: ${token.borderRadius}px;
       --input-shadow: none;
       --input-shadow-focus: none;
@@ -166,7 +215,7 @@ export default (token: Theme) => {
       --prose-text-weight: 400;
       --prose-header-text-weight: 600;
       --slider-color: ${token.colorPrimary};
-      --stat-background-fill: ${token.geekblue4};
+      --stat-background-fill: ${token.colorPrimaryBg};
       --table-border-color: ${token.colorBorderSecondary};
       --table-even-background-fill: transparent;
       --table-odd-background-fill: ${token.colorFillTertiary};
@@ -177,8 +226,8 @@ export default (token: Theme) => {
       --button-cancel-background-fill-hover: ${token.colorErrorHover};
       --button-cancel-border-color: ${token.colorErrorBorder};
       --button-cancel-border-color-hover: ${token.colorErrorBorderHover};
-      --button-cancel-text-color: ${readableColor(token.colorError)};
-      --button-cancel-text-color-hover: ${readableColor(token.colorError)};
+      --button-cancel-text-color: ${getReadableForeground(token.colorError)};
+      --button-cancel-text-color-hover: ${getReadableForeground(token.colorErrorHover)};
       --button-large-padding: var(--spacing-lg) calc(2 * var(--spacing-lg));
       --button-large-radius: ${token.borderRadius}px;
       --button-large-text-size: var(--text-lg);
@@ -187,8 +236,8 @@ export default (token: Theme) => {
       --button-primary-background-fill-hover: ${token.colorPrimaryHover};
       --button-primary-border-color: ${token.colorPrimaryBorder};
       --button-primary-border-color-hover: ${token.colorPrimaryBorderHover};
-      --button-primary-text-color: ${readableColor(token.colorPrimary)};
-      --button-primary-text-color-hover: ${readableColor(token.colorPrimary)};
+      --button-primary-text-color: var(--lobe-primary-contrast);
+      --button-primary-text-color-hover: var(--lobe-primary-hover-contrast);
       --button-secondary-background-fill: ${token.colorFillSecondary};
       --button-secondary-background-fill-hover: ${token.colorFill};
       --button-secondary-border-color: ${token.colorBorderSecondary};
@@ -202,14 +251,16 @@ export default (token: Theme) => {
       --button-small-radius: ${token.borderRadiusSM}px;
       --button-small-text-size: var(--text-md);
       --button-small-text-weight: 400;
-      --button-transition: all 0.12s ${token.motionEaseInOut};
+      --button-transition:
+        color 0.12s ${token.motionEaseInOut}, background-color 0.12s ${token.motionEaseInOut},
+        border-color 0.12s ${token.motionEaseInOut}, box-shadow 0.12s ${token.motionEaseInOut};
       --button-lg-height: 44px;
       --button-lg-tool-height: 36px;
       --popup-overlay: ${token.colorBgMask};
       --thumbnail-shadow: ${token.boxShadow};
       --lightbox-img-shadow: ${token.boxShadowSecondary};
-      --checkbox-check: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23ffffff' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-      --radio-circle: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23ffffff' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3.5'/%3e%3c/svg%3e");
+      --checkbox-check: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='${encodeURIComponent(getReadableForeground(token.colorPrimary))}' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+      --radio-circle: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='${encodeURIComponent(getReadableForeground(token.colorPrimary))}' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3.5'/%3e%3c/svg%3e");
     }
 
     .dark {
@@ -225,8 +276,8 @@ export default (token: Theme) => {
       --neutral-900: ${token.colorBgElevated};
       --neutral-950: ${token.colorBgContainer};
       --layer-top: 10000;
-      --checkbox-check: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23ffffff' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-      --radio-circle: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23ffffff' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3.5'/%3e%3c/svg%3e");
+      --checkbox-check: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='${encodeURIComponent(getReadableForeground(token.colorPrimary))}' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+      --radio-circle: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='${encodeURIComponent(getReadableForeground(token.colorPrimary))}' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3.5'/%3e%3c/svg%3e");
     }
   `;
 };

@@ -21,10 +21,11 @@ export default (token: Theme) => css`
   }
 
   .sd-ar-res-preview {
-    font-family: ${token.fontFamilyCode};
+    font-family: ${token.fontFamily};
+    font-variant-numeric: tabular-nums;
     font-size: 12px;
     font-weight: 700;
-    color: ${token.colorPrimary};
+    color: var(--lobe-accent-text);
   }
 
   .sd-ar-popover {
@@ -39,13 +40,13 @@ export default (token: Theme) => css`
   .sd-ar-popover-btn.active {
     background: ${token.colorPrimary} !important;
     border-color: ${token.colorPrimary} !important;
-    color: #121214 !important;
+    color: var(--lobe-primary-contrast, #ffffff) !important;
     font-weight: 700 !important;
   }
 
   .sd-ar-btn.active {
     background: ${token.colorPrimary} !important;
     border-color: ${token.colorPrimary} !important;
-    color: #121214 !important;
+    color: var(--lobe-primary-contrast, #ffffff) !important;
   }
 `;

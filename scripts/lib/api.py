@@ -18,6 +18,40 @@ class LobeApi:
         pass
 
     def create_api_route(self, app: FastAPI):
+        from scripts.lib.tools_api import register
+        register(app)
+
+        @app.get("/lobe/native-locales")
+        async def native_locales():
+            from modules import extensions, localization, shared
+            localization.list_localizations(shared.cmd_opts.localizations_dir)
+            managed = any(ext.canonical_name == "sd-webui-language-diffusion" for ext in extensions.active())
+            return {
+                "active": shared.opts.localization,
+                "options": ["None", *sorted(localization.localizations)],
+                "managedByLanguageDiffusion": managed,
+            }
+
+        @app.post("/lobe/native-locales")
+        async def set_native_locale(request: Request):
+            from modules import localization, shared
+            from fastapi import HTTPException
+            data = await request.json()
+            language = data.get("language") if isinstance(data, dict) else None
+            localization.list_localizations(shared.cmd_opts.localizations_dir)
+            if not isinstance(language, str) or language not in ("None", *localization.localizations):
+                raise HTTPException(400, "Unknown WebUI language")
+            previous = shared.opts.localization
+            if language == previous:
+                return {"active": language}
+            try:
+                if not shared.opts.set("localization", language, is_api=True):
+                    raise HTTPException(409, "WebUI localization setting is locked")
+                shared.opts.save(shared.config_filename)
+            except (OSError, AssertionError):
+                shared.opts.data["localization"] = previous
+                raise HTTPException(409, "Could not save WebUI localization")
+            return {"active": language}
 
         @app.get("/lobe/package")
         async def lobe_package_get():
@@ -62,8 +96,17 @@ class LobeApi:
         async def lobe_config_save(request: Request):
             LobeLog.debug("lobe_config_save")
 
-            data = await request.json()
-            self.config.save(data)
+            try:
+                data = await request.json()
+                self.config.save(data)
+                from scripts.lib.safetensors_compat import apply_safetensors_pread
+                apply_safetensors_pread(bool(self.config.config.get("safetensorsPread", True)))
+            except (ValueError, TypeError):
+                return Response(content=json.dumps({"error": "Invalid settings"}),
+                                media_type="application/json", status_code=400)
+            except OSError:
+                return Response(content=json.dumps({"error": "Failed to save settings"}),
+                                media_type="application/json", status_code=500)
             return Response(
                 content=json.dumps({"message": "Config saved successfully"}),
                 media_type="application/json", status_code=200

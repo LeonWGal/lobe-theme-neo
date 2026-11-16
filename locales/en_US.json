@@ -1,15 +1,94 @@
 {
+  "autocomplete": {
+    "title": "Autocomplete",
+    "description": "Autocomplete for tags, LoRA, embeddings, and wildcards uses local dictionaries and model lists.",
+    "dictionary": "Tag dictionary",
+    "defaultDictionary": "Use saved Forge selection",
+    "noDictionary": "Disable regular tags",
+    "mode": "Suggestion list",
+    "classic": "Classic",
+    "placement": "List position",
+    "field": "Below the prompt",
+    "caret": "At the caret",
+    "limit": "Maximum tag suggestions",
+    "limitDesc": "Applies to regular tags. Model and wildcard lists keep their own limits.",
+    "history": "Rank by usage history",
+    "negative": "Suggest in negative prompts",
+    "inherit": "Use TagComplete settings",
+    "on": "On",
+    "off": "Off",
+    "loading": "Loading tags…",
+    "extraFiles": "Additional tag lists",
+    "extraFilesDesc": "Supplemental CSV lists (e.g. quality tags, English dictionary) merged with the main dictionary.",
+    "extraAddMode": "Additional lists order",
+    "insertAfter": "After main tags",
+    "insertBefore": "Before main tags",
+    "chantFile": "Chants preset file",
+    "delayTime": "Popup delay (ms)",
+    "insertionTitle": "Insertion & Formatting",
+    "replaceUnderscores": "Replace underscores with spaces",
+    "escapeParentheses": "Escape parentheses",
+    "appendComma": "Append comma after tag",
+    "appendSpace": "Append space after comma",
+    "formatMode": "Prompt formatting",
+    "formatManual": "Manual (Alt+Shift+F)",
+    "formatAuto": "Auto (on blur)",
+    "behaviorTitle": "Models, Wildcards & Behavior",
+    "loraArchFilter": "LoRA architecture filter",
+    "loraArchHide": "Hide mismatched",
+    "loraArchFirst": "Matching first",
+    "modelKeywordCompletion": "LoRA trigger words",
+    "modelKeywordOnlyList": "User list",
+    "modelKeywordAlways": "Always",
+    "modelKeywordNever": "Never",
+    "modelKeywordLocation": "Trigger word position",
+    "locStart": "Start of prompt",
+    "locEnd": "End of prompt",
+    "locBeforeLora": "Before LoRA",
+    "locAfterLora": "After LoRA",
+    "animaArtistPrefix": "ANIMA artist @ prefix",
+    "auto": "Auto",
+    "frequencySort": "Sort by usage frequency",
+    "useWildcards": "Enable wildcard suggestions",
+    "dimUsedTags": "Dim tags already in prompt",
+    "selectUsedTag": "Jump to existing tag on re-entry",
+    "unavailable": "Restart Forge to initialize the bundled autocomplete engine."
+  },
   "brand": {
     "custom": "Custom",
     "kitchen": "Kitchen",
-    "lobe": "LobeHub"
+    "lobe": "LobeHub",
+    "mark": "Spark mark",
+    "none": "None",
+    "wordmark": "Wordmark"
   },
   "cancel": "Cancel",
   "confirm": "Confirm",
+  "controls": {
+    "pngSource": "Add a source image to send it to Extras or read its generation parameters.",
+    "pngNoParameters": "This image has no generation parameters. You can still send it to Extras.",
+    "extrasSource": "Choose a source mode and add your image, files, folder or video. Set the processing options, then select Generate.",
+    "openFolder": "Open output folder",
+    "pasteParameters": "Apply generation parameters from the prompt",
+    "randomSeed": "Use a random seed",
+    "randomVariationSeed": "Use a random variation seed",
+    "reuseSeed": "Reuse the last seed",
+    "reuseVariationSeed": "Reuse the last variation seed",
+    "saveImage": "Save image",
+    "saveArchive": "Save images as ZIP",
+    "sendToImg2img": "Send to img2img",
+    "sendToInpaint": "Send to inpaint",
+    "sendToExtras": "Send to Extras",
+    "upscale": "Upscale image",
+    "emptyGallery": "Generate an image to see the result here"
+  },
   "custom": {
     "initializing": "StableDiffusion / LobeTheme is initializing, please wait..."
   },
   "footer": {
+    "basedOn": "Based on the original theme by",
+    "changelog": "Changelog",
+    "issues": "Report an issue",
     "community": "Community",
     "compatForge": "Optimized for Forge Neo (Gradio 4)",
     "help": "Help",
@@ -18,10 +97,40 @@
     "tagline": "Empowering your AI dreams",
     "taglineForge": "Lobe Theme · Forge Neo compatible"
   },
+  "gallery": {
+    "liveGeneration": "Live generation",
+    "openLive": "Open live preview",
+    "liveEnded": "Last live frame",
+    "viewer": "Image viewer",
+    "close": "Close (Esc)",
+    "save": "Save image (S)",
+    "next": "Next image (→)",
+    "previous": "Previous image (←)",
+    "tile": "Preview tiling",
+    "live": "Toggle live preview",
+    "zoom": "Toggle zoom"
+  },
   "header": {
     "feedback": "Feedback",
     "setting": "Setting",
-    "switchTheme": "Switch Light/Dark Theme"
+    "switchTheme": "Switch Light/Dark Theme",
+    "history": "Generation history",
+    "commandPalette": "Command palette (Ctrl+K)",
+    "nav": {
+      "allTabs": "All tabs",
+      "search": "Find a tab",
+      "pin": "Pin to the bar",
+      "unpin": "Unpin from the bar",
+      "reset": "Reset bar",
+      "empty": "No tab matches",
+      "hint": "Pinned tabs stay in the bar · Ctrl+K searches everything",
+      "groups": {
+        "generate": "Generate",
+        "tools": "Tools",
+        "extensions": "Extensions",
+        "system": "System"
+      }
+    }
   },
   "modal": {
     "themeFeedback": {
@@ -41,22 +150,95 @@
     "load": "Load Prompt",
     "negative": "Negative",
     "positive": "Positive",
-    "set": "Set Prompt"
+    "set": "Set Prompt",
+    "formatPreview": "Preview prompt formatting",
+    "before": "Before",
+    "after": "After",
+    "changed": "The prompt changed while this preview was open. Close it and try again.",
+    "undo": "Undo prompt change",
+    "loadError": "Could not load tags. Try again.",
+    "workbench": {
+      "styles": "Styles",
+      "picker": "Tag Picker",
+      "booruLite": "Booru Tags Lite",
+      "tipoPrompt": "TIPO prompt",
+      "settings": "Settings",
+      "hideSettings": "Hide settings"
+    }
   },
   "setting": {
+    "layoutGuide": {
+      "stageTitle": "SplitView OFF — 2-Zone Stage (A)",
+      "stageDesc": "Prompt on the left; Generate buttons and active panel (Styles, Dynamic Prompts, Tag Picker) open on the right.",
+      "dockedTitle": "SplitView ON — Docked in Parameters (B)",
+      "dockedDesc": "Preview stays pinned beside the settings; prompt and panels dock compactly above Sampling."
+    },
+    "studioHideSettingsByDefault": {
+      "title": "Hide parameters in Studio / Focus by default",
+      "desc": "Start Studio / Focus with parameters collapsed behind the Settings button."
+    },
+    "highlightCategories": {
+      "title": "Highlight categories",
+      "tagColors": {
+        "title": "Tag categories (Danbooru / e621)",
+        "desc": "Color artist, character, copyright, and meta tags using TagComplete dictionaries."
+      },
+      "models": {
+        "title": "Models & LoRA",
+        "desc": "Highlight <lora:...>, <hypernet:...>, and extra network syntax."
+      },
+      "weights": {
+        "title": "Weights & Brackets",
+        "desc": "Highlight attention brackets and weights like (tag:1.2), [tag], {a|b}."
+      },
+      "wildcards": {
+        "title": "Wildcards",
+        "desc": "Highlight wildcard tokens such as __character__."
+      },
+      "keywords": {
+        "title": "Operators (BREAK / AND)",
+        "desc": "Highlight prompt section keywords BREAK and AND."
+      }
+    },
     "button": {
       "applySuccess": "Settings applied",
       "export": "Export",
       "exportSuccess": "Settings exported",
       "import": "Import",
       "importError": "Failed to import settings",
-      "importSuccess": "Settings imported",
+      "importSuccess": "Settings imported into the draft. Apply to save them.",
       "reset": "Revert to default",
-      "submit": "Apply"
+      "submit": "Apply",
+      "saveError": "Could not save settings. Check the values and the WebUI connection.",
+      "saving": "Saving…",
+      "unsaved": "Unapplied changes",
+      "discardChanges": "Close and discard unapplied changes?",
+      "discard": "Discard"
     },
     "confirmPageUnload": {
       "desc": "Helps prevent loss of unsaved data",
       "title": "Confirmation on page leaving"
+    },
+    "safetensorsPread": {
+      "desc": "Use backend=\"pread\" for safetensors.safe_open by default to prevent Windows mmap crashes on large (>4 GB) models",
+      "title": "Safe safetensors loading (pread)"
+    },
+    "bootSplash": {
+      "modeTitle": "Startup splash screen",
+      "modeDesc": "Choose how the loading screen is displayed at startup (takes effect on reload)",
+      "modes": {
+        "random": "Random",
+        "custom": "From selected",
+        "single": "Single",
+        "off": "Off"
+      },
+      "sceneTitle": "Splash scene",
+      "sceneDesc": "Specific splash screen to show at startup",
+      "scenesTitle": "Allowed splash scenes",
+      "scenesDesc": "Randomly pick from the selected scenes (if none selected, all scenes are used)",
+      "scenesPlaceholder": "Select splash scenes...",
+      "selectAll": "Select all",
+      "clear": "Clear"
     },
     "customFont": {
       "desc": "When enabled, it will automatically load a webfont to enhance the display of text in Chinese, English, and code",
@@ -90,6 +272,14 @@
       "enable": {
         "desc": "Enable the extra network sidebar on the right side",
         "title": "Enable"
+      },
+      "folderTree": {
+        "desc": "Show top-level folders only; click a folder to open its sub-folders",
+        "title": "Folder tree"
+      },
+      "tabRail": {
+        "title": "Model types as a side rail",
+        "desc": "Textual Inversion, Checkpoints, Lora... as a column down the side of the sidebar instead of tabs that wrap over several lines"
       }
     },
     "group": {
@@ -98,31 +288,42 @@
       "layout": "Layout Settings",
       "promptTextarea": "Prompt Textbox",
       "quickSettingSidebar": "Quick Setting Sidebar",
-      "theme": "Theme Settings"
+      "theme": "Theme Settings",
+      "tools": "Tools",
+      "workbench": "Prompt Workbench"
     },
     "hideFooter": {
       "desc": "Hide the theme footer and only display the default footer of stable diffusion webui",
       "title": "Hide Footer"
     },
     "aspectRatio": {
+      "sampling": "Sampling panel",
+      "samplingDesc": "Group the sampler, schedule, steps and CFG controls.",
+      "families": "Resolution presets",
       "buttons": "Buttons",
-      "desc": "Ergonomic SDXL aspect ratio panel, floating dimension presets popover, and streamlined generation parameters layout",
+      "desc": "Show size and aspect ratio presets in txt2img and img2img.",
       "dimensionPresets": "Dimension Presets",
       "landscape": "Landscape",
       "list": "List",
-      "mode": "Aspect Ratio View Mode",
+      "mode": "Preset display",
       "modeDesc": "Choose between compact popover dropdown or full buttons grid with filter tabs",
       "portrait": "Portrait",
       "square": "Square",
-      "title": "Aspect Ratio Panel"
+      "title": "Aspect ratio panel"
     },
     "imageInfo": {
       "desc": "Display better image information in the generated image",
       "title": "Image Info Alternative"
     },
     "language": {
-      "desc": "Lobe Theme language",
-      "title": "Language"
+      "desc": "Language for the Lobe Theme interface.",
+      "title": "Language",
+      "diffusionTitle": "WebUI Language (Language Diffusion)",
+      "nativeTitle": "Forge WebUI language",
+      "nativeDesc": "Choose the language pack for Forge and its extensions.",
+      "nativeNone": "Default (English)",
+      "nativeSave": "Save WebUI language",
+      "nativeReload": "Saved. Reload WebUI to apply."
     },
     "logoType": {
       "desc": "Logo Type",
@@ -130,6 +331,8 @@
       "title": "Logo Type"
     },
     "neutralColor": {
+      "previewDescription": "Preview of the workspace, panels, and raised surfaces.",
+      "defaultOption": "Default",
       "desc": "Customize different shades of gray with different color tendencies, the second one is the original Kitchen neutral color",
       "title": "Neutral Color"
     },
@@ -174,7 +377,7 @@
       "title": "Reduce Animation"
     },
     "splitPreviewer": {
-      "desc": "Put the prompt input box on the left and the generate button on the right, ensuring that the generated image is always displayed at the top when scrolling (experimental)",
+      "desc": "Default for both generation tabs. Workspace can override it per tab. Applies without reloading.",
       "title": "Split Previewer"
     },
     "svgIcons": {
@@ -184,8 +387,150 @@
     "tab": {
       "appearance": "Appearance",
       "experimental": "Experimental",
-      "layout": "Layout",
-      "sidebar": "Sidebar"
+      "layout": "Layout & Workspace",
+      "resolution": "Resolution and aspect ratio",
+      "sidebar": "Sidebar",
+      "tools": "Tools",
+      "prompt": "Prompt"
+    },
+    "commandPalette": {
+      "title": "Command palette",
+      "desc": "Press Ctrl+K (⌘K on Mac) to search and run actions, tabs, samplers, checkpoints, LoRAs, presets, history and WebUI settings"
+    },
+    "history": {
+      "title": "Generation history",
+      "desc": "Keep every txt2img and img2img result with its parameters and a thumbnail, stored in the extension's lobe_data folder"
+    },
+    "presets": {
+      "title": "Parameter presets",
+      "desc": "A Presets panel in the left sidebar to save and apply sampler, steps, CFG, size and hires fix settings"
+    },
+    "loraTools": {
+      "title": "LoRA card tools",
+      "desc": "Favorites, a weight per LoRA, model family badges, trigger words and filters on LoRA cards"
+    },
+    "tabProgress": {
+      "title": "Progress on tab icon",
+      "desc": "A progress ring on the tab icon while generating, and a check mark when a background tab finishes"
+    },
+    "notification": {
+      "title": "Desktop notification",
+      "desc": "Notify when a generation finishes while the page is in the background (the browser asks for permission)"
+    },
+    "localAssets": {
+      "title": "Local assets",
+      "desc": "Load the logo, icons and fonts from the extension instead of a CDN, so the theme works without internet access"
+    },
+    "customColor": "Custom",
+    "resetColor": "Reset",
+    "imageButtonsTop": {
+      "title": "Image buttons under Generate",
+      "desc": "Moves the image buttons (open folder, save, zip, send to img2img, inpaint, extras...) from under the gallery to right under Generate / Interrupt / Skip"
+    },
+    "sizeTools": {
+      "title": "Aspect ratios and suggested settings",
+      "desc": "Under Width and Height: aspect ratios at a base size that follows the model, a ratio lock, and steps / CFG scale suited to the loaded model"
+    },
+    "chaoticSeeds": {
+      "title": "Chaotic seeds",
+      "desc": "Under Seed: each Generate can roll a seed with a random number of digits (4 to 15 by default) instead of -1, so seeds jump across magnitudes"
+    },
+    "cornerStyle": {
+      "desc": "Corners of buttons, fields, panels and cards",
+      "round": "Round",
+      "sharp": "Sharp",
+      "soft": "Soft",
+      "title": "Corners"
+    },
+    "density": {
+      "compact": "Compact",
+      "comfortable": "Comfortable",
+      "desc": "Compact tightens tabs, accordions, fields and spacing so more fits on screen",
+      "title": "Density"
+    },
+    "surfaceStyle": {
+      "desc": "Flat: plain panels. Glass: frosted, translucent header and sidebars. Elevated: cards with soft shadows",
+      "elevated": "Elevated",
+      "flat": "Flat",
+      "glass": "Glass",
+      "title": "Surfaces"
+    },
+    "fontFamily": {
+      "desc": "Interface font. All are bundled, so they work offline; Be Vietnam Pro is drawn for Vietnamese",
+      "title": "Font"
+    },
+    "fontMono": {
+      "desc": "Font for prompts and code",
+      "title": "Monospace font"
+    },
+    "sidebarSwap": {
+      "desc": "Quick Setting on the right, Extra Network on the left",
+      "title": "Swap sidebars"
+    },
+    "accordionMode": {
+      "desc": "One at a time: opening an accordion folds the others next to it. Folding never switches an extension off",
+      "free": "Free",
+      "single": "One at a time",
+      "title": "Accordions"
+    },
+    "systemMonitor": {
+      "title": "Resource monitor",
+      "desc": "RAM, VRAM and GPU load while the panel is visible"
+    },
+    "memoryKeeper": {
+      "title": "Memory keeper",
+      "desc": "Under System: what holds the VRAM and the RAM, and buttons to free it, all of it or one thing at a time, except what you keep"
+    },
+    "progressBarStyle": {
+      "aurora": "Aurora",
+      "classic": "Classic",
+      "desc": "Aurora: a flowing gradient with a glowing head, and step, percent and ETA on the bar",
+      "title": "Progress bar"
+    },
+    "resultFrameStyle": {
+      "ambient": "Ambient",
+      "desc": "Animated frame around the result while an image is made. Glow edge: a turning coloured edge. Pulse: a ring at every step. Ambient: the preview's own colours glow behind it. Scan: a line sweeps down. Orbit: lights circle the frame",
+      "glow": "Glow edge",
+      "off": "Off",
+      "orbit": "Orbit",
+      "pulse": "Pulse",
+      "scan": "Scan",
+      "title": "Result frame"
+    },
+    "promptSections": {
+      "title": "Prompt sections",
+      "desc": "A button under the prompt splits the positive prompt into sections joined with BREAK; the prompt that is generated and saved still reads with BREAK"
+    },
+    "layoutPreset": {
+      "title": "Layout preset",
+      "desc": "Where the blocks go. Only the layout changes: colours, fonts and every other setting stay as they are",
+      "classic": {
+        "title": "Classic",
+        "desc": "Tabs across the top, the prompt above the settings and the result"
+      },
+      "studio": {
+        "title": "Studio",
+        "desc": "Tabs in a rail on the left; controls and result side by side, each as tall as the window"
+      },
+      "studioMirror": {
+        "title": "Studio, mirrored",
+        "desc": "Like Studio, with the result on the left and the controls on the right"
+      }
+    },
+    "appearanceMode": {
+      "dark": "Dark",
+      "title": "Color mode",
+      "auto": "System",
+      "light": "Light",
+      "desc": "Saved with your accent and neutral colors, including when opening a fresh URL."
+    },
+    "workbench": {
+      "title": "Prompt Workbench",
+      "desc": "Enable the compact Prompt Workbench bar (quick tools and collapsible panels)."
+    },
+    "hideTipoPrompt": {
+      "title": "Hide TIPO prompt & button",
+      "desc": "Hide TIPO Tag/NL prompt fields and the Generate Prompt button in the prompt area."
     }
   },
   "share": "Share",
@@ -208,12 +553,423 @@
     "withFooter": "Include Footer"
   },
   "sidebar": {
+    "settingsTab": "Settings",
+    "navigation": "Interface tabs",
     "extraNetwork": "Extra Network",
     "moduleSearch": "Search and add…",
     "mode": {
       "fixed": "Fixed",
       "float": "Float"
     },
-    "quickSetting": "Quick Setting"
+    "quickSetting": "Quick Setting",
+    "pin": "Pin / unpin sidebar",
+    "collapse": "Collapse {{title}}",
+    "allFolders": "All",
+    "findFolder": "Find a folder",
+    "showFolderContents": "Show all folder contents",
+    "toggleSubfolders": "Expand or collapse subfolders",
+    "nextPage": "Next page",
+    "previousPage": "Previous page",
+    "presets": "Presets",
+    "system": {
+      "disk": "Disk",
+      "noNvml": "GPU load and temperature need nvidia-ml-py",
+      "noNvmlHint": "Restart the WebUI once so the theme can install nvidia-ml-py, or run: pip install nvidia-ml-py",
+      "temp": "Temp",
+      "title": "System"
+    },
+    "memory": {
+      "title": "Memory",
+      "generating": "generating",
+      "details": "Details",
+      "webui": "WebUI",
+      "started": "started by it",
+      "others": "other programs",
+      "free": "free",
+      "freeRam": "Free RAM",
+      "freeVram": "Free VRAM",
+      "freeAll": "Free VRAM+RAM",
+      "freeRamTip": "Let go of what is only in RAM (models moved off the GPU, caches, servers on the CPU), but what is kept (🔒); what is on the GPU stays",
+      "freeVramTip": "Everything off the GPU but what is kept (🔒): models go to RAM, LLM servers are stopped",
+      "freeAllTip": "VRAM and RAM: Let go of everything but what is kept (🔒); the checkpoint loads again on the next generation",
+      "toRam": "→ RAM",
+      "toRamTip": "Off the GPU, kept in RAM: back fast when used",
+      "unload": "Unload",
+      "unloadTip": "Out of the GPU and out of RAM",
+      "reloadOnNextGeneration": "After unloading, the next generation loads the model again",
+      "clear": "Clear",
+      "clearTip": "Let go of the cache",
+      "keep": "Keep it: Free VRAM and Free VRAM + RAM leave it alone",
+      "unkeep": "Kept: Free VRAM and Free VRAM + RAM leave it alone. Click to stop keeping it",
+      "kept": "🔒 {{count}} kept",
+      "keepHint": "🔒 keeps a thing, across restarts",
+      "sectionFree": "Free",
+      "sectionFreeTip": "Let go of everything in this section but what is kept (🔒)",
+      "freed": "{{what}}: freed {{amount}} in {{seconds}} s",
+      "left": "left: {{list}}",
+      "busyMove": "Moving to RAM…",
+      "busyUnload": "Unloading…",
+      "busyFree": "Freeing…",
+      "inRam": "{{count}} in RAM",
+      "loaded": "loaded",
+      "nothingHeld": "nothing held",
+      "unknown": "could not tell",
+      "reading": "Reading…",
+      "nothing": "Nothing loaded: no checkpoint, no models, no caches.",
+      "categories": {
+        "checkpoint": "Checkpoint",
+        "lora": "LoRA",
+        "control": "ControlNet & adapters",
+        "upscaler": "Upscalers",
+        "face": "Face restore & detailers",
+        "tagger": "Taggers & interrogators",
+        "llm": "LLM / VLM",
+        "other": "Other models",
+        "process": "Other processes"
+      },
+      "mode": "VRAM",
+      "modeTip": "The memory manager's VRAM mode, changed without a restart; a restart goes back to the mode the WebUI started in.",
+      "busyMode": "Switching VRAM mode…",
+      "modeSet": "VRAM mode: {{mode}}; models are placed again by the next generation",
+      "modes": {
+        "high": "High",
+        "normal": "Normal",
+        "low": "Low"
+      },
+      "modeTips": {
+        "high": "High: models stay on the GPU, nothing is moved back to RAM",
+        "normal": "Normal: models on the GPU as far as they fit, the text encoder on the GPU",
+        "low": "Low: models on the GPU as far as they fit, the text encoder in RAM"
+      },
+      "modeStartup": "the WebUI started in this mode",
+      "generationBusy": "Generation is in progress. Try again when it finishes.",
+      "parts": {
+        "unet": "UNet / diffusion model",
+        "clip": "Text encoder (CLIP / T5)",
+        "vae": "VAE",
+        "clipvision": "CLIP vision"
+      },
+      "holderNames": {
+        "cache:lora": "LoRA files",
+        "cache:controlnet": "ControlNet models",
+        "cache:clipvision": "CLIP vision cache (IP-Adapter, Revision)",
+        "interrogator": "CLIP / BLIP interrogator"
+      },
+      "holderDetails": {
+        "checkpoint": "Unloaded. The next generation loads it again.",
+        "gpuModel": "On the GPU. The model file stays cached in RAM.",
+        "cache:lora": "Read from disk again when used.",
+        "cache:controlnet": "Loaded again when used.",
+        "cache:clipvision": "Preprocessor models. Loaded again when used.",
+        "interrogator": "CLIP used by img2img Interrogate.",
+        "faceModel": "Face restoration. Loaded again when used.",
+        "seedvr2": "Cached in RAM between images. Read from disk again after unloading."
+      }
+    },
+    "tabs": {
+      "prompt": "Prompt",
+      "settings": "Settings"
+    },
+    "promptTab": "Prompt",
+    "civitai": {
+      "open": "Open model on Civitai",
+      "previewPrompt": "Use prompt from preview",
+      "replacePreview": "Replace preview",
+      "triggerWords": "Add trigger words to prompt"
+    }
+  },
+  "tools": {
+    "queue": {
+      "send": "Send image",
+      "title": "Queue",
+      "settings": "Queue settings",
+      "settingsDescription": "Control what happens when the queue finishes and manage waiting jobs. Queue changes take effect immediately.",
+      "unavailable": "The queue is unavailable.",
+      "checkpointMode": "Checkpoint selection",
+      "enqueue": "Add to queue",
+      "view": "View queue",
+      "drawer": "Queue and history",
+      "current": "Current checkpoint",
+      "single": "Choose checkpoint",
+      "presetFilterHint": "Only models matching the active UI preset ({{preset}}) are enabled",
+      "folder": "All in selected checkpoint folder",
+      "all": "All checkpoints",
+      "error": "Queue request failed",
+      "paused": "Paused",
+      "pause": "Pause",
+      "resume": "Resume",
+      "pending": "Waiting",
+      "running": "Generating",
+      "done": "Done",
+      "failed": "Failed",
+      "interrupted": "Interrupted",
+      "bookmarked": "Bookmark",
+      "requeue": "Requeue",
+      "retryFailed": "Retry failed",
+      "clear": "Clear waiting tasks",
+      "clearConfirm": "Remove all waiting tasks?",
+      "export": "Export JSON",
+      "import": "Import JSON",
+      "completion": "After the queue finishes",
+      "completionConfirm": "Run “{{action}}” when the queue finishes?",
+      "none": "Do nothing",
+      "sleep": "Sleep",
+      "hibernate": "Hibernate",
+      "shutdown": "Shut down computer",
+      "stop": "Stop WebUI",
+      "empty": "No active or waiting tasks",
+      "up": "Move up",
+      "down": "Move down",
+      "remove": "Remove"
+    },
+    "palette": {
+      "placeholder": "Search actions, tabs, settings, LoRAs, presets…",
+      "empty": "No matches",
+      "hint": "↑ ↓ move · Enter run · Esc close",
+      "groups": {
+        "action": "Actions",
+        "tab": "Tabs",
+        "preset": "Presets",
+        "sampler": "Samplers",
+        "scheduler": "Schedule types",
+        "checkpoint": "Checkpoints",
+        "lora": "LoRAs",
+        "history": "History",
+        "setting": "WebUI settings"
+      },
+      "generate": "Generate",
+      "interrupt": "Interrupt",
+      "skip": "Skip",
+      "toggleTheme": "Switch light/dark theme",
+      "themeSettings": "Theme settings",
+      "openHistory": "Generation history",
+      "openPresets": "Presets",
+      "savePreset": "Save current parameters as a preset",
+      "setSampler": "Use sampler",
+      "setScheduler": "Use schedule type",
+      "loadCheckpoint": "Load checkpoint",
+      "addLora": "Add to prompt",
+      "applyPreset": "Apply preset",
+      "reuse": "Reuse parameters",
+      "openSetting": "Open setting"
+    },
+    "history": {
+      "title": "Generation history",
+      "search": "Search prompts and parameters",
+      "all": "All",
+      "empty": "Nothing here yet. Finished txt2img and img2img generations appear here.",
+      "loadMore": "Load more",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "reuseAll": "Reuse all",
+      "reusePrompt": "Prompt",
+      "reuseSeed": "Seed",
+      "copy": "Copy parameters",
+      "copied": "Copied",
+      "savePreset": "Save as preset",
+      "delete": "Delete",
+      "clear": "Clear history",
+      "clearConfirm": "Delete all history entries? Images already saved on disk are kept.",
+      "compare": "Compare",
+      "compareHint": "Tick two entries to compare them",
+      "applied": "Parameters applied",
+      "prompt": "Prompt",
+      "negative": "Negative prompt",
+      "parameter": "Parameter",
+      "onlyIn": "Only in {{name}}",
+      "images": "{{count}} images"
+    },
+    "presets": {
+      "title": "Presets",
+      "empty": "No presets yet. Set the parameters you like, then save them here.",
+      "name": "Preset name",
+      "save": "Save current",
+      "includeSeed": "Include seed",
+      "includeBatch": "Include batch count and size",
+      "apply": "Apply",
+      "applied": "Preset applied",
+      "rename": "Rename",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this preset?",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "overwrite": "Overwrite with current parameters",
+      "saved": "Preset saved",
+      "defaultName": "Preset {{n}}",
+      "for": "For {{tab}}"
+    },
+    "lora": {
+      "all": "All",
+      "favorites": "Favorites",
+      "recent": "Recent",
+      "compatible": "Compatible",
+      "favorite": "Favorite",
+      "weight": "Weight (scroll to adjust, click to reset)",
+      "triggerWords": "Add trigger words"
+    },
+    "notify": {
+      "done": "Generation finished"
+    },
+    "size": {
+      "ratio": "Ratio",
+      "base": "Base",
+      "auto": "Auto",
+      "lock": "Keep this shape while a slider moves",
+      "suggested": "Suggested",
+      "noSuggestions": "No suggestions for this model family",
+      "steps": "steps",
+      "cfg": "CFG",
+      "distilled": "Distilled CFG"
+    },
+    "chaotic": {
+      "title": "Chaotic seeds",
+      "toggle": "Every image gets a new seed with a random number of digits; the Seed box is skipped",
+      "digits": "Digits",
+      "hint": "On: every image gets a new seed in this range and the Seed box is skipped. Each seed is in its infotext; %reuse% brings it back."
+    },
+    "sections": {
+      "add": "Add section",
+      "merge": "Remove this section (its text goes to the one before)",
+      "section": "Section",
+      "tokens": "tokens",
+      "toggle": "Prompt sections: split the prompt at BREAK into separate boxes"
+    },
+    "studio": {
+      "prompt": "Prompt",
+      "parameters": "Parameters",
+      "extensions": "Extensions"
+    }
+  },
+  "workspace": {
+    "title": "Workspace",
+    "description": "Arrange panels and tools for each generation tab. Drag the handles or use the arrow buttons. Changes take effect after Apply.",
+    "profiles": "Saved workspaces",
+    "quickPresets": "WebUI layout presets",
+    "presetClassic": "1. Classic",
+    "presetClassicDesc": "Standard WebUI without SplitView: 2-zone Stage on top, parameters & gallery below.",
+    "presetInference": "2. Inference",
+    "presetInferenceDesc": "SplitView enabled: 3 columns (Params | Prompt | Preview) or 2-column Cockpit.",
+    "presetStudio": "3. Studio / Focus",
+    "presetStudioDesc": "Centered preview & prompt (Variant A); parameters toggle open on the left.",
+    "inferenceVariant": "Inference arrangement",
+    "inf3Col": "3 columns (Params | Prompt | Preview)",
+    "inf3ColRev": "3 columns (Preview | Prompt | Params)",
+    "inf2ColLeft": "Cockpit 2 columns (Preview left)",
+    "inf2ColRight": "Cockpit 2 columns (Preview right)",
+    "threeCol": "3 columns (Params | Prompt | Preview)",
+    "threeColPreviewLeft": "3 columns (Preview | Prompt | Params)",
+    "studio": "Studio / Focus (collapsible params)",
+    "selectProfile": "Choose a saved workspace",
+    "deleteProfile": "Remove saved workspace",
+    "profileName": "Workspace name",
+    "saveProfile": "Save as preset",
+    "reset": "Default layout",
+    "resetGroup": "Reset this group",
+    "placement": "Panel arrangement",
+    "native": "Parameters left, preview right",
+    "previewLeft": "Preview left, parameters right",
+    "stacked": "Preview first, panels below",
+    "previewWidth": "Preview width",
+    "area": "Choose area",
+    "drag": "Drag {{label}}",
+    "show": "Show {{label}}",
+    "up": "Move {{label}} up",
+    "down": "Move {{label}} down",
+    "empty": "No configurable items in this area.",
+    "scriptNote": "Hiding an item only changes its visibility. Script and its controls stay in Forge’s original layout.",
+    "groups": {
+      "prompts": "Prompt panels",
+      "parameters": "Generation parameters",
+      "extensions": "Extension panels",
+      "commands": "Command groups",
+      "promptTools": "Prompt toolbar",
+      "output": "Preview panels",
+      "outputTools": "Preview toolbar",
+      "promptFields": "Individual prompt fields"
+    },
+    "items": {
+      "positive": "Prompt",
+      "negative": "Negative prompt",
+      "tipo": "TIPO",
+      "generate": "Generate / Interrupt / Skip",
+      "queue": "Enqueue",
+      "promptTools": "Prompt toolbar",
+      "styles": "Styles",
+      "sampling": "Sampling",
+      "resolution": "Resolution and batch",
+      "seed": "Seed and variation",
+      "denoise": "Denoising strength",
+      "overrides": "Override settings",
+      "clearPrompt": "Clear prompt",
+      "paste": "Paste generation parameters",
+      "restoreProgress": "Restore progress",
+      "applyStyle": "Apply styles",
+      "format": "Prompt formatting",
+      "sections": "Prompt sections",
+      "preview": "Image preview",
+      "outputTools": "Preview toolbar",
+      "folder": "Open folder",
+      "save": "Save image",
+      "archive": "Save ZIP",
+      "sendExtras": "Send to Extras",
+      "sendImg": "Send to img2img",
+      "sendInpaint": "Send to inpaint",
+      "upscale": "Upscale",
+      "share": "Share",
+      "tipoTag": "TIPO tag prompt",
+      "tipoNatural": "TIPO natural language prompt"
+    },
+    "split": "Split Viewer for this tab",
+    "splitMode": {
+      "inherit": "Use the theme default",
+      "on": "On",
+      "off": "Off"
+    },
+    "height": "Minimum height in pixels: {{label}}"
+  },
+  "imageInfo": {
+    "positive": "Positive prompt",
+    "negative": "Negative prompt"
+  },
+  "aspectPanel": {
+    "title": "Resolution",
+    "samplingTitle": "Sampling",
+    "presetsEmpty": "Enable a preset family in Theme settings, or enter a custom size.",
+    "aspectRatio": "Aspect Ratio",
+    "buttonsView": "Buttons",
+    "dropdownView": "Dropdown",
+    "buttonsViewTip": "Switch to full buttons grid view",
+    "dropdownViewTip": "Switch to compact dropdown popover view",
+    "filterAll": "All",
+    "filterSquare": "Square",
+    "filterPortrait": "Portrait",
+    "filterLandscape": "Landscape",
+    "resPreviewTip": "Current Resolution (Width × Height)",
+    "selectPreset": "Select preset...",
+    "customRes": "Custom",
+    "portrait": "Portrait",
+    "landscape": "Landscape",
+    "square": "Square",
+    "width": "Width",
+    "height": "Height",
+    "batchCount": "Batch Count",
+    "batchSize": "Batch Size",
+    "swapTip": "Swap width and height (⇅)",
+    "closeTip": "Close",
+    "settingsTip": "Settings",
+    "1:1": "Square 1:1",
+    "4:5": "Photo / Social 4:5",
+    "3:4": "Portrait 3:4",
+    "2:3": "Classic 35mm 2:3",
+    "9:16": "Mobile / Story 9:16",
+    "9:21": "Cinematic Tall 9:21",
+    "5:4": "Landscape 5:4",
+    "4:3": "Display 4:3",
+    "3:2": "Classic 35mm 3:2",
+    "16:9": "Widescreen 16:9",
+    "21:9": "Ultra-wide Cinema 21:9",
+    "2:1": "Panorama 2:1",
+    "frames": "Frames",
+    "saveModeError": "Could not save display mode."
   }
 }

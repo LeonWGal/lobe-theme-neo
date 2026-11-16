@@ -1,6 +1,28 @@
 import { Theme, css } from 'antd-style';
 
 export default (token: Theme) => css`
+  .generate-box > button[id$='_generate']::before,
+  .generate-box > button[id$='_generate']::after {
+    content: none !important;
+  }
+
+  /* Forge overlays Stop/Skip without hiding Generate. Preserve its layout while removing its paint and hit target. */
+  .generate-box:has(
+      .generate-box-interrupt[style*='display:']:not([style*='display: none']),
+      .generate-box-interrupting[style*='display:']:not([style*='display: none']),
+      .generate-box-skip[style*='display:']:not([style*='display: none'])
+    )
+    > button[id$='_generate'] {
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  .generate-box > .generate-box-interrupt,
+  .generate-box > .generate-box-interrupting,
+  .generate-box > .generate-box-skip {
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+  }
   button {
     cursor: pointer;
     min-width: fit-content !important;
@@ -77,7 +99,6 @@ export default (token: Theme) => css`
 
         font-weight: 500 !important;
 
-        box-shadow: none !important;
       }
 
       &[id$='_enqueue'] {
@@ -87,6 +108,10 @@ export default (token: Theme) => css`
         border-radius: ${token.borderRadius}px !important;
 
         font-weight: 500 !important;
+        color: var(--lobe-text) !important;
+        border: 1px solid var(--lobe-border) !important;
+        background: var(--lobe-surface) !important;
+        &:hover { background: var(--lobe-field) !important; }
 
         box-shadow: none !important;
       }

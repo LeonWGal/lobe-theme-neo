@@ -1,6 +1,10 @@
+import { useThemeMode } from 'antd-style';
 import { consola } from 'consola';
-import { type FC, memo, useCallback, useEffect, useState } from 'react';
+import { type FC, memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { WithContext } from 'react-tag-input';
+
+import { attachAutocompleteArea } from '@/features/Autocomplete/presentation';
+import { getCachedTagColor, useTagColors } from '@/utils/tagColors';
 
 import { genTagType } from '../utils';
 import { useStyles } from './style';
@@ -32,15 +36,18 @@ interface TagListProps {
 
 const TagList = memo<TagListProps>(({ tags, setTags, type, setValue }) => {
   const id = `${type}_tag_editor`;
-  const [bind, setBind] = useState(false);
   const { styles } = useStyles(type);
+  const { isDarkMode } = useThemeMode();
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const tagTexts = useMemo(() => tags.map((tag) => tag.text), [tags]);
+  const colorVersion = useTagColors(tagTexts, isDarkMode);
   const handleDelete = useCallback(
     (index_: number) => {
       const newTags = tags.filter((tag, index) => index !== index_);
       setTags(newTags);
       setValue(newTags);
     },
-    [tags],
+    [tags, setTags, setValue],
   );
 
   const handleAddition = useCallback(
@@ -49,7 +56,7 @@ const TagList = memo<TagListProps>(({ tags, setTags, type, setValue }) => {
       setTags(newTags);
       setValue(newTags);
     },
-    [tags],
+    [tags, setTags, setValue],
   );
 
   const handleDrag = useCallback(
@@ -60,7 +67,7 @@ const TagList = memo<TagListProps>(({ tags, setTags, type, setValue }) => {
       setTags(newTags);
       setValue(newTags);
     },
-    [tags],
+    [tags, setTags, setValue],
   );
 
   const handleTagUpdate = useCallback(
@@ -70,32 +77,54 @@ const TagList = memo<TagListProps>(({ tags, setTags, type, setValue }) => {
       setTags(newTags);
       setValue(newTags);
     },
-    [tags],
+    [tags, setTags, setValue],
   );
 
   useEffect(() => {
-    try {
-      if (!addAutocompleteToArea || bind) return;
-      let retryTimes = 0;
-      const bindInterval = setInterval(() => {
-        if (bind || retryTimes > 10) {
-          const inputDom = document.querySelector(`#${id}`) as HTMLInputElement;
-          if (inputDom) {
-            setBind(true);
-            addAutocompleteToArea(inputDom);
-            clearInterval(bindInterval);
-            consola.success('🤯 [promptTagEditor] inject');
-          }
+    let attempts = 0;
+    const bind = () => {
+      const input = document.querySelector<HTMLInputElement>(`#${id}`);
+      if (input) {
+        try {
+          attachAutocompleteArea(input);
+        } catch (error) {
+          consola.warn('Tag autocomplete failed', error);
         }
-        retryTimes++;
-      }, 1000);
-    } catch (error) {
-      consola.error('🤯 [promptTagEditor]', error);
-    }
-  }, [bind]);
+        return input.classList.contains('autocomplete');
+      }
+      return false;
+    };
+    if (bind()) return;
+    const interval = setInterval(() => {
+      if (bind() || ++attempts >= 10) clearInterval(interval);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [id]);
+
+  useEffect(() => {
+    const host = wrapRef.current;
+    if (!host) return;
+    const pills = host.querySelectorAll<HTMLElement>('span.ReactTags__tag');
+    pills.forEach((pill, index) => {
+      const tag = tags[index];
+      if (!tag || tag.className) {
+        pill.style.removeProperty('color');
+        pill.style.removeProperty('border-color');
+        return;
+      }
+      const color = getCachedTagColor(tag.text, isDarkMode);
+      if (color) {
+        pill.style.color = color;
+        pill.style.borderColor = `color-mix(in srgb, ${color} 40%, transparent)`;
+      } else {
+        pill.style.removeProperty('color');
+        pill.style.removeProperty('border-color');
+      }
+    });
+  }, [tags, isDarkMode, colorVersion]);
 
   return (
-    <div className={styles}>
+    <div className={styles} ref={wrapRef}>
       <ReactTags
         delimiters={delimiters}
         editable

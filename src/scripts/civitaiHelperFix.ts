@@ -1,5 +1,7 @@
-import { consola } from 'consola';
-import { isNumber } from 'lodash-es';
+import { isPromptOutputMutation } from '@/utils/promptMutations';
+import { svgIcon } from '@/icons/native';
+import { externalLink, messageCode, pencil, photoUp, sparkles, trashX } from '@/icons/tablerPaths';
+import i18next from 'i18next';
 
 const TAB_PREFIX_LIST = ['txt2img', 'img2img'] as const;
 const MODEL_TYPE_LIST = [
@@ -31,6 +33,20 @@ const CH_BTN_TXTS = new Set(['🌐', '💡', '🏷️']);
 const DOM_CACHE_PREFIX = 'lobe' as const;
 const DOM_CACHE_KEY = `${DOM_CACHE_PREFIX}Done` as const;
 const DOM_CACHE_VALUE = '1' as const;
+const actionLabels = {
+  preview: 'sidebar.civitai.replacePreview',
+  prompt: 'sidebar.civitai.previewPrompt',
+  trigger: 'sidebar.civitai.triggerWords',
+  url: 'sidebar.civitai.open',
+} as const;
+
+const labelAction = (node: HTMLElement) => {
+  const type = node.dataset.lobeCivitaiIcon as keyof typeof actionLabels;
+  if (!Object.hasOwn(actionLabels, type)) return;
+  node.title = i18next.t(actionLabels[type]);
+  node.setAttribute('aria-label', node.title);
+  node.dataset.lobeLocalized = '';
+};
 
 const styleButton = (node: HTMLElement, isThumbMode: boolean) => {
   if (isThumbMode) {
@@ -122,13 +138,15 @@ const updateCardForCivitai = () => {
       modelTypeHasCards.push(jsModelType);
 
       for (const card of cards) {
-        if (card.dataset[DOM_CACHE_KEY] === DOM_CACHE_VALUE) break;
+        if (card.dataset[DOM_CACHE_KEY] === DOM_CACHE_VALUE) continue;
         card.dataset[DOM_CACHE_KEY] = DOM_CACHE_VALUE;
+        needToAddButtons = false;
         if (card.querySelectorAll('.actions .additional a').length > 2) continue;
         // Metadata_buttoncard
         metadataButton = card.querySelector('.metadata-button');
         // Additional node
         additionalNode = card.querySelector('.actions .additional')!;
+        if (!additionalNode) continue;
 
         // Get ul node, which is the parent of all buttons
         ulNode = card.querySelector('.actions .additional ul');
@@ -138,7 +156,10 @@ const updateCardForCivitai = () => {
         }
 
         // Replace preview text button
-        replacePreviewButton = card.querySelector('.actions .additional a');
+        replacePreviewButton = card.querySelector('.actions .additional a:is(.replacepreview, [data-lobe-civitai-icon="preview"], [onclick*="replace_preview("])');
+        replacePreviewButton ??= Array.from(additionalNode.querySelectorAll('a')).find(
+          (action) => action.textContent?.trim() === replacePreviewText,
+        ) ?? null;
         if (is_nullable(replacePreviewButton)) {
           replacePreviewButton = document.createElement('a');
           additionalNode.append(replacePreviewButton);
@@ -165,12 +186,12 @@ const updateCardForCivitai = () => {
               // Reset display
               atag.style.display = undefined as any;
               // Remove extension's button
-              if (CH_BTN_TXTS.has(atag.innerHTML)) {
+              if (atag.dataset.lobeCivitaiIcon || CH_BTN_TXTS.has(atag.innerHTML)) {
                 // Need to remove
                 atag.remove();
-              } else {
+              } else if (atag === replacePreviewButton) {
                 // Do not remove, just reset
-                atag.innerHTML = replacePreviewText;
+                atag.textContent = replacePreviewText;
                 atag.style.display = undefined as any;
                 atag.style.fontSize = undefined as any;
                 atag.style.position = undefined as any;
@@ -186,10 +207,22 @@ const updateCardForCivitai = () => {
           additionalNode.style.display = chAlwaysDisplay ? 'block' : (undefined as any as string);
         }
 
+        for (const action of additionalNode.querySelectorAll('a[onclick], button[onclick]')) {
+          const symbol = action.textContent?.trim().replaceAll('️', '');
+          if (symbol !== '✏' && symbol !== '❌') continue;
+          const label = action.getAttribute('title') || (symbol === '✏' ? 'Rename model' : 'Delete model');
+          if (!action.hasAttribute('aria-label')) action.setAttribute('aria-label', label);
+          action.innerHTML = svgIcon(symbol === '✏' ? pencil : trashX);
+        }
+        const previewIcon = svgIcon(photoUp);
         // Change replace preview text button into icon
-        if (replacePreviewButton.innerHTML !== '🖼️') {
+        if (!replacePreviewButton.querySelector('svg')) {
           needToAddButtons = true;
-          replacePreviewButton.innerHTML = '🖼️';
+          replacePreviewButton.innerHTML = previewIcon;
+          if (replacePreviewButton.hasAttribute('onclick'))
+            replacePreviewButton.dataset.lobeCivitaiIcon = 'preview';
+          replacePreviewButton.title = replacePreviewText;
+          labelAction(replacePreviewButton);
           styleButton(replacePreviewButton, isThumbMode);
         }
 
@@ -205,9 +238,10 @@ const updateCardForCivitai = () => {
         // Then we need to add 3 buttons to each ul node:
         const openUrlNode = document.createElement('a');
         openUrlNode.href = '#';
-        openUrlNode.innerHTML = '🌐';
+        openUrlNode.innerHTML = svgIcon(externalLink);
+        openUrlNode.dataset.lobeCivitaiIcon = 'url';
         styleButton(openUrlNode, isThumbMode);
-        openUrlNode.title = "Open this model's civitai url";
+        labelAction(openUrlNode);
         openUrlNode.setAttribute(
           'onclick',
           `open_model_url(event, '${modelType}', '${searchTerm}')`,
@@ -215,9 +249,10 @@ const updateCardForCivitai = () => {
 
         const addTriggerWordsNode = document.createElement('a');
         addTriggerWordsNode.href = '#';
-        addTriggerWordsNode.innerHTML = '💡';
+        addTriggerWordsNode.innerHTML = svgIcon(sparkles);
+        addTriggerWordsNode.dataset.lobeCivitaiIcon = 'trigger';
         styleButton(addTriggerWordsNode, isThumbMode);
-        addTriggerWordsNode.title = 'Add trigger words to prompt';
+        labelAction(addTriggerWordsNode);
         addTriggerWordsNode.setAttribute(
           'onclick',
           `add_trigger_words(event, '${modelType}', '${searchTerm}')`,
@@ -225,9 +260,10 @@ const updateCardForCivitai = () => {
 
         const usePreviewPromptNode = document.createElement('a');
         usePreviewPromptNode.href = '#';
-        usePreviewPromptNode.innerHTML = '🏷️';
+        usePreviewPromptNode.innerHTML = svgIcon(messageCode);
+        usePreviewPromptNode.dataset.lobeCivitaiIcon = 'prompt';
         styleButton(usePreviewPromptNode, isThumbMode);
-        usePreviewPromptNode.title = 'Use prompt from preview image';
+        labelAction(usePreviewPromptNode);
         usePreviewPromptNode.setAttribute(
           'onclick',
           `use_preview_prompt(event, '${modelType}', '${searchTerm}')`,
@@ -246,41 +282,53 @@ const updateCardForCivitai = () => {
   return modelTypeHasCards;
 };
 
-export default () => {
-  let checkDomCurrent: INullable<HTMLElement>;
-  let x: number = 0;
+let cleanupActive: (() => void) | undefined;
+let scheduleActive: (() => void) | undefined;
 
-  const helperFix = () => {
-    // eslint-disable-next-line unicorn/consistent-function-scoping
-    const fnClick = () => setTimeout(helperFix, 500);
-    let retryTimes = 0;
-    const fixInterval = setInterval(() => {
-      consola.info('🤯 [civitai helper] update card for civitai');
-      const checkDom = document.querySelector('#txt2img_lora_cards') as any;
-      if (checkDom || retryTimes > 5) {
-        if (checkDomCurrent !== checkDom) {
-          x = 0;
-          checkDomCurrent = checkDom;
-          for (const activeTabType of TAB_PREFIX_LIST) {
-            const elems = document.querySelectorAll(`#${activeTabType}_extra_tabs .tab-nav button`);
-            if (elems) {
-              for (const elem of elems) {
-                elem.removeEventListener('click', fnClick);
-                elem.addEventListener('click', fnClick);
-              }
-            }
-          }
-        }
-        const y = updateCardForCivitai()?.length as number;
-        if (isNumber(y) && y < x) x = y;
-        if (retryTimes > 5 || !checkDom || y >= MODEL_TYPE_LIST.length || y > x) {
-          clearInterval(fixInterval);
-          x = y ?? x;
+export default () => {
+  if (cleanupActive) {
+    scheduleActive?.();
+    return cleanupActive;
+  }
+  if (!document.querySelector('#tab_civitai_helper')) return () => {};
+  const root = (typeof gradioApp === 'function' ? gradioApp() : null) || document.body;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const schedule = () => {
+    if (timer !== undefined) return;
+    timer = setTimeout(() => {
+      timer = undefined;
+      updateCardForCivitai();
+    }, 120);
+  };
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (!mutation.addedNodes.length || isPromptOutputMutation(mutation)) continue;
+      if (mutation.target instanceof Element && mutation.target.closest('.extra-network-cards')) {
+        schedule();
+        break;
+      }
+      for (const node of mutation.addedNodes) {
+        if (
+          node instanceof HTMLElement &&
+          (node.matches('.extra-network-cards') || node.querySelector('.extra-network-cards'))
+        ) {
+          schedule();
+          return;
         }
       }
-      retryTimes++;
-    }, 500);
+    }
+  });
+  observer.observe(root, { childList: true, subtree: true });
+  const updateLabels = () => root.querySelectorAll<HTMLElement>('[data-lobe-civitai-icon]').forEach(labelAction);
+  window.addEventListener('lobe:language', updateLabels);
+  scheduleActive = schedule;
+  cleanupActive = () => {
+    observer.disconnect();
+    window.removeEventListener('lobe:language', updateLabels);
+    if (timer !== undefined) clearTimeout(timer);
+    scheduleActive = undefined;
+    cleanupActive = undefined;
   };
-
-  return helperFix();
+  updateCardForCivitai();
+  return cleanupActive;
 };

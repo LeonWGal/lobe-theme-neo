@@ -1,32 +1,15 @@
-import { Form } from '@lobehub/ui';
-import { InputNumber, Segmented, Switch, message } from 'antd';
-import isEqual from 'fast-deep-equal';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { InputNumber, Segmented, Switch } from 'antd';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { type WebuiSetting, selectors, useAppStore } from '@/store';
-import { needsLayoutReload } from '@/utils/settingApply';
-
+import { useSettingDraft } from '../Draft';
+import Form from './DraftForm';
 import { SettingItemGroup } from './types';
 
 const SettingForm = memo(() => {
-  const setting = useAppStore(selectors.currentSetting, isEqual);
-  const onSetSetting = useAppStore((st) => st.onSetSetting);
-  const [rawSetting, setRawSetting] = useState<WebuiSetting>(setting);
-
+  const { draft: setting, updateDraft, apply } = useSettingDraft();
+  const rawSetting = setting;
   const { t } = useTranslation();
-
-  const onFinish = useCallback(
-    async (value: WebuiSetting) => {
-      await onSetSetting(value);
-      if (needsLayoutReload(setting, value)) {
-        location.reload();
-      } else {
-        message.success(t('setting.button.applySuccess'));
-      }
-    },
-    [onSetSetting, setting, t],
-  );
 
   const quickSettingSidebar: SettingItemGroup = useMemo(
     () => ({
@@ -67,7 +50,7 @@ const SettingForm = memo(() => {
           name: 'sidebarFixedMode',
         },
         {
-          children: <InputNumber />,
+          children: <InputNumber max={640} min={200} step={8} />,
           desc: t('setting.quickSettingSidebar.defaultWidth.desc'),
           hidden: !rawSetting.enableSidebar,
           label: t('setting.quickSettingSidebar.defaultWidth.title'),
@@ -77,7 +60,7 @@ const SettingForm = memo(() => {
 
       title: t('setting.group.quickSettingSidebar'),
     }),
-    [rawSetting.enableSidebar],
+    [rawSetting.enableSidebar, t],
   );
 
   const extraNetworkSidebar: SettingItemGroup = useMemo(
@@ -119,14 +102,14 @@ const SettingForm = memo(() => {
           valuePropName: 'checked',
         },
         {
-          children: <InputNumber />,
+          children: <InputNumber max={640} min={200} step={8} />,
           desc: t('setting.extraNetworkSidebar.defaultWidth.desc'),
           hidden: !rawSetting.enableExtraNetworkSidebar,
           label: t('setting.extraNetworkSidebar.defaultWidth.title'),
           name: 'extraNetworkSidebarWidth',
         },
         {
-          children: <InputNumber />,
+          children: <InputNumber max={256} min={64} step={8} />,
           desc: t('setting.extraNetworkSidebar.defaultCardSize.desc'),
           hidden: !rawSetting.enableExtraNetworkSidebar,
           label: t('setting.extraNetworkSidebar.defaultCardSize.title'),
@@ -136,7 +119,7 @@ const SettingForm = memo(() => {
 
       title: t('setting.group.extraNetworkSidebar'),
     }),
-    [rawSetting.enableExtraNetworkSidebar],
+    [rawSetting.enableExtraNetworkSidebar, t],
   );
 
   return (
@@ -144,8 +127,8 @@ const SettingForm = memo(() => {
       id="theme_settings"
       initialValues={setting}
       items={[quickSettingSidebar, extraNetworkSidebar]}
-      onFinish={onFinish}
-      onValuesChange={(_, v) => setRawSetting(v)}
+      onFinish={apply}
+      onValuesChange={(changed) => updateDraft(changed)}
       style={{ flex: 1 }}
       variant={'borderless'}
     />

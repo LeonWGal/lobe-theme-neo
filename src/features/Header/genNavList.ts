@@ -1,11 +1,12 @@
 import { consola } from 'consola';
-import { startCase } from 'lodash-es';
 
 const getRoot = () => (typeof gradioApp === 'function' ? gradioApp() : null) || document;
 
 const getNavTabs = (): HTMLDivElement[] =>
   Array.prototype.slice.call(
-    getRoot().querySelectorAll('#tabs > [id^="tab_"], #tabs > .tabitem') as NodeListOf<HTMLDivElement>,
+    getRoot().querySelectorAll(
+      '#tabs > [id^="tab_"], #tabs > .tabitem',
+    ) as NodeListOf<HTMLDivElement>,
   );
 
 export const getNavButtons = (): HTMLButtonElement[] =>
@@ -15,7 +16,9 @@ export const getNavButtons = (): HTMLButtonElement[] =>
     ) as NodeListOf<HTMLButtonElement>,
   );
 
-interface NavItem {
+export type NavGroup = 'generate' | 'tools' | 'extensions' | 'system';
+export interface NavItem {
+  group: NavGroup;
   id: string;
   index: number;
   label: string;
@@ -31,9 +34,10 @@ export const genNavList = (): NavItem[] => {
       const id = tabEl?.id || button.id || `tab_${index}`;
       const rawText = button.textContent?.trim() || `Tab ${index + 1}`;
       return {
+        group: (['tab_txt2img','tab_img2img','tab_extras'].includes(id) ? 'generate' : ['tab_settings','tab_extensions'].includes(id) ? 'system' : ['tab_pnginfo','tab_modelmerger'].includes(id) ? 'tools' : 'extensions') as NavGroup,
         id,
         index,
-        label: startCase(rawText),
+        label: rawText,
       };
     })
     .filter(Boolean);

@@ -1,54 +1,24 @@
-import { Form } from '@lobehub/ui';
-import { Segmented, Switch, message } from 'antd';
-import isEqual from 'fast-deep-equal';
-import { memo, useCallback, useMemo } from 'react';
+import { Switch } from 'antd';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { WebuiSetting, selectors, useAppStore } from '@/store';
-import { needsLayoutReload } from '@/utils/settingApply';
-
+import { useSettingDraft } from '../Draft';
+import Form from './DraftForm';
 import { SettingItemGroup } from './types';
 
 const SettingForm = memo(() => {
-  const setting = useAppStore(selectors.currentSetting, isEqual);
-  const onSetSetting = useAppStore((st) => st.onSetSetting);
-
+  const { draft: setting, updateDraft, apply } = useSettingDraft();
   const { t } = useTranslation();
-
-  const onFinish = useCallback(
-    async (value: WebuiSetting) => {
-      await onSetSetting(value);
-      if (needsLayoutReload(setting, value)) {
-        location.reload();
-      } else {
-        message.success(t('setting.button.applySuccess'));
-      }
-    },
-    [onSetSetting, setting, t],
-  );
 
   const experimental: SettingItemGroup = useMemo(
     () => ({
       children: [
         {
           children: <Switch />,
-          desc: t('setting.aspectRatio.desc'),
-          label: t('setting.aspectRatio.title'),
-          name: 'enableAspectRatio',
+          desc: t('setting.aspectRatio.samplingDesc', { defaultValue: 'Group the sampler, schedule, steps and CFG controls.' }),
+          label: t('setting.aspectRatio.sampling', { defaultValue: 'Sampling panel' }),
+          name: 'enhanceSampling',
           valuePropName: 'checked',
-        },
-        {
-          children: (
-            <Segmented
-              options={[
-                { label: t('setting.aspectRatio.list'), value: 'dropdown' },
-                { label: t('setting.aspectRatio.buttons'), value: 'buttons' },
-              ]}
-            />
-          ),
-          desc: t('setting.aspectRatio.modeDesc'),
-          label: t('setting.aspectRatio.mode'),
-          name: 'aspectRatioMode',
         },
         {
           children: <Switch />,
@@ -60,38 +30,16 @@ const SettingForm = memo(() => {
       ],
       title: t('setting.group.experimental'),
     }),
-    [],
-  );
-
-  const promptTextarea: SettingItemGroup = useMemo(
-    () => ({
-      children: [
-        {
-          children: <Switch />,
-          desc: t('setting.promptHighlight.desc'),
-          label: t('setting.promptHighlight.title'),
-          name: 'enableHighlight',
-          valuePropName: 'checked',
-        },
-        {
-          children: <Switch />,
-          desc: t('setting.promptEditor.desc'),
-          label: t('setting.promptEditor.title'),
-          name: 'promptEditor',
-          valuePropName: 'checked',
-        },
-      ],
-      title: t('setting.group.promptTextarea'),
-    }),
-    [],
+    [t],
   );
 
   return (
     <Form
       id="theme_settings"
       initialValues={setting}
-      items={[experimental, promptTextarea]}
-      onFinish={onFinish}
+      items={[experimental]}
+      onFinish={apply}
+      onValuesChange={(changed) => updateDraft(changed)}
       style={{ flex: 1 }}
       variant={'borderless'}
     />

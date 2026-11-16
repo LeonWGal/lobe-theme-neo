@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 const observerOptions = {
+  attributeFilter: ['src', 'class'],
   attributes: true,
   characterData: true,
   childList: true,
@@ -21,8 +22,12 @@ export const useGalleryObserver = (selector: string) => {
       const infos = Array.from(infoDoms)
         .filter(Boolean)
         .map((i: any) => i.src);
-      if (info) setValue(String((info as any)?.src || ''));
-      setAllValue(infos);
+      setValue(String((info as HTMLImageElement | null)?.src || ''));
+      setAllValue((previous) =>
+        previous.length === infos.length && previous.every((src, index) => src === infos[index])
+          ? previous
+          : infos,
+      );
     };
 
     const attach = (container: Element) => {

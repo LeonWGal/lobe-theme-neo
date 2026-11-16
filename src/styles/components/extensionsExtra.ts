@@ -6,39 +6,156 @@ export default (token: Theme) => css`
   #sddp-dynamic-prompting {
     margin-block: 8px;
 
+    .gradio-accordion,
+    details.accordion {
+      margin: 4px 0 !important;
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary}) !important;
+      border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
+      background: var(--lobe-surface, ${token.colorBgContainer}) !important;
+    }
+
     .sddp-warning {
-      color: ${token.colorWarning} !important;
+      display: block;
+      padding: 8px 12px;
+      border: 1px solid ${token.colorWarningBorder};
+      border-radius: var(--lobe-radius, ${token.borderRadius}px);
+      background: ${token.colorWarningBg};
+      color: ${token.colorWarningText} !important;
+      font-size: 12px;
+      line-height: 1.45;
     }
 
     .sddp-info {
-      color: ${token.colorTextDescription} !important;
+      display: block;
+      padding: 8px 12px;
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary});
+      border-radius: var(--lobe-radius, ${token.borderRadius}px);
+      background: ${token.colorFillQuaternary};
+      color: var(--lobe-text-muted, ${token.colorTextDescription}) !important;
+      font-size: 12px;
+      line-height: 1.45;
     }
 
     .codeblock,
     .codeblock textarea {
       font-family: ${token.fontFamilyCode} !important;
     }
+
+    code,
+    pre {
+      padding: 2px 6px;
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary});
+      border-radius: ${token.borderRadiusSM}px;
+      background: ${token.colorFillTertiary};
+      font-family: ${token.fontFamilyCode};
+      font-size: 12px;
+    }
+
+    pre {
+      overflow-x: auto;
+      padding: 8px 10px;
+    }
+
+    h3,
+    h4 {
+      margin: 8px 0 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--lobe-text, ${token.colorText});
+    }
+
+    a {
+      color: var(--lobe-accent-text, ${token.colorLink});
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   #tab_sddp-wildcard-manager {
+    gap: 12px;
+
     #sddp-wildcard-tree {
       overflow: auto;
-
-      max-height: 60vh;
+      max-height: 64vh;
       padding: 8px;
-      border: 1px solid ${token.colorBorderSecondary};
-      border-radius: ${token.borderRadius}px;
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary});
+      border-radius: var(--lobe-radius, ${token.borderRadius}px);
+      background: var(--lobe-surface, ${token.colorBgContainer});
+      font-size: 13px;
 
-      background: ${token.colorBgContainer};
+      .tree-leaf {
+        position: relative;
+        margin: 1px 0;
+      }
+
+      .tree-leaf-content {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: ${token.borderRadiusSM}px;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 120ms ease, color 120ms ease;
+
+        &:hover {
+          background: ${token.colorFillTertiary};
+        }
+      }
+
+      .tree-expando {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 18px;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        background: ${token.colorFillSecondary};
+        color: var(--lobe-text-muted, ${token.colorTextSecondary});
+        font-family: ${token.fontFamilyCode};
+        font-size: 12px;
+        line-height: 1;
+        cursor: pointer;
+
+        &.hidden {
+          visibility: hidden;
+        }
+      }
+
+      .tree-leaf-text {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--lobe-text, ${token.colorText});
+      }
+
+      .tree-child-leaves {
+        margin-left: 10px;
+        padding-left: 10px;
+        border-left: 1px solid var(--lobe-border, ${token.colorBorderSecondary});
+
+        &.hidden {
+          display: none;
+        }
+      }
     }
 
     #sddp-wildcard-file-editor textarea {
       font-family: ${token.fontFamilyCode} !important;
       font-size: 13px !important;
+      line-height: 1.5 !important;
+      border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
     }
 
+    #sddp-wildcard-search textarea,
     #sddp-wildcard-search input {
-      border-radius: ${token.borderRadius}px;
+      border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
     }
   }
 
@@ -85,12 +202,12 @@ export default (token: Theme) => css`
         pointer-events: auto !important;
         cursor: pointer !important;
         font-weight: 600 !important;
-        color: ${token.colorPrimary} !important;
+        color: var(--lobe-accent-text) !important;
         text-decoration: none !important;
         white-space: nowrap !important;
 
         &:hover {
-          color: ${token.colorPrimaryHover} !important;
+          color: var(--lobe-accent-text) !important;
           text-decoration: underline !important;
         }
       }
@@ -106,7 +223,7 @@ export default (token: Theme) => css`
       padding: 0 7px !important;
       border-radius: ${token.borderRadiusSM}px !important;
       background: ${token.colorSuccess} !important;
-      color: #ffffff !important;
+      color: var(--lobe-success-contrast) !important;
       font-size: 11px !important;
       font-weight: 700 !important;
       line-height: 20px !important;
@@ -126,12 +243,12 @@ export default (token: Theme) => css`
       padding: 12px 14px !important;
       border: 1px solid ${token.colorBorderSecondary} !important;
       border-radius: ${token.borderRadius}px !important;
-      background: ${token.colorFillQuaternary} !important;
+      background: ${token.colorBgContainer} !important;
       box-shadow: none !important;
       transition: border-color 0.2s ease !important;
 
       &:hover {
-        border-color: ${token.colorPrimaryHover} !important;
+        border-color: ${token.colorPrimary} !important;
       }
 
       .label-wrap {
@@ -169,7 +286,7 @@ export default (token: Theme) => css`
       &:hover:not(:disabled) {
         background: ${token.colorFillSecondary} !important;
         border-color: ${token.colorPrimary} !important;
-        color: ${token.colorPrimary} !important;
+        color: var(--lobe-accent-text) !important;
       }
     }
 
@@ -177,13 +294,13 @@ export default (token: Theme) => css`
     button[id*='adetailer_ad_apply_btn'] {
       background: ${token.colorPrimary} !important;
       border-color: ${token.colorPrimary} !important;
-      color: #121214 !important;
+      color: var(--lobe-primary-contrast, #ffffff) !important;
       font-weight: 600 !important;
 
       &:hover:not(:disabled) {
         background: ${token.colorPrimaryHover} !important;
-        border-color: ${token.colorPrimaryHover} !important;
-        color: #121214 !important;
+        border-color: ${token.colorPrimary} !important;
+        color: var(--lobe-primary-contrast, #ffffff) !important;
       }
     }
 
@@ -260,7 +377,120 @@ export default (token: Theme) => css`
     }
   }
 
-  /* —— booru-tags-gacha (no stable elem_ids; style sampler-section buttons gently) —— */
+  /* —— z-tipo-extension (Lobe Workbench & settings skin) —— */
+  [id$='_tipo_accordion'] {
+    margin: 0 !important;
+    border: 1px solid var(--lobe-border, ${token.colorBorderSecondary}) !important;
+    border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
+    background: var(--lobe-surface, ${token.colorBgContainer}) !important;
+
+    .gradio-row,
+    .gradio-column {
+      gap: 8px !important;
+      min-width: 0 !important;
+    }
+
+    .gradio-group {
+      padding: 8px 10px !important;
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary}) !important;
+      border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
+      background: ${token.colorFillQuaternary} !important;
+    }
+
+    .gradio-radio .wrap {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 4px !important;
+    }
+
+    .gradio-radio label {
+      padding: 4px 9px !important;
+      font-size: 12px !important;
+      border-radius: ${token.borderRadiusSM}px !important;
+    }
+
+    .prose,
+    .gradio-markdown {
+      font-size: 12px !important;
+      line-height: 1.45 !important;
+      color: ${token.colorTextDescription} !important;
+      margin: 2px 0 !important;
+    }
+
+    .gradio-html:empty {
+      display: none !important;
+    }
+
+    .gradio-accordion,
+    details.accordion {
+      margin: 4px 0 !important;
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary}) !important;
+      border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
+      background: ${token.colorFillQuaternary} !important;
+    }
+
+    button.primary {
+      border-radius: ${token.borderRadius}px !important;
+    }
+  }
+
+  /* —— booru-tags-gacha (Booru Tags Lite skin) —— */
+  .booru-gacha-container {
+    margin: 0 !important;
+    color: var(--lobe-text, ${token.colorText}) !important;
+
+    .gacha-status-bar,
+    .gacha-stats-banner,
+    .gacha-hero,
+    .gacha-footer,
+    .gacha-preview-col,
+    .gacha-gallery-col,
+    .gacha-gallery-grid,
+    [id^='booru_gacha_gallery_'],
+    .gacha-card-actions-row,
+    hr {
+      display: none !important;
+    }
+
+    .sd-ar-panel-compact {
+      margin: 0 !important;
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary}) !important;
+      border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
+      background: var(--lobe-surface, ${token.colorBgContainer}) !important;
+    }
+
+    .gacha-card,
+    .gacha-section,
+    .gacha-panel {
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary}) !important;
+      border-radius: var(--lobe-radius, ${token.borderRadius}px) !important;
+      background: ${token.colorFillQuaternary} !important;
+      padding: 8px 10px !important;
+    }
+
+    .gacha-chip,
+    .gacha-tag-chip {
+      border: 1px solid var(--lobe-border, ${token.colorBorderSecondary}) !important;
+      border-radius: ${token.borderRadiusSM}px !important;
+      background: var(--lobe-field, ${token.colorBgElevated}) !important;
+      color: var(--lobe-text, ${token.colorText}) !important;
+    }
+
+    button.primary {
+      border-radius: ${token.borderRadius}px !important;
+    }
+
+    .gradio-tabs > .tab-nav {
+      margin-bottom: 6px !important;
+      gap: 4px !important;
+    }
+
+    .gradio-row,
+    .gradio-column {
+      gap: 6px !important;
+    }
+  }
+
   #txt2img_script_container .gradio-accordion button.primary,
   #img2img_script_container .gradio-accordion button.primary {
     border-radius: ${token.borderRadius}px !important;

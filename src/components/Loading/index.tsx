@@ -1,6 +1,6 @@
 import { Icon } from '@lobehub/ui';
 import { LobeHub as Logo } from '@lobehub/ui/brand';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/icons';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';

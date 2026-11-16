@@ -1,5 +1,6 @@
 import { createGlobalStyle } from 'antd-style';
 
+import accessibility from './accessibility';
 import antdOverride from './antdOverride';
 import button from './components/button';
 import collapse from './components/collapse';
@@ -14,10 +15,14 @@ import lightboxModal from './components/lightboxModal';
 import options from './components/options';
 import popup from './components/popup';
 import progress from './components/progress';
+import sidebar from './components/sidebar';
 import slider from './components/slider';
+import surfaces from './components/surfaces';
 import table from './components/table';
 import tabs from './components/tabs';
+import workspace from './components/workspace';
 import mobile from './mobile';
+import motion from './motion';
 import tokens from './tokens';
 
 const GlobalStyle = createGlobalStyle(({ theme }) => [
@@ -32,6 +37,7 @@ const GlobalStyle = createGlobalStyle(({ theme }) => [
   options(theme),
   progress(theme),
   slider(theme),
+  sidebar(theme),
   table(theme),
   tabs(theme),
   popup(theme),
@@ -40,6 +46,10 @@ const GlobalStyle = createGlobalStyle(({ theme }) => [
   forge(theme),
   lightboxModal(theme),
   mobile(),
+  motion,
+  accessibility(theme),
+  surfaces(theme),
+  workspace(theme),
 ]);
 
 export default GlobalStyle;

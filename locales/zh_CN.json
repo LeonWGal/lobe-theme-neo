@@ -1,8 +1,16 @@
 {
+  "gallery": {
+    "liveGeneration": "正在生成图像",
+    "openLive": "打开实时预览",
+    "liveEnded": "最后一帧预览"
+  },
   "brand": {
     "custom": "自定义",
     "kitchen": "Kitchen",
-    "lobe": "LobeHub"
+    "lobe": "LobeHub",
+    "mark": "火花标志",
+    "none": "无",
+    "wordmark": "文字标志"
   },
   "cancel": "取消",
   "confirm": "确认",
@@ -21,7 +29,24 @@
   "header": {
     "feedback": "反馈",
     "setting": "设置",
-    "switchTheme": "切换浅色/深色主题"
+    "switchTheme": "切换浅色/深色主题",
+    "history": "生成历史",
+    "commandPalette": "命令面板 (Ctrl+K)",
+    "nav": {
+      "allTabs": "所有标签页",
+      "search": "查找标签页",
+      "pin": "固定到栏",
+      "unpin": "从栏中取消固定",
+      "reset": "重置栏",
+      "empty": "没有匹配的标签页",
+      "hint": "已固定的标签页会保留在栏中 · Ctrl+K 可搜索全部内容",
+      "groups": {
+        "generate": "生成",
+        "tools": "工具",
+        "extensions": "扩展",
+        "system": "系统"
+      }
+    }
   },
   "modal": {
     "themeFeedback": {
@@ -90,6 +115,14 @@
       "enable": {
         "desc": "在右侧启用额外的网络侧边栏",
         "title": "启用"
+      },
+      "folderTree": {
+        "desc": "仅显示顶层文件夹；点击文件夹可打开其子文件夹",
+        "title": "文件夹树"
+      },
+      "tabRail": {
+        "title": "模型类型侧栏",
+        "desc": "将 Textual Inversion、Checkpoint、Lora 等以竖列显示在侧边栏一侧，而不是折成多行的标签页"
       }
     },
     "group": {
@@ -98,7 +131,8 @@
       "layout": "布局设置",
       "promptTextarea": "提示文本框",
       "quickSettingSidebar": "快速设置侧边栏",
-      "theme": "主题设置"
+      "theme": "主题设置",
+      "tools": "工具"
     },
     "hideFooter": {
       "desc": "隐藏主题页脚，仅显示 Stable Diffusion webui 的默认页脚",
@@ -183,7 +217,132 @@
       "appearance": "外观",
       "experimental": "实验性",
       "layout": "布局",
-      "sidebar": "侧边栏"
+      "sidebar": "侧边栏",
+      "tools": "工具"
+    },
+    "commandPalette": {
+      "title": "命令面板",
+      "desc": "按 Ctrl+K（Mac 上为 ⌘K）搜索并执行操作、标签页、采样器、Checkpoint、LoRA、预设、历史记录和 WebUI 设置"
+    },
+    "history": {
+      "title": "生成历史",
+      "desc": "保存每次 txt2img 和 img2img 的结果及其参数和缩略图，存储在扩展的 lobe_data 文件夹中"
+    },
+    "presets": {
+      "title": "参数预设",
+      "desc": "在左侧边栏添加预设面板，用于保存和应用采样器、步数、CFG、尺寸及 Hires. fix 设置"
+    },
+    "loraTools": {
+      "title": "LoRA 卡片工具",
+      "desc": "在 LoRA 卡片上提供收藏、单独权重、模型系列标记、触发词和筛选"
+    },
+    "tabProgress": {
+      "title": "标签页图标显示进度",
+      "desc": "生成时在标签页图标上显示进度环，后台标签页完成时显示对勾"
+    },
+    "notification": {
+      "title": "桌面通知",
+      "desc": "页面处于后台时，生成完成后发送通知（浏览器会请求权限）"
+    },
+    "localAssets": {
+      "title": "本地资源",
+      "desc": "从扩展而非 CDN 加载标志、图标和字体，使主题在无网络时也能使用"
+    },
+    "customColor": "自定义",
+    "resetColor": "重置",
+    "imageButtonsTop": {
+      "title": "图像按钮置于生成下方",
+      "desc": "将图像按钮（打开文件夹、保存、打包、发送到 img2img、局部重绘、附加功能等）从图库下方移到生成 / 中断 / 跳过按钮正下方"
+    },
+    "sizeTools": {
+      "title": "宽高比与建议设置",
+      "desc": "在宽度和高度下方：按模型基础尺寸提供宽高比、比例锁定，以及适合当前模型的步数 / CFG 比例"
+    },
+    "chaoticSeeds": {
+      "title": "混沌种子",
+      "desc": "在种子下方：每次生成可随机抽取位数随机（默认 4 到 15 位）的种子来代替 -1，让种子跨越不同数量级"
+    },
+    "cornerStyle": {
+      "desc": "按钮、输入框、面板和卡片的圆角",
+      "round": "圆润",
+      "sharp": "直角",
+      "soft": "柔和",
+      "title": "圆角"
+    },
+    "density": {
+      "compact": "紧凑",
+      "comfortable": "舒适",
+      "desc": "紧凑模式会收紧标签页、折叠面板、输入框和间距，让屏幕容纳更多内容",
+      "title": "密度"
+    },
+    "surfaceStyle": {
+      "desc": "扁平：纯色面板。玻璃：磨砂半透明的顶栏和侧边栏。立体：带柔和阴影的卡片",
+      "elevated": "立体",
+      "flat": "扁平",
+      "glass": "玻璃",
+      "title": "表面"
+    },
+    "fontFamily": {
+      "desc": "界面字体。所有字体均已内置，可离线使用；Be Vietnam Pro 专为越南语设计",
+      "title": "字体"
+    },
+    "fontMono": {
+      "desc": "用于提示词和代码的字体",
+      "title": "等宽字体"
+    },
+    "sidebarSwap": {
+      "desc": "快速设置在右侧，额外网络在左侧",
+      "title": "交换侧边栏"
+    },
+    "accordionMode": {
+      "desc": "一次一个：展开一个折叠面板时会收起旁边的其他面板。折叠不会关闭扩展",
+      "free": "自由",
+      "single": "一次一个",
+      "title": "折叠面板"
+    },
+    "systemMonitor": {
+      "desc": "在快速设置下方显示 CPU、RAM、GPU 负载、VRAM、温度和磁盘",
+      "title": "系统监视器"
+    },
+    "memoryKeeper": {
+      "title": "内存管家",
+      "desc": "在系统信息下方：查看占用显存和内存的内容，可一次全部或逐项释放，保留的除外"
+    },
+    "progressBarStyle": {
+      "aurora": "极光",
+      "classic": "经典",
+      "desc": "极光：流动的渐变和发光的前端，并在进度条上显示步数、百分比和 ETA",
+      "title": "进度条"
+    },
+    "resultFrameStyle": {
+      "ambient": "氛围",
+      "desc": "生成图像时结果周围的动画边框。发光边缘：旋转的彩色边缘。脉冲：每一步出现一个光环。氛围：预览自身的颜色在其后发光。扫描：一条线向下扫过。环绕：光点绕边框移动",
+      "glow": "发光边缘",
+      "off": "关闭",
+      "orbit": "环绕",
+      "pulse": "脉冲",
+      "scan": "扫描",
+      "title": "结果边框"
+    },
+    "promptSections": {
+      "title": "提示词分段",
+      "desc": "提示词下方的按钮可将正向提示词拆分为以 BREAK 连接的分段；实际生成和保存的提示词仍包含 BREAK"
+    },
+    "layoutPreset": {
+      "title": "布局预设",
+      "desc": "决定各区块的位置。只改变布局：颜色、字体和其他所有设置保持不变",
+      "classic": {
+        "title": "经典",
+        "desc": "标签页位于顶部，提示词位于设置和结果上方"
+      },
+      "studio": {
+        "title": "工作室",
+        "desc": "标签页位于左侧栏；控件与结果并排，高度与窗口一致"
+      },
+      "studioMirror": {
+        "title": "工作室（镜像）",
+        "desc": "与工作室相同，但结果在左侧，控件在右侧"
+      }
     }
   },
   "share": "分享",
@@ -212,6 +371,239 @@
       "fixed": "固定",
       "float": "浮动"
     },
-    "quickSetting": "快速设置"
+    "quickSetting": "快速设置",
+    "presets": "预设",
+    "system": {
+      "disk": "磁盘",
+      "noNvml": "GPU 负载和温度需要 nvidia-ml-py",
+      "noNvmlHint": "重启一次 WebUI 以便主题安装 nvidia-ml-py，或运行：pip install nvidia-ml-py",
+      "temp": "温度",
+      "title": "系统"
+    },
+    "memory": {
+      "title": "内存",
+      "generating": "生成中",
+      "details": "详情",
+      "webui": "WebUI",
+      "started": "由其启动",
+      "others": "其他程序",
+      "free": "空闲",
+      "freeRam": "释放内存",
+      "freeVram": "释放显存",
+      "freeAll": "释放显存+内存",
+      "freeRamTip": "释放只在内存中的内容（已移出 GPU 的模型、缓存、CPU 上的服务），保留项 (🔒) 除外；GPU 上的不动",
+      "freeVramTip": "除保留项 (🔒) 外全部移出 GPU：模型移到内存，LLM 服务被停止",
+      "freeAllTip": "显存和内存：除保留项 (🔒) 外全部释放；下次生成时重新加载模型",
+      "toRam": "→ 内存",
+      "toRamTip": "移出 GPU，保留在内存中：再次使用时很快",
+      "unload": "卸载",
+      "unloadTip": "移出 GPU 和内存",
+      "clear": "清除",
+      "clearTip": "清除缓存",
+      "keep": "保留：释放显存和释放显存 + 内存都不会动它",
+      "unkeep": "已保留：释放时不会动它。点击取消保留",
+      "kept": "🔒 已保留 {{count}} 项",
+      "keepHint": "🔒 保留某项，重启后仍有效",
+      "sectionFree": "释放",
+      "sectionFreeTip": "释放此类中除保留项 (🔒) 外的全部",
+      "freed": "{{what}}：{{seconds}} 秒内释放了 {{amount}}",
+      "left": "未释放：{{list}}",
+      "busyMove": "正在移到内存…",
+      "busyUnload": "正在卸载…",
+      "busyFree": "正在释放…",
+      "inRam": "内存中 {{count}} 个",
+      "loaded": "已加载",
+      "nothingHeld": "未占用",
+      "unknown": "无法判断",
+      "reading": "读取中…",
+      "nothing": "未加载任何内容：没有模型或缓存。",
+      "categories": {
+        "checkpoint": "模型",
+        "lora": "LoRA",
+        "control": "ControlNet 与适配器",
+        "upscaler": "放大器",
+        "face": "面部修复与细化",
+        "tagger": "标注与反推",
+        "llm": "LLM / VLM",
+        "other": "其他模型",
+        "process": "其他进程"
+      },
+      "mode": "显存",
+      "modeTip": "内存管理器的显存模式，无需重启即可切换；重启后恢复为 WebUI 启动时的模式。",
+      "busyMode": "正在切换显存模式…",
+      "modeSet": "显存模式：{{mode}}；下次生成时重新放置模型",
+      "modes": {
+        "high": "高",
+        "normal": "普通",
+        "low": "低"
+      },
+      "modeTips": {
+        "high": "高：模型留在 GPU 上，不移回内存",
+        "normal": "普通：模型尽量放在 GPU，文本编码器在 GPU",
+        "low": "低：模型尽量放在 GPU，文本编码器在内存"
+      },
+      "modeStartup": "WebUI 以此模式启动"
+    },
+    "tabs": {
+      "prompt": "提示词",
+      "settings": "设置"
+    }
+  },
+  "tools": {
+    "palette": {
+      "placeholder": "搜索操作、标签页、设置、LoRA、预设…",
+      "empty": "无匹配结果",
+      "hint": "↑ ↓ 移动 · Enter 执行 · Esc 关闭",
+      "groups": {
+        "action": "操作",
+        "tab": "标签页",
+        "preset": "预设",
+        "sampler": "采样器",
+        "scheduler": "调度类型",
+        "checkpoint": "Checkpoint",
+        "lora": "LoRA",
+        "history": "历史记录",
+        "setting": "WebUI 设置"
+      },
+      "generate": "生成",
+      "interrupt": "中断",
+      "skip": "跳过",
+      "toggleTheme": "切换浅色/深色主题",
+      "themeSettings": "主题设置",
+      "openHistory": "生成历史",
+      "openPresets": "预设",
+      "savePreset": "将当前参数保存为预设",
+      "setSampler": "使用采样器",
+      "setScheduler": "使用调度类型",
+      "loadCheckpoint": "加载 Checkpoint",
+      "addLora": "添加到提示词",
+      "applyPreset": "应用预设",
+      "reuse": "复用参数",
+      "openSetting": "打开设置"
+    },
+    "history": {
+      "title": "生成历史",
+      "search": "搜索提示词和参数",
+      "all": "全部",
+      "empty": "暂无内容。完成的 txt2img 和 img2img 生成会显示在这里。",
+      "loadMore": "加载更多",
+      "today": "今天",
+      "yesterday": "昨天",
+      "reuseAll": "全部复用",
+      "reusePrompt": "提示词",
+      "reuseSeed": "种子",
+      "copy": "复制参数",
+      "copied": "已复制",
+      "savePreset": "保存为预设",
+      "delete": "删除",
+      "clear": "清空历史",
+      "clearConfirm": "删除所有历史记录？已保存到磁盘的图像会保留。",
+      "compare": "对比",
+      "compareHint": "勾选两条记录进行对比",
+      "applied": "参数已应用",
+      "prompt": "提示词",
+      "negative": "反向提示词",
+      "parameter": "参数",
+      "onlyIn": "仅在 {{name}} 中",
+      "images": "{{count}} 张图像"
+    },
+    "presets": {
+      "title": "预设",
+      "empty": "暂无预设。设置好你喜欢的参数，然后在这里保存。",
+      "name": "预设名称",
+      "save": "保存当前",
+      "includeSeed": "包含种子",
+      "includeBatch": "包含批次数和批次大小",
+      "apply": "应用",
+      "applied": "预设已应用",
+      "rename": "重命名",
+      "delete": "删除",
+      "deleteConfirm": "删除此预设？",
+      "moveUp": "上移",
+      "moveDown": "下移",
+      "overwrite": "用当前参数覆盖",
+      "saved": "预设已保存",
+      "defaultName": "预设 {{n}}",
+      "for": "用于 {{tab}}"
+    },
+    "lora": {
+      "all": "全部",
+      "favorites": "收藏",
+      "recent": "最近",
+      "compatible": "兼容",
+      "favorite": "收藏",
+      "weight": "权重（滚动调整，点击重置）",
+      "triggerWords": "添加触发词"
+    },
+    "notify": {
+      "done": "生成完成"
+    },
+    "size": {
+      "ratio": "比例",
+      "base": "基础",
+      "auto": "自动",
+      "lock": "拖动滑块时保持此比例",
+      "suggested": "建议",
+      "noSuggestions": "此模型系列暂无建议",
+      "steps": "步数",
+      "cfg": "CFG",
+      "distilled": "蒸馏 CFG"
+    },
+    "chaotic": {
+      "title": "混沌种子",
+      "toggle": "每张图都会得到一个位数随机的新种子；忽略种子输入框",
+      "digits": "位数",
+      "hint": "已开启：每张图都会在此范围内得到新种子，并忽略种子输入框。每个种子都记录在生成信息中；%reuse% 可找回。"
+    },
+    "sections": {
+      "add": "添加分段",
+      "merge": "移除此分段（其文本并入前一段）",
+      "section": "分段",
+      "tokens": "token",
+      "toggle": "提示词分段：在 BREAK 处将提示词拆分为独立的输入框"
+    },
+    "studio": {
+      "prompt": "提示词",
+      "parameters": "参数",
+      "extensions": "扩展"
+    }
+  },
+  "aspectPanel": {
+    "frames": "帧数",
+    "title": "尺寸预设",
+    "aspectRatio": "宽高比",
+    "buttonsView": "按钮",
+    "dropdownView": "列表",
+    "buttonsViewTip": "切换至按钮网格视图",
+    "dropdownViewTip": "切换至紧凑下拉列表视图",
+    "filterAll": "全部",
+    "filterSquare": "方形",
+    "filterPortrait": "竖向",
+    "filterLandscape": "横向",
+    "resPreviewTip": "当前分辨率 (宽 × 高)",
+    "selectPreset": "选择预设...",
+    "customRes": "自定义",
+    "portrait": "竖向",
+    "landscape": "横向",
+    "square": "方形",
+    "width": "宽度",
+    "height": "高度",
+    "batchCount": "生成批次",
+    "batchSize": "每批数量",
+    "swapTip": "交换宽度和高度 (⇅)",
+    "closeTip": "关闭",
+    "settingsTip": "设置",
+    "1:1": "正方形 1:1",
+    "4:5": "照片 / 社交 4:5",
+    "3:4": "竖版人像 3:4",
+    "2:3": "经典摄影 2:3",
+    "9:16": "移动端 / 竖屏 9:16",
+    "9:21": "修长画幅 9:21",
+    "5:4": "横向风景 5:4",
+    "4:3": "标准显示 4:3",
+    "3:2": "经典摄影 3:2",
+    "16:9": "宽屏显示 16:9",
+    "21:9": "超宽电影 21:9",
+    "2:1": "全景 2:1"
   }
 }

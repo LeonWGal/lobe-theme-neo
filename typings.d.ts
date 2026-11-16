@@ -135,3 +135,10 @@ declare module '*.txt' {
   const source: string;
   export default source;
 }
+
+declare module 'stylis' {
+  type Middleware = (element: unknown, index: number, children: unknown[], callback: unknown) => string | void;
+  export function compile(input: string): unknown[];
+  export function serialize(children: unknown[], callback: Middleware): string;
+  export const stringify: Middleware;
+}

@@ -4,24 +4,10 @@ import type { WebuiSetting } from '@/store/initialState';
 export const LAYOUT_RELOAD_KEYS: (keyof WebuiSetting)[] = [
   'enableSidebar',
   'enableExtraNetworkSidebar',
-  'layoutSplitPreview',
   'layoutHideFooter',
-  'promptTextareaType',
   'enableHighlight',
   'enableImageInfo',
-  'promptEditor',
   'svgIcon',
-  'enableWebFont',
-  'logoType',
-  'logoCustomTitle',
-  'logoCustomUrl',
-  'sidebarFixedMode',
-  'extraNetworkFixedMode',
-  'sidebarExpand',
-  'extraNetworkSidebarExpand',
-  'sidebarWidth',
-  'extraNetworkSidebarWidth',
-  'extraNetworkCardSize',
 ];
 
 export const needsLayoutReload = (prev: WebuiSetting, next: Partial<WebuiSetting>): boolean =>

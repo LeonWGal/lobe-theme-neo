@@ -1,57 +1,37 @@
-import { Button, Skeleton } from 'antd';
+import { Alert, Button, Skeleton } from 'antd';
 import { consola } from 'consola';
 import { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 import useSWR from 'swr';
 
+import { useExternalTextareaObserver } from '@/hooks/useExternalTextareaObserver';
 import { selectors, useAppStore } from '@/store';
 import { getPrompt } from '@/store/api';
+import { getPromptTextarea, setPromptValue } from '@/utils/promptInput';
 
 import { TagItem } from '../TagList';
 import { formatPrompt } from '../utils';
 
-const ID = `[id$='2img_prompt'] textarea`;
-
-const PromptPicker = memo(() => {
-  const { data, isLoading } = useSWR('prompt', getPrompt);
+const PromptPicker = memo<{ tab?: string }>(({ tab }) => {
+  const { data, error, isLoading, mutate } = useSWR('prompt', getPrompt);
   const [tags, setTags] = useState<TagItem[]>([]);
   const [activeObject, setActiveObject] = useState<string>();
   const [activeAttribute, setActiveAttribute] = useState<string>();
   const i18n = useAppStore(selectors.currentLanguage);
   const { t } = useTranslation();
+  const storeTab = useAppStore((state) => state.currentTab);
+  const currentTab = tab ?? storeTab;
+  const value = useExternalTextareaObserver(`#${currentTab.replace(/^tab_/, '')}_prompt textarea`);
+  useEffect(() => {
+    setTags(formatPrompt(value));
+  }, [value, currentTab]);
 
   const isCN = i18n === 'zh_CN' || i18n === 'zh_HK';
 
-  const getActiveTabContent = () => {
-    if (typeof (window as any).get_uiCurrentTabContent === 'function') {
-      try {
-        const el = (window as any).get_uiCurrentTabContent();
-        if (el) return el;
-      } catch {}
-    }
-    const root = typeof gradioApp === 'function' ? gradioApp() : document;
-    return (
-      root.querySelector(
-        '.tabitem[style*="display: block"], .tabitem:not([style*="display: none"]), [id^="tab_txt2img"], [id^="tab_img2img"]',
-      ) || root
-    );
-  };
-
-  const dispatchUpdate = (textarea: HTMLTextAreaElement) => {
-    if (typeof (window as any).updateInput === 'function') {
-      try {
-        (window as any).updateInput(textarea);
-      } catch {}
-    }
-    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    textarea.dispatchEvent(new Event('change', { bubbles: true }));
-  };
-
   const getValue = useCallback(() => {
     try {
-      const container = getActiveTabContent();
-      const textarea = container?.querySelector(ID) as HTMLTextAreaElement | null;
+      const textarea = getPromptTextarea(currentTab);
       if (textarea) {
         const data = formatPrompt(textarea.value);
         setTags(data);
@@ -62,54 +42,67 @@ const PromptPicker = memo(() => {
       consola.error('🤯 [prompt]', error);
       return [];
     }
-  }, []);
+  }, [currentTab]);
 
-  const setValue = useCallback((currentTags: TagItem[]) => {
-    try {
-      const newValue = currentTags.map((t) => t.text).join(', ');
-      const container = getActiveTabContent();
-      const textarea = container?.querySelector(ID) as HTMLTextAreaElement | null;
-      if (textarea) {
-        textarea.value = newValue;
-        dispatchUpdate(textarea);
+  const setValue = useCallback(
+    (currentTags: TagItem[]) => {
+      try {
+        const newValue = currentTags.map((t) => t.text).join(', ');
+        const textarea = getPromptTextarea(currentTab);
+        if (textarea) {
+          setPromptValue(textarea, newValue);
+        }
+      } catch (error) {
+        consola.error('🤯 [prompt]', error);
       }
-    } catch (error) {
-      consola.error('🤯 [prompt]', error);
-    }
-  }, []);
+    },
+    [currentTab],
+  );
 
-  const handleTagUpdate = useCallback((tag: TagItem) => {
-    let currentTags = getValue() || [];
-    console.log(currentTags);
-    const hasTag = currentTags.some(
-      (t) => t.text.toLowerCase() === tag.text.toLowerCase() || t.id === tag.id,
-    );
-    if (hasTag) {
-      currentTags = currentTags.filter(
-        (t) => t.text.toLowerCase() !== tag.text.toLowerCase() && t.id !== tag.id,
+  const handleTagUpdate = useCallback(
+    (tag: TagItem) => {
+      let currentTags = getValue() || [];
+      const hasTag = currentTags.some(
+        (t) => t.text.toLowerCase() === tag.text.toLowerCase() || t.id === tag.id,
       );
-    } else {
-      currentTags = [...currentTags, tag].filter(Boolean);
-    }
+      if (hasTag) {
+        currentTags = currentTags.filter(
+          (t) => t.text.toLowerCase() !== tag.text.toLowerCase() && t.id !== tag.id,
+        );
+      } else {
+        currentTags = [...currentTags, tag].filter(Boolean);
+      }
 
-    setTags(currentTags);
-    setValue(currentTags);
-  }, []);
+      setTags(currentTags);
+      setValue(currentTags);
+    },
+    [getValue, setValue],
+  );
 
   useEffect(() => {
     getValue();
     if (!data || activeObject || activeAttribute) return;
     const defaultActiveObject = Object.keys(data)[0];
+    if (!defaultActiveObject) return;
     setActiveObject(defaultActiveObject);
     const defaultActiveAttribute = Object.keys(data[defaultActiveObject].children)[0];
     setActiveAttribute(defaultActiveAttribute);
   }, [data, activeObject, activeAttribute]);
 
-  if (isLoading || !data) return <Skeleton active />;
+  if (isLoading) return <Skeleton active />;
+  if (error || !data || !Object.keys(data).length)
+    return (
+      <Alert
+        action={<Button onClick={() => void mutate()}>{t('prompt.load')}</Button>}
+        title={t('prompt.loadError')}
+        type="error"
+      />
+    );
+  if (!['tab_txt2img', 'tab_img2img'].includes(currentTab)) return null;
 
   return (
     <>
-      <span style={{ marginBottom: -10 }}>{t('prompt.area.object')}</span>
+      <span className="lobe-prompt-picker-heading">{t('prompt.area.object')}</span>
       <Flexbox gap={4} horizontal style={{ flexWrap: 'wrap' }}>
         {Object.entries(data).map(([key, value], index) => {
           const name = isCN ? value.langName : value.name;
@@ -130,7 +123,7 @@ const PromptPicker = memo(() => {
           );
         })}
       </Flexbox>
-      <span style={{ marginBottom: -10 }}>{t('prompt.area.attribute')}</span>
+      <span className="lobe-prompt-picker-heading">{t('prompt.area.attribute')}</span>
       <Flexbox gap={4} horizontal style={{ flexWrap: 'wrap' }}>
         {activeObject &&
           Object.entries(data[activeObject].children).map(([key, value], index) => {
@@ -149,7 +142,7 @@ const PromptPicker = memo(() => {
             );
           })}
       </Flexbox>
-      <span style={{ marginBottom: -10 }}>{t('prompt.area.tag')}</span>
+      <span className="lobe-prompt-picker-heading">{t('prompt.area.tag')}</span>
       <Flexbox gap={4} horizontal style={{ flexWrap: 'wrap' }}>
         {activeObject &&
           activeAttribute &&

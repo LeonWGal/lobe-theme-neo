@@ -1,55 +1,14 @@
-import { createStyles } from 'antd-style';
-import { adjustHue } from 'polished';
+import { createStyles, keyframes } from 'antd-style';
+
+const lightDrift = keyframes`
+  50% { background-position: right 11vw top 76px; }
+`;
 
 export const useStyles = createStyles(
   (
-    { cx, css, stylish, token, isDarkMode },
+    { css, token, isDarkMode },
     { headerHeight, isPrimaryColor }: { headerHeight: number; isPrimaryColor: boolean },
   ) => ({
-    background: cx(
-      stylish.gradientAnimation,
-      isPrimaryColor &&
-        css`
-          background-image: linear-gradient(
-            -45deg,
-            ${token.colorPrimary},
-            ${adjustHue(45, token.colorPrimary)},
-            ${token.colorPrimary},
-            ${adjustHue(-45, token.colorPrimary)}
-          );
-        `,
-      css`
-        pointer-events: none;
-
-        position: absolute !important;
-        z-index: 0;
-        right: -20vw;
-        transform: rotate(4deg);
-
-        width: 60vw;
-        height: 200px;
-
-        opacity: 0.2;
-        filter: blur(100px);
-      `,
-    ),
-    backgroundLite: css`
-      pointer-events: none;
-
-      position: absolute !important;
-      top: -400px;
-      left: 0;
-
-      width: 100vw;
-      height: 100%;
-
-      opacity: ${isPrimaryColor ? (isDarkMode ? 0.2 : 0.05) : isDarkMode ? 0.15 : 0};
-      background: radial-gradient(
-        circle 600px at calc(100% - 300px) 300px,
-        ${token.colorPrimary},
-        transparent
-      );
-    `,
     panel: css`
       .draggable-panel {
         border-style: dashed;
@@ -62,7 +21,23 @@ export const useStyles = createStyles(
       }
     `,
     sidebar: css`
-      height: calc(100vh - ${headerHeight}px);
+      position: sticky;
+      top: ${headerHeight}px;
+      align-self: flex-start;
+      height: calc(100dvh - ${headerHeight}px);
+    `,
+    workspace: css`
+      background-image: radial-gradient(
+        closest-side at 60% 45%,
+        ${isPrimaryColor ? `color-mix(in srgb, ${token.colorPrimary} ${isDarkMode ? 20 : 12}%, transparent)` : 'transparent'},
+        transparent 100%
+      );
+      background-position: right 2vw top ${headerHeight + 8}px;
+      background-size: min(52vw, 760px) 260px;
+      background-repeat: no-repeat;
+
+      html[data-lobe-lite-effects='false'] & { animation: ${lightDrift} 14s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) { animation: none !important; }
     `,
   }),
 );

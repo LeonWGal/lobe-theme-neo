@@ -9,11 +9,23 @@ import type { WebuiSetting } from './initialState';
 
 export const DEFAULT_VERSION: string = version;
 export const DEFAULT_LOCALE_OPTIONS: SelectProps['options'] = defualtLocaleOptions;
+const requestJson = async (url: string, init?: RequestInit): Promise<unknown> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const res = await fetch(url, { ...init, signal: controller.signal });
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    return await res.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+};
 export const getSetting = async (): Promise<WebuiSetting | undefined> => {
   try {
-    const res = await fetch('/lobe/config');
-    if (!res.ok) return undefined;
-    const data = (await res.json()) as WebuiSetting & { empty?: boolean; setting?: WebuiSetting };
+    const data = (await requestJson('/lobe/config')) as WebuiSetting & {
+      empty?: boolean;
+      setting?: WebuiSetting;
+    };
     if (!data || data.empty) return undefined;
     // Support export-wrapper shape if someone dropped it into the root file
     if (data.setting && typeof data.setting === 'object') {
@@ -27,14 +39,14 @@ export const getSetting = async (): Promise<WebuiSetting | undefined> => {
 
 export const postSetting = async (setting: WebuiSetting): Promise<boolean> => {
   try {
-    const res = await fetch('/lobe/config', {
+    await requestJson('/lobe/config', {
       body: JSON.stringify(setting),
       headers: {
         'Content-Type': 'application/json',
       },
       method: 'POST',
     });
-    return res.ok;
+    return true;
   } catch (error) {
     console.warn('🤯 [setting] Failed to save lobe config:', error);
     return false;
@@ -43,8 +55,7 @@ export const postSetting = async (setting: WebuiSetting): Promise<boolean> => {
 
 export const getVersion = async (): Promise<string> => {
   try {
-    const res = await fetch('/lobe/package');
-    const data = (await res.json()) as any;
+    const data = (await requestJson('/lobe/package')) as any;
     if (!data || data.empty || !data.version) return DEFAULT_VERSION;
     return data.version;
   } catch {
@@ -72,16 +83,12 @@ interface PromptData {
 }
 
 export const getPrompt = async (): Promise<PromptData> => {
-  const res = await fetch('/lobe/prompt');
-  const data = (await res.json()) as any;
-  return data;
+  return (await requestJson('/lobe/prompt')) as PromptData;
 };
 
 export const getLocaleOptions = async (): Promise<SelectProps['options']> => {
   try {
-    const res = await fetch('/lobe/locales/options');
-    if (!res.ok) return DEFAULT_LOCALE_OPTIONS;
-    const data = (await res.json()) as SelectProps['options'];
+    const data = (await requestJson('/lobe/locales/options')) as SelectProps['options'];
     if (!data || data?.length === 0) return DEFAULT_LOCALE_OPTIONS;
     return data;
   } catch {

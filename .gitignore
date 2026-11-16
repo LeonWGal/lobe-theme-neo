@@ -46,5 +46,8 @@ test-output
 # add other ignore file below
 __pycache__
 /lobe_theme_config.json
+/lobe_data/
+/assets/autocomplete/tags/temp/
+/assets/autocomplete/tags/tag_frequency.db
 bun.lockb
 .env

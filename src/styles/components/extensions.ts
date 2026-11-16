@@ -6,9 +6,9 @@ export default (token: Theme) => {
   return css`
     /* sd-webui-prompt-all-in-one */
       .physton-highlight-prompt {
-        color: ${token.colorPrimary} !important;
+        color: var(--lobe-accent-text) !important;
 
-        -webkit-text-fill-color: ${token.colorPrimary} !important;
+        -webkit-text-fill-color: var(--lobe-accent-text) !important;
       }
 
       /* openOutpaint */
@@ -23,6 +23,58 @@ export default (token: Theme) => {
       }
 
       /* autocomplete */
+      .autocompleteParent[data-lobe-autocomplete] {
+        position: fixed !important;
+        inset: var(--lobe-ac-top) auto auto var(--lobe-ac-left) !important;
+        z-index: 1200 !important;
+        width: var(--lobe-ac-width);
+        max-width: none;
+        flex-wrap: nowrap;
+        align-items: start;
+        gap: 6px;
+        &[data-lobe-autocomplete='above'] { transform: translateY(-100%); }
+
+        > .autocompleteResults:not(.sideInfo) {
+          flex: 0 0 100%;
+          min-width: 0;
+          max-height: var(--lobe-ac-height) !important;
+          overscroll-behavior: contain;
+          padding: 3px;
+          color: var(--lobe-text) !important;
+          background: var(--lobe-surface) !important;
+          border-radius: ${token.borderRadiusLG}px !important;
+          box-shadow: 0 8px 24px color-mix(in srgb, #000 17%, transparent) !important;
+          font: 400 var(--lobe-type-ui)/1.4 var(--lobe-font-family);
+          @supports (backdrop-filter: blur(1px)) {
+            background: color-mix(in srgb, var(--lobe-surface) 94%, transparent) !important;
+            backdrop-filter: blur(5px);
+            html[data-lobe-lite-effects='true'] & { backdrop-filter: none; }
+          }
+        }
+        .autocompleteResultsList { margin: 0; }
+        .autocompleteResultsList > li {
+          min-height: 30px;
+          padding: 4px 8px;
+          overflow-wrap: anywhere;
+          border: 0;
+          border-radius: ${token.borderRadiusSM}px;
+          background: transparent !important;
+          &:is(:hover, .selected) { background: var(--lobe-field) !important; }
+          .acListItem { color: var(--lobe-text) !important; }
+          b { color: var(--lobe-accent-text); font-weight: 650; }
+          .acMetaText { color: var(--lobe-text-muted) !important; font-variant-numeric: tabular-nums; }
+        }
+        .acLoading { color: var(--lobe-text-muted) !important; }
+        > .sideInfo {
+          position: absolute;
+          inset: 0 0 auto auto;
+          min-width: 0;
+          width: min(120px, 28vw);
+          pointer-events: none;
+          img { width: 100%; }
+        }
+      }
+
       .autocompleteResults {
         z-index: 1100 !important;
 
@@ -80,7 +132,7 @@ export default (token: Theme) => {
         .cnet-badge {
           font-size: var(--text-xs);
           line-height: 1.3;
-          color: #ffffff !important;
+          color: var(--lobe-success-contrast) !important;
           background-color: ${token.colorSuccess} !important;
           border-radius: ${token.borderRadiusSM}px !important;
         }
@@ -88,7 +140,7 @@ export default (token: Theme) => {
         .tab-nav button {
           &.cnet-unit-active,
           &.selected.cnet-unit-active {
-            color: ${token.colorSuccess} !important;
+            color: var(--lobe-success-text) !important;
             font-weight: 600 !important;
           }
         }
@@ -106,7 +158,7 @@ export default (token: Theme) => {
           &:hover {
             border-color: ${token.colorPrimary} !important;
             background: ${token.colorFillSecondary} !important;
-            color: ${token.colorPrimary} !important;
+            color: var(--lobe-accent-text) !important;
           }
         }
 
@@ -185,6 +237,7 @@ export default (token: Theme) => {
 
       .gr-group:has([id^='extra_options_']) {
         background: transparent;
+        border: 0 !important;
 
         [id^='extra_options_'] {
           &.gradio-accordion {
@@ -207,6 +260,7 @@ export default (token: Theme) => {
       .gr-group:has(#soft_inpainting_enabled) {
         padding: 0 !important;
         background: transparent;
+        border: 0 !important;
 
         #soft_inpainting_enabled {
           &.gradio-accordion {

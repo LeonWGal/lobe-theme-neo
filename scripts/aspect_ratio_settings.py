@@ -1,5 +1,4 @@
-import gradio as gr
-from modules import scripts, script_callbacks, shared
+from modules import scripts
 
 
 class LobeAspectRatioScript(scripts.Script):
@@ -8,39 +7,3 @@ class LobeAspectRatioScript(scripts.Script):
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible
-
-
-def on_ui_settings():
-    section = ("lobe_ratio", "Ratio Controls (Lobe Theme)")
-    shared.opts.add_option(
-        "lobe_enable_aspect_ratio",
-        shared.OptionInfo(
-            True,
-            "Включить панель Aspect Ratio (Lobe Theme) / Enable Aspect Ratio panel",
-            gr.Checkbox,
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
-        "lobe_ratio_default_view",
-        shared.OptionInfo(
-            "buttons",
-            "Режим отображения соотношений сторон по умолчанию / Default aspect ratio view mode",
-            gr.Radio,
-            {"choices": ["buttons", "dropdown"]},
-            section=section,
-        ),
-    )
-    shared.opts.add_option(
-        "gal_ratio_default_view",
-        shared.OptionInfo(
-            "buttons",
-            "Режим отображения соотношений сторон по умолчанию (legacy)",
-            gr.Radio,
-            {"choices": ["buttons", "dropdown"]},
-            section=section,
-        ),
-    )
-
-
-script_callbacks.on_ui_settings(on_ui_settings)

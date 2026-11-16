@@ -1,6 +1,6 @@
 import { ActionIcon, CopyButton } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight } from '@/icons';
 import { memo, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
@@ -106,7 +106,7 @@ export const Highlighter = memo<HighlighterProps>(
           {showCopy ? (
             <CopyButton
               content={children}
-              size={{ blockSize: 24, size: 14, strokeWidth: 2 }}
+              size={{ blockSize: 24, size: 14, strokeWidth: 1.75 }}
             />
           ) : (
             <div />

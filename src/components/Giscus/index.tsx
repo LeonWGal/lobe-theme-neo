@@ -1,14 +1,14 @@
 import {
   Icon,
   Modal,
-  type ModalProps,
+  type ModalComponentProps,
 } from '@lobehub/ui';
 import { Giscus as G, GradientButton } from '@lobehub/ui/awesome';
-import { DiscordIcon, GithubIcon as Github } from '@lobehub/ui/icons';
+import { DiscordIcon, Github , Heart } from '@/icons';
 import { Button } from 'antd';
 import { useTheme } from 'antd-style';
 import isEqual from 'fast-deep-equal';
-import { Heart } from 'lucide-react';
+
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
@@ -18,8 +18,8 @@ import { DISCORD_URL, GISCUS_REPO_ID, GITHUB_REPO_URL, REPO_NAME, SPONSOR_URL } 
 import { selectors, useAppStore } from '@/store';
 
 export interface GiscusProps {
-  onCancel?: ModalProps['onCancel'];
-  open?: ModalProps['open'];
+  onCancel?: ModalComponentProps['onCancel'];
+  open?: ModalComponentProps['open'];
 }
 
 const Giscus = memo<GiscusProps>(({ open, onCancel }) => {

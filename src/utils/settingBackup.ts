@@ -1,5 +1,8 @@
+import schema from '@/../setting_schema.json';
 import type { WebuiSetting } from '@/store/initialState';
 import { DEFAULT_SETTING } from '@/store/initialState';
+
+import { isSettingObject, normalizeSetting } from './settingValidation';
 
 export const SETTING_SCHEMA_VERSION = 1;
 
@@ -16,20 +19,23 @@ export const buildSettingExport = (setting: WebuiSetting): LobeSettingExport => 
 });
 
 export const parseSettingImport = (raw: unknown): WebuiSetting => {
-  if (!raw || typeof raw !== 'object') {
+  if (!isSettingObject(raw)) {
     throw new Error('Invalid settings file');
   }
 
   const data = raw as Record<string, unknown>;
 
   // New format: { schemaVersion, setting }
-  if (data.setting && typeof data.setting === 'object') {
-    return { ...DEFAULT_SETTING, ...(data.setting as WebuiSetting) };
+  if ('schemaVersion' in data && data.schemaVersion !== SETTING_SCHEMA_VERSION) {
+    throw new Error('Unsupported settings version');
+  }
+  if ('setting' in data) {
+    return normalizeSetting(data.setting, true);
   }
 
   // Legacy: flat WebuiSetting object
-  if ('i18n' in data || 'enableSidebar' in data || 'primaryColor' in data) {
-    return { ...DEFAULT_SETTING, ...(data as unknown as WebuiSetting) };
+  if (Object.keys(schema).some((key) => key in data)) {
+    return normalizeSetting(data, true);
   }
 
   throw new Error('Unrecognized settings format');

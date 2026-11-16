@@ -1,10 +1,10 @@
-import { useCdnFn } from '@lobehub/ui';
 import { consola } from 'consola';
 import { PropsWithChildren, Suspense, memo, useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 
 import pkg from '@/../package.json';
 import { Loading } from '@/components';
+import { GITHUB_REPO_URL } from '@/const/url';
 import GlobalLayout from '@/layouts';
 import { useAppStore } from '@/store';
 import { applyForgeDocumentFlag } from '@/utils/forge';
@@ -21,16 +21,8 @@ export const Layout = memo<PropsWithChildren>(({ children }) => {
     setCurrentTab: st.setCurrentTab,
     storeLoading: st.loading,
   }));
-  const genCdnUrl = useCdnFn();
-  const genAssets = useCallback(
-    (path: string) =>
-      genCdnUrl({
-        path,
-        pkg: '@lobehub/assets-favicons',
-        version: 'latest',
-      }),
-    [],
-  );
+
+  const genAssets = useCallback((path:string) => '/lobe/' + path.replace('assets/','assets/favicons/'), []);
 
   useEffect(() => {
     onInit();
@@ -105,10 +97,7 @@ export const Layout = memo<PropsWithChildren>(({ children }) => {
           sizes="16x16"
           type="image/png"
         />
-        <meta
-          content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no"
-          name="viewport"
-        />
+        <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport" />
         <title>{TITLE}</title>
         <meta content={TITLE} name="apple-mobile-web-app-title" />
         <meta content={TITLE} name="application-name" />
@@ -125,7 +114,7 @@ export const Layout = memo<PropsWithChildren>(({ children }) => {
         <link href={manifest(genAssets)} rel="manifest" />
         <meta content={TITLE} property="og:title" />
         <meta content={DESC} property="og:description" />
-        <meta content="https://github.com/lobehub/sd-webui-lobe-theme" property="og:url" />
+        <meta content={GITHUB_REPO_URL} property="og:url" />
         <meta content={TITLE} property="og:site_name" />
         <meta content="en-US" property="og:locale" />
         <meta
@@ -141,10 +130,12 @@ export const Layout = memo<PropsWithChildren>(({ children }) => {
           content="https://repository-images.githubusercontent.com/606329910/7fd79db5-fd91-450c-9e95-8ccce8ffdc0b"
           name="twitter:image"
         />
-        <link href="https://github.com/lobehub/sd-webui-lobe-theme" rel="canonical" />
+        <link href={GITHUB_REPO_URL} rel="canonical" />
       </Helmet>
       <GlobalLayout>
-        {storeLoading === false && loading === false ? children : <Loading />}
+        <div id="lobe-neo-theme-app">
+          {storeLoading === false && loading === false ? children : <Loading />}
+        </div>
       </GlobalLayout>
     </Suspense>
   );

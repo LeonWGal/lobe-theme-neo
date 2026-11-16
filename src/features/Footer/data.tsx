@@ -1,6 +1,6 @@
 import { Icon } from '@lobehub/ui';
-import { GithubIcon as Github } from '@lobehub/ui/icons';
-import { Bug, FileClock, GitFork, Heart } from 'lucide-react';
+import { Bug, FileClock, GitFork, Github, Heart } from '@/icons';
+
 
 import { FORGE_NEO_URL, GITHUB_REPO_URL } from '@/const/url';
 
@@ -82,9 +82,9 @@ export const Community = [
 
 export const MoreProducts = [
   {
-    description: 'Stable Diffusion Extension',
+    description: 'Original Upstream Theme',
     openExternal: true,
-    title: '🤯 Lobe Theme Neo',
+    title: '🤯 Lobe Theme',
     url: 'https://github.com/lobehub/sd-webui-lobe-theme',
   },
   {

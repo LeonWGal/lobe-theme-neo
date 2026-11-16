@@ -1,7 +1,31 @@
 import { css } from 'antd-style';
 
 export default () => css`
-  @media (max-width: 575px) {
+  @media (max-width: 899px) {
+    #tab_txt2img > .gradio-row,
+    #tab_img2img > .gradio-row,
+    #tab_extras > .gradio-row,
+    #txt2img_render > .gradio-row,
+    #img2img_render > .gradio-row,
+    .gradio-row:has(
+      > #txt2img_settings,
+      > #img2img_settings,
+      > #txt2img_gallery_container,
+      > #img2img_gallery_container,
+      > #txt2img_results,
+      > #img2img_results,
+      > #extras_results
+    ) {
+      flex-direction: column !important;
+      > .gradio-column {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+    }
+    [id$='_gallery_container'] {
+      min-height: 0 !important;
+    }
     #quicksettings {
       flex-wrap: wrap !important;
       gap: 6px !important;
@@ -46,16 +70,6 @@ export default () => css`
 
       [id$='_settings'] {
         width: 100%;
-      }
-    }
-
-    #tab_settings {
-      #settings .tab-nav {
-        width: 35%;
-      }
-
-      .tabitem {
-        margin-left: 35%;
       }
     }
 

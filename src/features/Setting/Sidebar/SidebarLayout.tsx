@@ -6,13 +6,14 @@ import BrandWatermark from './BrandWatermark';
 
 const useStyles = createStyles(({ token, css }) => ({
   container: css`
-    padding: 24px 12px 16px;
+    padding: 12px 12px 16px;
     background: ${token.colorBgContainer};
     border-inline-end: 1px solid ${token.colorBorder};
+    font-family: ${token.fontFamily};
   `,
   desc: css`
     line-height: 1.4;
-    color: ${token.colorTextDescription};
+    color: ${token.colorTextSecondary};
   `,
   header: css`
     padding: 0 0.75rem;
@@ -22,9 +23,10 @@ const useStyles = createStyles(({ token, css }) => ({
   `,
   title: css`
     margin: 0;
-    font-size: 26px;
+    color: ${token.colorText};
+    font-size: var(--lobe-type-title);
     font-weight: 600;
-    line-height: 1.3;
+    line-height: var(--lobe-leading-title);
   `,
 }));
 
@@ -44,8 +46,8 @@ const SidebarLayout = ({ children, className, title, desc, ...rest }: SidebarLay
       {...rest}
     >
       <Flexbox className={styles.header} gap={4}>
-        <h1 className={styles.title}>{title}</h1>
-        {desc && <p className={styles.desc}>{desc}</p>}
+        {title && <h2 className={styles.title}>{title}</h2>}
+        {desc && <div className={styles.desc}>{desc}</div>}
       </Flexbox>
       {children}
       <BrandWatermark paddingInline={12} />

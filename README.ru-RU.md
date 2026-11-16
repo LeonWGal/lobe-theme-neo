@@ -1,141 +1,258 @@
-# 🎨 Lobe Theme Neo
-
 <div align="center">
 
-**Современный Glassmorphism-интерфейс, оптимизированный для Stable Diffusion WebUI & Forge Neo (Gradio 4)**
+<img height="112" src="https://registry.npmmirror.com/@lobehub/assets-emoji/1.3.0/files/assets/lottie-exploding-head.png" alt="Lobe Theme Neo Logo" />
 
-[![Релиз](https://img.shields.io/github/v/release/LeonWGal/lobe-theme-neo?color=7952F5&style=flat-square)](https://github.com/LeonWGal/lobe-theme-neo/releases)
-[![Оригинал LobeHub](https://img.shields.io/badge/Upstream-lobehub%2Fsd--webui--lobe--theme-18181b?style=flat-square&logo=github)](https://github.com/lobehub/sd-webui-lobe-theme)
-[![Совместимость с Forge Neo](https://img.shields.io/badge/Forge_Neo-Gradio_4.x-00C7B7?style=flat-square)](https://github.com/Haoming02/sd-webui-forge-classic)
-[![Лицензия](https://img.shields.io/badge/license-AGPL--3.0-blue?style=flat-square)](./LICENSE)
-[![Поддержка языков](https://img.shields.io/badge/i18n-11_Languages-success?style=flat-square)](#-интернационализация)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/LeonWGal/lobe-theme-neo/pulls)
+# Lobe Theme Neo
+
+**Современная, глубоко настраиваемая тема рабочего пространства и набор инструментов для Stable Diffusion WebUI Forge Neo**
+
+[![Version](https://img.shields.io/badge/version-5.1.1-c4f042?style=flat-square&labelColor=18181b)](./package.json)
+[![Forge Neo](https://img.shields.io/badge/Forge%20Neo-Gradio%204.x-0ea5e9?style=flat-square)](https://github.com/Haoming02/sd-webui-forge-classic/tree/neo)
+[![React 19](https://img.shields.io/badge/React-19-20232a?style=flat-square&logo=react&logoColor=61dafb)](./package.json)
+[![Ant Design 6](https://img.shields.io/badge/Ant%20Design-6-1677ff?style=flat-square&logo=antdesign)](./package.json)
+[![i18n](https://img.shields.io/badge/i18n-11%20%D1%8F%D0%B7%D1%8B%D0%BA%D0%BE%D0%B2-10b981?style=flat-square)](#-языки-и-встроенные-шрифты)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-f59e0b?style=flat-square)](./LICENSE)
 
 [English](./README.md) · [Русский](./README.ru-RU.md) · [简体中文](./README.zh-CN.md)
 
-<br/>
+<br />
 
-<img src="./docs/assets/screenshot01.png" alt="Lobe Theme Neo Превью" width="100%" />
+<img src="./docs/assets/hero-dark-classic.png" alt="Lobe Theme Neo — Тёмная тема OLED Lime, 1. Классический пресет Split, верхняя кнопка Generate, кнопки пропорций, единые вкладки Extra Network и встроенная очередь" width="100%" />
+
+*Тёмная тема (нейтральная палитра `OLED` · канонический акцент `Lime`) · Пресет `1. Classic` (SplitView) с кнопкой `Generate` сверху, сеткой пропорций и боковыми панелями «Быстрые настройки», «Монитор ресурсов» и «Extra Networks»*
 
 </div>
 
 ---
 
-## ✨ Ключевые возможности
+## ✨ Главные особенности и пресеты макета
 
-* 🌗 **Мгновенное переключение Dark / Light темы**: Смена темы без перезагрузки страницы через динамические CSS-классы и синхронизацию состояния URL (`history.replaceState`), исключая зависания Gradio.
-* 🧩 **Полная адаптация под Forge Neo & Gradio 4**: Собственные селекторы и безопасная работа с Shadow DOM структурой Gradio 4.
-* 📐 **SplitView (Двухколоночный режим)**: Удобное разделение параметров генерации и галереи предпросмотра с автоматическим позиционированием кнопки очереди `agent-scheduler-neo` (Enqueue).
-* 🎴 **Extra Networks Sidebar 2.0**: Выдвижная панель LoRA, Checkpoints и Embeddings с плавной регулировкой масштаба карточек, поиском и интеграцией кнопок Civitai Helper.
-* 🪄 **Prompt Studio & Formator**: Быстрое автоформатирование промптов, регулировка весов тегов, подсветка синтаксиса и очистка лишних знаков.
-* 🛡️ **Поддержка сторонних расширений**: Готовые визуальные хуки и стили для ADetailer Neo, TIPO, Booru Tags Gacha, Dynamic Prompts, Aspect Ratio Plus и TagComplete.
-* 🌐 **Многоязычность (i18n)**: Встроенная локализация на 11 языков (Русский, English, 简体中文, 繁體中文, 日本語, 한국어, Deutsch, Español, Français, Português, Turkish).
+**Lobe Theme Neo** превращает **Stable Diffusion WebUI Forge Neo (Gradio 4.x)** в современную студию на базе **React 19**, **Ant Design 6**, **@lobehub/ui v6**, **TypeScript** и контурных SVG-иконок **Tabler**. Во всех пресетах кнопка `Generate` и очередь размещены сверху для мгновенного запуска, а расширение включает готовые инструменты продуктивности «из коробки»: встроенную очередь генераций на SQLite, историю с визуальным A/B-сравнением, **Memory Keeper** для управления VRAM/RAM, подсветку синтаксиса промптов с автодополнением Danbooru/Gelbooru и Dynamic Prompts, drag-and-drop редактор макетов и 13 процедурных сплэш-экранов запуска.
 
----
-
-## 🏛 Архитектура и интеграция
-
-<div align="center">
-  <img src="./docs/assets/screenshot02.png" alt="Lobe Theme Neo Архитектура и боковые панели" width="100%" />
-</div>
-
-<br/>
-
-* **Безопасные DOM-порталы (`useInject`)**: Узлы Gradio не разрушаются, а аккуратно оборачиваются и перемещаются, сохраняя все нативные обработчики событий и состояние компонентов.
-* **Реактивные Mutation Observers**: Автоматическое отслеживание асинхронной загрузки вкладок, текстовых полей и панелей расширений.
-* **Двойная синхронизация настроек**: Параметры интерфейса сохраняются в `localStorage` браузера (`SD-LOBE-SETTING`) и дублируются на сервере в `lobe_theme_config.json` через Fast-API эндпоинты `/lobe/config`.
-
----
-
-## 📊 Матрица совместимости
-
-| Среда / Расширение | Статус | Примечание |
-| :--- | :---: | :--- |
-| **Forge Neo (Gradio 4.x)** | 🟢 Полная | Нативная поддержка `#quicksettings`, dtype-бейджей и настроек памяти |
-| **SD WebUI (A1111 1.9+)** | 🟢 Полная | Обратная совместимость через fallback-селекторы |
-| **ADetailer Neo** | 🟢 Полная | Адаптивная верстка аккордеонов и контейнеров |
-| **Agent Scheduler Neo** | 🟢 Полная | Автоматический перенос кнопки Enqueue в SplitView |
-| **TagComplete (a1111-tac)** | 🟢 Полная | Корректный z-index приоритет поверх `PromptHighlight` |
-| **Civitai Helper** | 🟢 Полная | Авто-инъекция ссылок, триггер-слов и промптов превью |
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a href="./docs/assets/hero-dark-inference.png">
+        <img src="./docs/assets/hero-dark-inference.png" alt="Тёмная палитра OLED Lime — 2. Инференс (3 колонки: Параметры, Промпт и Превью)" />
+      </a>
+      <p align="center"><b>Тёмная · OLED + Lime · 2. Инференс (3 колонки)</b><br /><sub>Параллельные колонки параметров, промпта и превью с живой очередью и 2×2 Sampling</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <a href="./docs/assets/preview-light-studio.png">
+        <img src="./docs/assets/preview-light-studio.png" alt="Светлая палитра Nord Sky — 1. Классический макет с сеткой соотношений сторон и вкладками Extra Network" />
+      </a>
+      <p align="center"><b>Светлая · Nord + Sky · 1. Классический Split</b><br /><sub>Светлая тема без перезагрузки, быстрые кнопки пропорций и единые вкладки Extra Network</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center" valign="top">
+      <a href="./docs/assets/preview-studio-focus.png">
+        <img src="./docs/assets/preview-studio-focus.png" alt="Тёмная палитра Kitchen Lime — 3. Студия / Фокус с промптом и Generate сверху и широким превью по центру" width="90%" />
+      </a>
+      <p align="center"><b>Тёмная · Kitchen + Lime · 3. Студия / Фокус</b><br /><sub>Компактный блок промпта и Generate над широким превью с кнопкой выдвижной панели параметров</sub></p>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 🚀 Установка и быстрый старт
+## 🎨 Глубокая визуальная настройка и панель параметров
 
-### Способ 1: Через веб-интерфейс WebUI / Forge (Рекомендуется)
-1. Откройте интерфейс Forge Neo / WebUI.
-2. Перейдите во вкладку **Extensions** ➔ **Install from URL**.
-3. Вставьте URL репозитория:
+Любой элемент интерфейса — палитры, яркость поверхностей, скругления, отступы, макет, шрифты и логотип — настраивается в реальном времени, а всю конфигурацию можно сохранить или перенести через **Экспорт / Импорт JSON**.
+
+### Движок цветов, материалы поверхностей и CIELAB-яркость
+
+<img src="./docs/assets/customization-appearance.png" alt="Настройки внешнего вида — 24 акцентных цвета с каноническим Lime, 12 нейтральных палитр и ползунок яркости CIELAB" width="100%" />
+
+- **Авто / Светлая / Тёмная тема**: мгновенное переключение в шапке без перезагрузки страницы или автоматическая синхронизация с системой.
+- **24 акцентных цвета**: канонический `Lime`, `Crimson`, `Kitchen` (фирменный тёпло-оранжевый), `Amber`, `Gold`, `Emerald`, `Teal`, `Cyan`, `Sky`, `Blue`, `Indigo`, `Violet`, `Purple`, `Pink`, `Rose` и строгий `Mono` с расчётом высококонтрастного текста (`--lobe-primary-contrast` / `--lobe-accent-text`).
+- **12 нейтральных палитр поверхностей**: продуманные тоновые системы `Default`, `OLED` (чистый чёрный), `Kitchen`, `Zinc`, `Slate`, `Nord`, `Twilight`, `Mauve`, `Rosewood`, `Espresso`, `Sand` и `Sage`.
+- **CIELAB-яркость темы (`-30%` … `+30%`)**: равномерная для человеческого глаза коррекция светлоты с шагом 5%, сохраняющая контраст текста и рамок.
+- **Поверхности, углы и плотность**: режимы `Flat`, `Glass` (полупрозрачное стекло с лёгким размытием) и `Elevated`; углы `Round`, `Soft`, `Sharp`; плотность `Comfortable` или `Compact`.
+- **Свой логотип, Favicon и SVG-иконки Tabler**: установка изображения по URL / Base64 / эмодзи с синхронной генерацией PNG-фавиконки на Canvas и заменой эмодзи WebUI на чёткие **SVG-иконки Tabler**.
+- **Прогресс-бар и анимация рамки результата**: градиентный прогресс-бар `Aurora` со счётчиком шагов и ETA или `Classic`, а также эффекты рамки результата (`Glow edge`, `Pulse`, `Ambient`, `Scan`, `Orbit`).
+
+### Drag-and-Drop редактор рабочего пространства
+
+<img src="./docs/assets/customization-workspace.png" alt="Редактор макета и рабочего пространства — 3 пресета, перетаскивание блоков и профили" width="100%" />
+
+- **3 встроенных пресета компоновки** (во всех пресетах кнопка `Generate` расположена сверху):
+  1. **Classic**: адаптивный двухзонный SplitView с параметрами рядом с предпросмотром.
+  2. **Inference (Мультиколонка)**: 3 параллельные колонки (`Параметры | Промпт | Превью` или `Превью | Промпт | Параметры`) либо 2-колоночный Cockpit для работы без скроллинга на широких мониторах.
+  3. **Studio / Focus**: центрированное широкое превью под компактной верхней зоной «Промпт + Generate» с выдвижной панелью параметров.
+- **Сортировка блоков и профили**: меняйте порядок и скрывайте неиспользуемые аккордеоны (`Sampling`, `Seed`, `Resolution`, `Hires. fix`, `Refiner`, расширения) отдельно для `txt2img` и `img2img`, задавайте высоту полей промпта и сохраняйте до **8 именованных профилей**.
+- **Единый стиль боковых панелей**: закрепляйте (`Fixed`) или делайте плавающими (`Float` с размытием фона) левую панель **Быстрых настроек** (`Настройки | Пресеты`) и правую панель **Extra Networks** (переключатели вкладок `Textual Inversion | Checkpoints | Lora` оформлены в едином стиле сегментной панели), регулируйте ширину и размер карточек (`64 px – 256 px`).
+
+### Обзор вкладок панели настроек
+
+<img src="./docs/assets/settings-features.png" alt="Обзор панели настроек Theme Settings — Разрешение, Промпт, Автодополнение и Боковые панели" width="100%" />
+
+Каждый модуль вынесен на отдельную вкладку **Theme Settings** (`Внешний вид`, `Макет`, `Разрешение и пропорции`, `Промпт`, `Автодополнение`, `Очередь`, `Боковые панели`, `Экспериментальные`) с поддержкой **JSON Экспорта / Импорта** и безопасным применением настроек по кнопке **Применить**.
+
+---
+
+## 🚀 Встроенные инструменты продуктивности
+
+### Студия промптов, подсветка синтаксиса и автодополнение тегов
+
+<img src="./docs/assets/feature-prompt-studio.png" alt="Студия промптов — Верхняя кнопка Generate, панель инструментов, подсветка синтаксиса и автодополнение тегов" width="100%" />
+
+- **Панель работы с промптом (Prompt Workbench)**: сворачиваемые секции для `Styles`, `Dynamic Prompts` и `Подбора тегов` в сочетании с унифицированной панелью быстрых кнопок (вставка параметров, очистка, копирование, форматтер, отмена/повтор, разбиение по секциям).
+- **Секции промпта (Prompt Sections)**: автоматическое разбиение по `BREAK` на отдельные карточки с цветовыми метками и подсчётом токенов в каждой секции.
+- **Гибкая подсветка синтаксиса**: раздельное включение расцветки для **категорий тегов Danbooru / e621**, **моделей `<lora:...>`**, **весов и скобок** `(tag:1.2)`, **вайлдкардов** `__path/name__` и **операторов `BREAK` / `AND`**.
+- **Встроенные автодополнение и Dynamic Prompts**:
+  - В поставку уже включены **словари Danbooru и Gelbooru**, **английский словарь**, **шаблоны Chants** и **1 702 файла вайлдкардов** (`assets/wildcards/`) с отдельной вкладкой управления (`scripts/dynamic_prompts.py`).
+  - **Фильтрация LoRA по архитектуре и триггер-слова**: приоритизация совместимых LoRA под текущий чекпоинт (`SDXL`, `Flux`, `Illustrious`, `SD 1.5`, `Pony`, `SD 3` и др.), автоподстановка activation text и `@artist` для ANIMA.
+  - **Сортировка по частоте использования и форматтер промптов**: локальная SQLite-база частоты тегов, приглушение уже введённых тегов (`🔁`) и форматирование с предпросмотром diff (`Alt+Shift+F` или при потере фокуса).
+
+### Очередь генерации, история и A/B-сравнение
+
+<img src="./docs/assets/feature-queue-history.png" alt="Очередь, история генераций и окно визуального A/B-сравнения с диффом токенов" width="100%" />
+
+- **Встроенная очередь генерации**: комбинированная кнопка `В очередь ▾` (`Ctrl/Cmd+Shift+Enter`) и виджет активных задач прямо под `Generate` (пауза, возобновление, изменение приоритета, импорт/экспорт в JSON и автоматическая миграция задач из `agent-scheduler-neo`).
+- **Пакетная генерация по чекпоинтам и действия по завершении**: добавление заданий для текущего чекпоинта, выбранных моделей, всей папки или всех чекпоинтов; автодействие после очереди (`Ничего`, `Сон`, `Гибернация`, `Выключить ПК`, `Остановить WebUI`).
+- **История генераций и A/B-сравнение**: до **2 000 записей** с миниатюрами в `lobe_data/theme.sqlite3`, полнотекстовый поиск, закладки, кнопки `Повторить всё` / `Промпт` / `Сид`, `Сохранить как пресет`, **лента результатов с Lightbox** (`←` / `→` / `Esc`) и **A/B-сравнение двух генераций** с подсветкой отличий `TokenDiff` в промпте и параметрах.
+
+### Memory Keeper, мониторинг железа и палитра команд
+
+<img src="./docs/assets/feature-memory-palette.png" alt="Memory Keeper с разбивкой моделей в VRAM/RAM, мониторинг железа и палитра команд Ctrl+K" width="100%" />
+
+- **Memory Keeper**: наглядные шкалы VRAM и RAM с разбивкой на **WebUI**, **подпроцессы** и **другие приложения**. Раскройте **Подробности** (`>`), чтобы увидеть загруженные `Checkpoint` (с разбивкой на UNet / Text Encoder / VAE) и `LoRA`: закрепляйте модели (`🔒 Удерживать` между перезапусками), выгружайте компоненты `→ RAM`, очищайте VRAM/RAM по разделам и меняйте `VRAM Mode` (`High` / `Normal` / `Low`) на лету.
+- **Монитор ресурсов**: живые графики загрузки CPU, RAM, GPU, VRAM, температуры, энергопотребления (NVML) и занятости диска.
+- **Палитра команд (`Ctrl+K` / `⌘K`)** и **поиск вкладок**: быстрый нечёткий поиск действий (`Генерировать`, `Прервать`, пресеты, сэмплеры, планировщики, чекпоинты, LoRA, история, настройки, вкладки) + поповер «Все вкладки» с закреплением нужных табов.
+
+### 13 процедурных сплэш-экранов запуска
+
+<img src="./docs/assets/feature-boot-splashes.png" alt="Glow Horizon в 4 вариантах ориентации и 12 процедурных WebGL2 сплэш-экранов загрузки" width="100%" />
+
+- Убирает белую вспышку до загрузки Gradio, отображая один из **13 сплэш-экранов**: CSS-сцену **Glow Horizon** в **4 вариантах появления** (`Top`, `Bottom`, `Left`, `Right`) и **12 живых WebGL2-шейдеров** (`Chromatic Lens`, `Fluted Folds`, `Frosted Panels`, `Fluted Glass`, `Ride the Wave`, `Aurora Ribbons`, `Black Hole · VGPU`, `Etched Accretion`, `Infinite Plane`, `Liquid Crystal`, `Cosmic Ocean`, `Neuro Noise`).
+- Все сцены автоматически подстраиваются под ваш текущий акцентный цвет и поддерживают режимы **Случайная**, **Выборочный набор**, **Одна сцена** или **Откл.**.
+
+---
+
+## 🛠️ Дополнительные встроенные фишки
+
+- **Инструменты карточек LoRA**: кнопки веса (`−` / значение / `+` и изменение колёсиком мыши прямо на карточке с обновлением промпта), избранное (`★`), фильтры (`Все`, `Избранные`, `Недавние`, `Совместимые`), вставка триггер-слов и бейджи совместимости с архитектурой чекпоинта (`XL`, `Flux` и др.).
+- **Панель соотношений сторон и разрешений**: переключение между компактным `Выпадающим списком` и сеткой `Кнопок` (`SDXL/Flux`, `SD 2.x`, `SD 1.5`, `Wan`), кнопка инверсии `⇄`, пропорциональная блокировка сторон Ratio Lock, подсказки рекомендованных настроек модели, сетка **Sampling 2×2** и генератор **Chaotic Seed**.
+- **Безопасная загрузка Safetensors на Windows**: встроенный патч `safetensors_compat.py` включает `backend="pread"` для стабильной загрузки моделей крупнее 4 ГБ без ошибок `mmap`.
+- **Пресеты параметров**: сохранение наборов настроек (с опциональным сохранением Seed и размера батча) прямо в левой панели.
+
+---
+
+## 🌐 Языки и встроенные шрифты
+
+<img src="./docs/assets/feature-i18n-locales.png" alt="Многоязычный интерфейс — примеры на русском, китайском, японском и немецком языках" width="100%" />
+
+- **11 встроенных языков**: `English (en_US)`, `Русский (ru_RU)`, `简体中文 (zh_CN)`, `繁體中文 (zh_HK)`, `日本語 (ja_JP)`, `한국어 (ko_KR)`, `Deutsch (de_DE)`, `Español (es_ES)`, `Français (fr_FR)`, `Português (pt_BR)`, `Türkçe (tr_TR)`, а также двусторонняя синхронизация с нативными локализациями Forge и расширением `sd-webui-language-diffusion`.
+- **100% офлайн-шрифты**: интерфейсные шрифты (`HarmonyOS Sans`, `Inter`, `Geist`, `System UI`) и моноширинные для промптов (`Hack`, `Geist Mono`, `System`) встроены в `assets/fonts/` и работают без интернета и внешних CDN.
+
+---
+
+## 🧩 Совместимость и экосистема
+
+| Компонент / Расширение | Статус | Примечание |
+| --- | --- | --- |
+| **Forge Neo (Gradio 4.x)** | ✅ Нативная | Создано специально под DOM, компоненты Gradio 4 и пресеты Forge Neo |
+| **Встроенное автодополнение тегов** | ✅ Из коробки | Автоматически уступает управление внешнему `a1111-sd-webui-tagcomplete`, если он установлен |
+| **Встроенный Dynamic Prompts** | ✅ Из коробки | Подключает скрипт и менеджер вайлдкардов (`assets/wildcards/`), если внешний DP отсутствует |
+| **Встроенная очередь генераций** | ✅ Из коробки | Автоматически переносит историю и задания из SQLite-базы `agent-scheduler-neo` |
+| **Внешние расширения (ADetailer / ControlNet / TIPO)** | 🔌 Опциональная интеграция | Автоматически стилизуются токенами темы и Tabler SVG-иконками, если установлены пользователем отдельно |
+| **SD WebUI 1.x / A1111 (Gradio 3)** | ⚠️ Не поддерживается | Для классического Gradio 3 используйте оригинальный [`lobehub/sd-webui-lobe-theme`](https://github.com/lobehub/sd-webui-lobe-theme) |
+
+<details>
+<summary><b>⌨️ Горячие клавиши</b></summary>
+
+| Комбинация | Действие |
+| --- | --- |
+| `Ctrl+K` / `⌘K` | Открыть **Палитру команд** |
+| `Ctrl+Enter` / `⌘Enter` | Запустить генерацию |
+| `Ctrl+Shift+Enter` / `⌘Shift+Enter` | Поставить промпт в **Очередь генерации** |
+| `Alt+Shift+F` | Форматировать промпт с **предпросмотром diff** |
+| `←` / `→` / `Esc` | Навигация и закрытие **Lightbox результатов** / окна сравнения |
+
+</details>
+
+---
+
+## 📦 Установка и обновление
+
+### Способ 1: Через интерфейс Forge Neo (Рекомендуется)
+
+> Готовая продакшн-сборка фронтенда (`javascript/main.mjs` и `javascript/chunks/*`) уже включена в репозиторий — установка Node.js не требуется.
+
+1. Откройте **Stable Diffusion WebUI Forge Neo**.
+2. Перейдите во вкладку **Extensions → Install from URL**.
+3. Вставьте ссылку и нажмите **Install**:
    ```text
-   https://github.com/LeonWGal/lobe-theme-neo.git
+   https://github.com/LeonWGal/lobe-theme-neo
    ```
-4. Нажмите **Install**.
-5. Перейдите во вкладку **Installed**, нажмите **Apply and restart UI**.
+4. Перейдите в **Extensions → Installed**, нажмите **Check for updates**, затем **Apply and restart UI**.
 
-### Способ 2: Через Git
+### Способ 2: Клонирование через Git
+
 ```bash
-cd extensions
+cd path/to/sd-webui-forge-neo/extensions
 git clone https://github.com/LeonWGal/lobe-theme-neo.git
 ```
 
-### Обновление
-```bash
-cd extensions/lobe-theme-neo
-git pull origin main
-```
+Полностью перезапустите Forge Neo через лаунчер, чтобы на старте зарегистрировались `preload.py` и Python-маршруты `/lobe/*`.
 
-> [!IMPORTANT]
-> Во избежание визуальных конфликтов отключите другие версии Lobe Theme или Kitchen Theme перед включением `lobe-theme-neo`.
+> [!NOTE]
+> Пользовательский конфиг (`lobe_theme_config.json`) и локальные базы данных (`lobe_data/theme.sqlite3`, база частоты тегов) добавлены в `.gitignore` и не затираются при обновлениях через Git.
 
 ---
 
-## ⚙️ Настройки и персонализация
+## 🧑‍💻 Разработка и сборка
 
-<div align="center">
-  <img src="./docs/assets/screenshot03.png" alt="Lobe Theme Neo Настройки и Prompt Studio" width="100%" />
-</div>
+Стек проекта: **React 19**, **Ant Design 6**, **@lobehub/ui v6**, **antd-style**, **Zustand**, **Vite 5**, **TypeScript** и **Python**.
 
-<br/>
-
-Открыть панель настроек можно кликом по иконке ⚙️ в верхней панели:
-
-| Раздел | Опции |
-| :--- | :--- |
-| **🎨 Внешний вид** | 14 акцентных цветов, нейтральные оттенки, кастомный логотип и заголовок, веб-шрифты, режим уменьшения анимаций. |
-| **📐 Раскладка и SplitView**| Двухколоночный режим галереи, отступы, отображение/скрытие футера. |
-| **⬅️ Панель QuickSettings** | Фиксированный (Fixed) или плавающий (Float) режим, состояние раскрытия, ширина по умолчанию. |
-| **➡️ Панель Extra Networks** | Фиксированный / плавающий режим, размер сетки карточек (64px - 256px), выбор вкладки по умолчанию. |
-| **🪄 Текстовые поля промптов** | Режим прокрутки или ресайза, подсветка синтаксиса, встроенный редактор Prompt Editor с тегами. |
-
----
-
-## 🛠️ Разработка и сборка
-
-Проект построен на Vite, React 18 и TypeScript:
+### Фронтенд
 
 ```bash
-# 1. Установка зависимостей
 npm install
 
-# 2. Проверка типов
-npm run type-check
+# Режим разработки (Vite dev server)
+npm run dev
 
-# 3. Сборка продакшн-бандла (компилируется в javascript/main.mjs)
+# Сборка продакшн-бандла в javascript/main.mjs и javascript/chunks/
 npm run build
+
+# Проверка ESLint и типов TypeScript
+npm run ci
+
+# Юнит-тесты Vitest
+npm test
+```
+
+### Тесты Python-бэкенда
+
+Запускайте в виртуальном окружении Forge Neo:
+
+```bash
+python -B -m unittest discover -s tests -p "test_*.py" -v
+```
+
+### Структура репозитория
+
+```text
+lobe-theme-neo/
+├── assets/
+│   ├── autocomplete/       # Встроенные словари Danbooru/Gelbooru/English, chants и JS-движок
+│   ├── boot/               # WebGL2-шейдеры экранов запуска (scenes.mjs)
+│   ├── fonts/              # Офлайн-шрифты HarmonyOS Sans, Inter, Geist, Hack, Mono
+│   └── wildcards/          # 1 702 шаблона вайлдкардов
+├── docs/assets/            # Скриншоты интерфейса для README
+├── javascript/             # Предсобранный Vite-бандл и мосты (aspect_ratio, boot, queue)
+├── locales/                # 11 языковых файлов локализации + options.json
+├── scripts/                # FastAPI-роуты, SQLite очереди/истории, Memory Keeper, DP и pread-патч
+├── src/                    # Исходный код UI на React 19 / TypeScript
+└── tests/                  # Наборы тестов Vitest и Python unittest
 ```
 
 ---
 
-## 💖 Благодарности и оригинальный проект
+## 🙏 Благодарности и лицензия
 
-`lobe-theme-neo` является модернизированным развитием и адаптацией под Forge Neo оригинальной темы **[sd-webui-lobe-theme](https://github.com/lobehub/sd-webui-lobe-theme)**.
-
-* **Создатели и авторы оригинала**: Команда **[LobeHub](https://github.com/lobehub)** и **[CanisMinor](https://github.com/canisminor1990)** (`i@lobehub.com`).
-* **Оригинальный репозиторий**: [lobehub/sd-webui-lobe-theme](https://github.com/lobehub/sd-webui-lobe-theme) — Выражаем огромную благодарность LobeHub за инновационный UI/UX дизайн, библиотеку компонентов `@lobehub/ui` и колоссальный вклад в экосистему Stable Diffusion.
-* **Адаптация и развитие для Forge Neo**: Поддерживается [LeonWGal](https://github.com/LeonWGal) (поддержка Gradio 4, SplitView, исправление runtime-ошибок и интеграция с новыми расширениями).
-
----
-
-## 📄 Лицензия
-
-Распространяется под лицензией [AGPL-3.0 License](./LICENSE) в соответствии с лицензией оригинального проекта LobeHub.
+- Основано на **[sd-webui-lobe-theme](https://github.com/lobehub/sd-webui-lobe-theme)** от **LobeHub** — расширено, перенесено на Gradio 4.x / React 19 / Ant Design 6 и пересобрано специально для Forge Neo.
+- Встроенное автодополнение и вайлдкарды адаптированы из `a1111-sd-webui-tagcomplete` / `sd-webui-tagcomplete-neo` и `sd-dynamic-prompts`.
+- Распространяется под лицензией **GNU Affero General Public License v3.0 ([AGPL-3.0](./LICENSE))**.

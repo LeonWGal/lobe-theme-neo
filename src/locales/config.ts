@@ -1,57 +1,35 @@
 import i18next from 'i18next';
-import HttpBackend, { HttpBackendOptions } from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
 
-import de_DE from '@/../locales/de_DE.json';
 import en_US from '@/../locales/en_US.json';
-import es_ES from '@/../locales/es_ES.json';
-import fr_FR from '@/../locales/fr_FR.json';
-import ja_JP from '@/../locales/ja_JP.json';
-import ko_KR from '@/../locales/ko_KR.json';
-import pt_BR from '@/../locales/pt_BR.json';
-import ru_RU from '@/../locales/ru_RU.json';
-import tr_TR from '@/../locales/tr_TR.json';
-import zh_CN from '@/../locales/zh_CN.json';
-import zh_HK from '@/../locales/zh_HK.json';
-import type { WebuiSetting } from '@/store/initialState';
+import options from '@/../locales/options.json';
 
-/** Keep in sync with SETTING_KEY in store/action.ts — avoid circular import via @/store */
-const SETTING_KEY = 'SD-LOBE-SETTING';
+const dictionaries = import.meta.glob<Record<string, string>>('../../locales/*.json', {
+  import: 'default',
+});
 
-export const resources = {
-  de_DE: { translation: de_DE },
-  en_US: { translation: en_US },
-  es_ES: { translation: es_ES },
-  fr_FR: { translation: fr_FR },
-  ja_JP: { translation: ja_JP },
-  ko_KR: { translation: ko_KR },
-  pt_BR: { translation: pt_BR },
-  ru_RU: { translation: ru_RU },
-  tr_TR: { translation: tr_TR },
-  zh_CN: { translation: zh_CN },
-  zh_HK: { translation: zh_HK },
-};
-
-const readLocalI18n = (): string => {
-  try {
-    const raw = localStorage.getItem(SETTING_KEY);
-    if (!raw) return 'en_US';
-    const localSetting = JSON.parse(raw) as WebuiSetting;
-    return localSetting?.i18n || 'en_US';
-  } catch {
-    return 'en_US';
-  }
-};
-
-i18next
+void i18next
   .use(initReactI18next)
-  .use(HttpBackend)
-  .init<HttpBackendOptions>({
-    backend: {
-      loadPath: '/lobe/locales/{{lng}}',
+  .use({
+    read(language: string, _namespace: string, callback: (error: Error | null, data: unknown) => void) {
+      const load = dictionaries[`../../locales/${language}.json`];
+      if (!load) return callback(new Error(`Unsupported locale: ${language}`), false);
+      void load().then((dictionary) => callback(null, dictionary), (error) => callback(error, false));
     },
-    debug: process.env.NODE_ENV === 'development',
+    type: 'backend' as const,
+  })
+  .init({
     fallbackLng: 'en_US',
-    lng: readLocalI18n(),
-    resources,
+    initImmediate: false,
+    lng: 'en_US',
+    load: 'currentOnly',
+    partialBundledLanguages: true,
+    resources: { en_US: { translation: en_US } },
+    supportedLngs: options.map(({ value }) => value),
   });
+
+i18next.on('languageChanged', () => window.dispatchEvent(new Event('lobe:language')));
+
+Object.assign(window, {
+  lobeTranslate: (key: string, fallback: string) => i18next.t(key as never, { defaultValue: fallback }),
+});

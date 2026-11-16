@@ -1,21 +1,19 @@
 import { ActionIcon } from '@lobehub/ui';
-import { GithubIcon as Github } from '@lobehub/ui/icons';
-import { Space } from 'antd';
-import { useResponsive } from 'antd-style';
-import { LayoutGrid, LucideIcon, Moon, Settings, Sun } from 'lucide-react';
+import { Badge, Space } from 'antd';
 import qs from 'query-string';
-import { memo, useCallback, useState } from 'react';
+import { Suspense, lazy, memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Giscus } from '@/components';
-import Setting from '@/features/Setting';
+import { GITHUB_REPO_URL } from '@/const/url';
+import { SettingsTabs } from '@/features/Setting/Sidebar';
+import { bus } from '@/features/Tools/bus';
+import { useQueue } from '@/features/Tools/useQueue';
+import { useOverlaySidebars } from '@/hooks/useOverlaySidebars';
+import { Github, History, Moon, Search, Settings, Sun } from '@/icons';
 import { selectors, useAppStore } from '@/store';
+import { applyThemeAppearance } from '@/utils/themeAppearance';
 
-const CivitaiLogo: LucideIcon | any = ({ size }: any) => (
-  <svg fill="currentColor" height={size} viewBox="0 0 16 16" width={size}>
-    <path d="M2 4.5L8 1l6 3.5v7L8 15l-6-3.5v-7zm6-1.194L3.976 5.653v4.694L8 12.694l4.024-2.347V5.653L8 3.306zm0 1.589l2.662 1.552v.824H9.25L8 6.54l-1.25.73v1.458L8 9.46l1.25-.73h1.412v.824L8 11.105 5.338 9.553V6.447L8 4.895z" />
-  </svg>
-);
+const Setting = lazy(() => import('@/features/Setting'));
 
 interface ActionsProps {
   themeMode: 'dark' | 'light';
@@ -23,72 +21,93 @@ interface ActionsProps {
 
 const Actions = memo<ActionsProps>(() => {
   const [isSettingOpen, setIsSettingOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [initialTab, setInitialTab] = useState(SettingsTabs.Appearance);
+  const showSettings = (tab = SettingsTabs.Appearance) => {
+    setInitialTab(tab);
+    setIsSettingOpen(true);
+  };
+  useEffect(() => {
+    const settings = bus.on('open:settings', () => showSettings());
+    const workspace = bus.on('open:workspace', () => showSettings(SettingsTabs.Layout));
+    const queueSettings = bus.on('open:queue-settings', () => showSettings(SettingsTabs.Queue));
+    return () => { settings(); workspace(); queueSettings(); };
+  }, []);
   const themeMode = useAppStore(selectors.themeMode);
   const onSetThemeMode = useAppStore((st) => st.onSetThemeMode);
-  const { mobile } = useResponsive();
   const { t } = useTranslation();
+  const queue = useQueue();
+  const historyTitle = t(queue ? 'tools.queue.drawer' : 'tools.history.title');
+  const { compact: mobile } = useOverlaySidebars();
+  const setting = useAppStore((state) => state.setting);
 
   // Soft toggle: full location.replace(?__theme=) reloads Gradio and used to leave
   // Lobe stuck on Loading (onUiLoaded race). Keep URL in sync without reload.
   const handleSetTheme = useCallback(() => {
     const theme = themeMode === 'light' ? 'dark' : 'light';
-    const reverse = themeMode;
-
-    document.body.classList.remove(reverse);
-    document.body.classList.add(theme);
-    document.documentElement.classList.remove(reverse);
-    document.documentElement.classList.add(theme);
-    document.documentElement.style.colorScheme = theme;
-
-    const app = document.querySelector('gradio-app');
-    if (app) {
-      app.classList.toggle('dark', theme === 'dark');
-      app.classList.toggle('light', theme === 'light');
-    }
-
+    applyThemeAppearance(theme);
     onSetThemeMode(theme);
 
     const gradioURL = qs.parseUrl(window.location.href);
     gradioURL.query.__theme = theme;
     window.history.replaceState({}, '', qs.stringifyUrl(gradioURL));
-  }, [themeMode, onSetThemeMode]);
+    void useAppStore
+      .getState()
+      .onSetSetting({ themeAppearance: theme })
+      .catch(async () => {
+        applyThemeAppearance(themeMode);
+        onSetThemeMode(themeMode);
+        const { message } = await import('antd');
+        message.error(t('setting.button.saveError'));
+      });
+  }, [themeMode, onSetThemeMode, t]);
 
   return (
     <>
       <Space.Compact>
+        {setting.enableCommandPalette && (
+          <ActionIcon
+            aria-label={t('setting.commandPalette.title')}
+            icon={Search}
+            onClick={() => bus.emit('open:palette')}
+            title={`${t('setting.commandPalette.title')} (Ctrl+K)`}
+          />
+        )}
+        {(setting.enableHistory || queue) && (
+          <Badge color="var(--color-accent)" count={queue?.count ?? 0} size="small">
+          <ActionIcon
+            aria-label={historyTitle}
+            icon={History}
+            onClick={() => bus.emit('open:history')}
+            title={historyTitle}
+          />
+          </Badge>
+        )}
         {!mobile && (
-          <>
-            <a href="https://civitai.com/" rel="noreferrer" target="_blank">
-              <ActionIcon icon={CivitaiLogo} title="Civitai" />
-            </a>
-            <a
-              href="https://supagruen.github.io/StableDiffusion-CheatSheet/"
-              rel="noreferrer"
-              target="_blank"
-            >
-              <ActionIcon icon={LayoutGrid} title="Cheat Sheet" />
-            </a>
+          <a href={`${GITHUB_REPO_URL}/issues`} rel="noreferrer" target="_blank">
             <ActionIcon
+              aria-label={t('header.feedback')}
               icon={Github}
-              onClick={() => setIsModalOpen(true)}
               title={t('header.feedback')}
             />
-          </>
+          </a>
         )}
         <ActionIcon
+          aria-label={t('header.switchTheme')}
+          data-lobe-theme-toggle
           icon={themeMode === 'light' ? Sun : Moon}
           onClick={handleSetTheme}
           title={t('header.switchTheme')}
         />
         <ActionIcon
+          aria-label={t('header.setting')}
           icon={Settings}
-          onClick={() => setIsSettingOpen(true)}
+          onClick={() => showSettings()}
           title={t('header.setting')}
         />
       </Space.Compact>
-      <Setting onCancel={() => setIsSettingOpen(false)} open={isSettingOpen} />
-      <Giscus onCancel={() => setIsModalOpen(false)} open={isModalOpen} />
+      <Suspense fallback={null}>
+        {isSettingOpen && <Setting initialTab={initialTab} onCancel={() => setIsSettingOpen(false)} open />}
+      </Suspense>
     </>
   );
 });

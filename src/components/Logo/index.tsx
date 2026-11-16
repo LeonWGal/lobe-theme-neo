@@ -9,11 +9,12 @@ import CustomLogo from './CustomLogo';
 import KitchenLogo from './KitchenLogo';
 
 export interface LogoProps {
+  iconOnly?: boolean;
   size?: number;
   style?: CSSProperties;
 }
 
-const Logo = memo<LogoProps>(({ size = 32, style }) => {
+const Logo = memo<LogoProps>(({ iconOnly, size = 32, style }) => {
   const setting = useAppStore(selectors.currentSetting, isEqual);
   const themeMode = useAppStore(selectors.themeMode);
 
@@ -24,13 +25,15 @@ const Logo = memo<LogoProps>(({ size = 32, style }) => {
   if (setting.logoType === 'custom') {
     return (
       <CustomLogo
-        logoCustomTitle={setting.logoCustomTitle}
+        logoCustomTitle={iconOnly ? undefined : setting.logoCustomTitle}
         logoCustomUrl={setting.logoCustomUrl}
         size={size}
         style={style}
       />
     );
   }
+
+  if (iconOnly) return <LobeLogo size={size} style={style} />;
 
   return (
     <LobeLogo

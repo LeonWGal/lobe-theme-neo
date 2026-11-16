@@ -51,7 +51,7 @@ export default (token: Theme) => css`
 
       &.selected {
         font-weight: 600;
-        color: ${token.colorPrimary} !important;
+        color: var(--lobe-accent-text) !important;
 
         background: ${token.colorFillSecondary} !important;
         border: 1px solid ${token.colorPrimary} !important;
@@ -60,20 +60,30 @@ export default (token: Theme) => css`
   }
 
   #tab_settings {
+    container: lobe-settings / inline-size;
+
     #settings {
-      display: flex !important;
-      flex-direction: row;
+      display: grid !important;
+      grid-template-columns: minmax(176px, 220px) minmax(0, 1fr);
+      align-items: start;
       gap: 16px;
+
+      /* Forge inserts an empty Group before each settings page. */
+      > .gradio-group:has(> .styler:only-child:empty) {
+        display: none !important;
+      }
 
       > div.tab-nav {
         float: none !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: stretch;
-        width: 220px !important;
-        min-width: 220px !important;
-        max-width: 220px !important;
-        flex: 0 0 220px !important;
+        grid-column: 1;
+        grid-row: 1 / span 1024;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        padding: 0 !important;
 
         button {
           width: 100%;
@@ -88,7 +98,7 @@ export default (token: Theme) => css`
           }
 
           &.selected {
-            color: ${token.colorPrimary} !important;
+            color: var(--lobe-accent-text) !important;
             background: ${token.colorPrimaryBg} !important;
             border: none !important;
           }
@@ -119,8 +129,10 @@ export default (token: Theme) => css`
       > div:not(.tab-nav) {
         float: none !important;
         margin-left: 0 !important;
-        flex: 1 1 auto !important;
+        grid-column: 2;
+        width: 100% !important;
         min-width: 0 !important;
+        padding: 16px !important;
       }
     }
 
@@ -130,6 +142,35 @@ export default (token: Theme) => css`
 
     #settings_search {
       margin: 0 0 var(--spacing-xl);
+    }
+
+    @container lobe-settings (max-width: 600px) {
+      #settings {
+        grid-template-columns: minmax(0, 1fr);
+
+        > div.tab-nav {
+          grid-row: auto;
+          flex-direction: row !important;
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          max-width: 100% !important;
+          padding-bottom: 8px !important;
+
+          button {
+            flex: 0 0 auto;
+            width: auto;
+            white-space: nowrap;
+          }
+
+          .settings-category {
+            display: none;
+          }
+        }
+
+        > div:not(.tab-nav) {
+          grid-column: 1;
+        }
+      }
     }
   }
 `;

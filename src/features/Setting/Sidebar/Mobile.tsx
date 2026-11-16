@@ -12,12 +12,13 @@ interface SidebarProps {
 const MobileSidebar = memo<SidebarProps>(({ tab, setTab }) => {
   const items = useTabItems();
   return (
-    <Segmented
-      block
-      onChange={setTab as any}
-      options={items.map(({ key, label }) => ({ label, value: key }))}
-      value={tab}
-    />
+    <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
+      <Segmented
+        onChange={setTab as any}
+        options={items.map(({ key, label }) => ({ label, value: key }))}
+        value={tab}
+      />
+    </div>
   );
 });
 

@@ -1,7 +1,8 @@
-import { FluentEmoji, getEmoji } from '@lobehub/fluent-emoji';
 import { LobeHub as LobeLogo } from '@lobehub/ui/brand';
 import { Space } from 'antd';
-import { type CSSProperties, memo } from 'react';
+import { type CSSProperties, Suspense, lazy, memo } from 'react';
+
+const EmojiLogo = lazy(() => import('./EmojiLogo'));
 
 export interface CustomLogoProps {
   logoCustomTitle?: string;
@@ -17,17 +18,20 @@ const CustomLogo = memo<CustomLogoProps>(({ size = 32, style, logoCustomUrl, log
     if (logoCustomUrl.includes('http') || logoCustomUrl.includes('data')) {
       customLogo = <img alt="logo" src={logoCustomUrl} style={{ height: size, ...style }} />;
     } else {
-      const pureEmoji = getEmoji(logoCustomUrl);
-      if (pureEmoji) {
-        customLogo = <FluentEmoji emoji={pureEmoji} size={size} style={style} />;
-      }
+      customLogo = (
+        <Suspense fallback={<span style={{ fontSize: size, ...style }}>{logoCustomUrl}</span>}>
+          <EmojiLogo emoji={logoCustomUrl} size={size} style={style} />
+        </Suspense>
+      );
     }
   }
+
+  if (!logoCustomTitle) return customLogo;
 
   return (
     <Space align="center" size={size * 0.3}>
       {customLogo}
-      <b style={{ fontSize: size * 0.6, whiteSpace: 'nowrap' }}>{logoCustomTitle}</b>
+      <b className="lobe-custom-logo-title" style={{ fontSize: size * 0.6, whiteSpace: 'nowrap' }}>{logoCustomTitle}</b>
     </Space>
   );
 });

@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from scripts.lib.lobe_log import LobeLog
+from scripts.lib.validation import SCHEMA
 
 EXTENSION_FOLDER = Path(__file__).parent.parent.parent
 
@@ -11,13 +12,18 @@ class LobeLocale:
         pass
 
     def load_language_file(self, lng: str):
-        file_path = Path(EXTENSION_FOLDER, f"locales/{lng}.json")
+        if lng not in (*SCHEMA["i18n"]["enum"], "options"):
+            return None
+        locale_folder = (EXTENSION_FOLDER / "locales").resolve()
+        file_path = (locale_folder / f"{lng}.json").resolve()
+        if file_path.parent != locale_folder:
+            return None
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 language_data = json.load(f)
                 return language_data
-        except FileNotFoundError:
+        except (OSError, ValueError):
             return None
 
     def get_language_file(self, lng: str):

@@ -1,96 +1,23 @@
-import {
-  type DivProps,
-  DraggablePanel,
-  DraggablePanelContainer,
-  DraggablePanelHeader,
-  LayoutSidebarInner,
-} from '@lobehub/ui';
-import { useResponsive } from 'antd-style';
-import isEqual from 'fast-deep-equal';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { selectors, useAppStore } from '@/store';
+import ThemeSidebar from '@/components/ThemeSidebar';
 
 import Inner from './Inner';
 import { useStyles } from './style';
 
-export interface QuickSettingSidebarProps extends DivProps {
-  headerHeight: number;
-}
-
-const QuickSettingSidebar = memo<QuickSettingSidebarProps>(({ headerHeight }) => {
-  const { mobile } = useResponsive();
-  const setting = useAppStore(selectors.currentSetting, isEqual);
-  const mobileSidebar = useAppStore((st) => st.mobileSidebar);
-  const setMobileSidebar = useAppStore((st) => st.setMobileSidebar);
-  const [expand, setExpand] = useState<boolean>(mobile ? false : setting.sidebarExpand);
-  const [pin, setPin] = useState<boolean>(setting.sidebarFixedMode === 'fixed');
-  const [width, setWidth] = useState<number>(setting.sidebarWidth);
-  const { styles, theme } = useStyles({ headerHeight, width });
+const QuickSettingSidebar = memo<{ headerHeight: number }>(({ headerHeight }) => {
   const { t } = useTranslation();
-
-  useEffect(() => {
-    if (mobile) {
-      setExpand(false);
-      setMobileSidebar('none');
-    }
-  }, [mobile, setMobileSidebar]);
-
-  // On mobile only one sidebar at a time
-  useEffect(() => {
-    if (!mobile) return;
-    setExpand(mobileSidebar === 'quick');
-  }, [mobile, mobileSidebar]);
-
-  const onExpandChange = useCallback(
-    (next: boolean) => {
-      if (mobile) {
-        setMobileSidebar(next ? 'quick' : 'none');
-      } else {
-        setExpand(next);
-      }
-    },
-    [mobile, setMobileSidebar],
-  );
-
-  const mode = mobile ? 'fixed' : pin ? 'fixed' : 'float';
-
+  const { styles } = useStyles();
   return (
-    <DraggablePanel
-      defaultSize={{ width: setting.sidebarWidth }}
-      expand={expand}
-      minWidth={setting.sidebarWidth}
-      mode={mode}
-      onExpandChange={onExpandChange}
-      onSizeChange={(_, size) => size?.width && setWidth(Number.parseInt(String(size.width)))}
-      pin={pin}
-      placement="left"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <LayoutSidebarInner>
-        <DraggablePanelContainer
-          className={styles.container}
-          style={
-            mode === 'float'
-              ? { background: theme.colorBgContainer, minWidth: setting.sidebarWidth }
-              : { minWidth: setting.sidebarWidth }
-          }
-        >
-          <DraggablePanelHeader
-            pin={pin}
-            position="left"
-            setExpand={onExpandChange}
-            setPin={setPin}
-            title={t('sidebar.quickSetting')}
-          />
-          <Inner />
-        </DraggablePanelContainer>
-      </LayoutSidebarInner>
-    </DraggablePanel>
+    <ThemeSidebar headerHeight={headerHeight} kind="quick" title={t('sidebar.quickSetting')}>
+      <div
+        className={styles.container}
+        style={{ display: 'flex', flex: 1, flexDirection: 'column', minHeight: 0 }}
+      >
+        <Inner />
+      </div>
+    </ThemeSidebar>
   );
 });
 

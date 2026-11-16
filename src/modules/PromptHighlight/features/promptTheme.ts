@@ -1,25 +1,24 @@
-import { colors as colorScales } from '@lobehub/ui/color';
-import { ThemeAppearance } from 'antd-style';
+import type { ThemeRegistration } from 'shiki';
 
-export const themeConfig: any = (isDarkMode: ThemeAppearance) => {
+export const themeConfig = (isDarkMode: boolean): ThemeRegistration => {
   const type = isDarkMode ? 'dark' : 'light';
 
-  const colorYellow = isDarkMode ? colorScales.yellow[type][9] : colorScales.gold[type][10];
-  const colorOrange = isDarkMode ? colorScales.gold[type][9] : colorScales.orange[type][10];
-  const colorVolcano = isDarkMode ? colorScales.volcano[type][10] : colorScales.volcano[type][8];
-  const colorGreen = isDarkMode ? colorScales.lime[type][9] : colorScales.green[type][10];
-  const colorBlue = isDarkMode ? colorScales.blue[type][9] : colorScales.geekblue[type][9];
-  const colorPurple = isDarkMode ? colorScales.purple[type][11] : colorScales.purple[type][8];
+  const colorYellow = isDarkMode ? '#fde68a' : '#854d0e';
+  const colorOrange = isDarkMode ? '#fcd34d' : '#92400e';
+  const colorVolcano = isDarkMode ? '#fdba74' : '#9a3412';
+  const colorText = isDarkMode ? '#e5e7eb' : '#1f2937';
+  const colorBlue = isDarkMode ? '#93c5fd' : '#1d4ed8';
+  const colorPurple = isDarkMode ? '#c4b5fd' : '#6d28d9';
   return {
     colors: {
-      'editor.foreground': colorGreen,
+      'editor.foreground': colorText,
     },
     name: type,
     tokenColors: [
       {
         scope: 'comma',
         settings: {
-          foreground: colorScales.gray[type][11],
+          foreground: colorText,
         },
       },
       {

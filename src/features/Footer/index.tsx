@@ -1,64 +1,50 @@
-import { Footer as F } from '@lobehub/ui';
-import isEqual from 'fast-deep-equal';
+import { LobeHub } from '@lobehub/ui/brand';
 import { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { FORGE_NEO_URL, GITHUB_REPO_URL } from '@/const/url';
 import { useInject } from '@/hooks/useInject';
-import { selectors, useAppStore } from '@/store';
-import { type DivProps } from '@/types';
+import { useAppStore } from '@/store';
 
-import Brand from './Brand';
-import { Community, MoreProducts, getResources } from './data';
 import { useStyles } from './style';
 
-const Footer = memo<DivProps>(({ className, ...props }) => {
-  const setting = useAppStore(selectors.currentSetting, isEqual);
-  const isForgeNeo = useAppStore((st) => st.isForgeNeo);
-  const { cx, styles } = useStyles();
+const Footer = memo(() => {
+  const isForgeNeo = useAppStore((state) => state.isForgeNeo);
+  const version = useAppStore((state) => state.version);
+  const { styles } = useStyles();
   const { t } = useTranslation();
-  const footerReference = useRef<HTMLDivElement>(null);
+  const nativeFooter = useRef<HTMLDivElement>(null);
 
-  useInject(footerReference, '#footer', {
-    debug: '[layout] inject - Footer',
-    onSuccess: (footer) => {
-      if (!setting.confirmPageUnload) return;
-      window.addEventListener('beforeunload', (event) => {
-        if (footer?.isConnected) {
-          event.preventDefault();
-          return (event.returnValue = '');
-        }
-      });
-    },
-  });
+  useInject(nativeFooter, '#footer', { debug: '[layout] inject - Footer' });
 
   return (
-    <div className={cx(styles.footer, className)} {...props}>
-      <F
-        bottom={<div ref={footerReference} />}
-        columns={
-          setting.layoutHideFooter
-            ? []
-            : [
-                {
-                  title: <Brand />,
-                },
-                {
-                  items: getResources(isForgeNeo),
-                  title: t('footer.resources'),
-                },
-                {
-                  items: Community,
-                  title: t('footer.community'),
-                },
-                {
-                  items: MoreProducts,
-                  title: t('footer.moreProducts'),
-                },
-              ]
-        }
-        contentMaxWidth={1280}
-      />
-    </div>
+    <footer className={styles.footer}>
+      <div className={styles.inner}>
+        <div className={styles.top}>
+          <div className={styles.identity}>
+            <strong>Lobe Theme Neo</strong>
+            {version && <span className={styles.version}>{version}</span>}
+            {isForgeNeo && <a href={FORGE_NEO_URL} rel="noreferrer" target="_blank">Forge Neo</a>}
+          </div>
+          <div className={styles.links}>
+            <a href={GITHUB_REPO_URL} rel="noreferrer" target="_blank">GitHub</a>
+            <a href={GITHUB_REPO_URL + '/blob/main/CHANGELOG.md'} rel="noreferrer" target="_blank">
+              {t('footer.changelog', { defaultValue: 'Changelog' })}
+            </a>
+            <a href={GITHUB_REPO_URL + '/issues'} rel="noreferrer" target="_blank">
+              {t('footer.issues', { defaultValue: 'Report an issue' })}
+            </a>
+          </div>
+        </div>
+        <div className={styles.runtime} ref={nativeFooter} />
+        <div className={styles.credit}>
+          {t('footer.basedOn', { defaultValue: 'Based on the original theme by' })}
+          <a href="https://github.com/lobehub/sd-webui-lobe-theme" rel="noreferrer" target="_blank">
+            <LobeHub size={14} type="combine" />
+          </a>
+        </div>
+      </div>
+    </footer>
   );
 });
 

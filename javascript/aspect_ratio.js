@@ -1,6 +1,6 @@
 /**
  * Lobe Theme Neo - Aspect Ratio & Generation Controls v3.2
- * 
+ *
  * Features:
  * - Native Lobe Theme Styling: Fully unified with Ant Design / LobeHub UI tokens.
  * - Dual View Modes (Configurable in Experimental Settings & on-panel toggle):
@@ -17,38 +17,41 @@
  */
 
 (function () {
+    const getAppRoot = () => (typeof gradioApp === "function" ? gradioApp() : null) || document.body;
     // Standard Resolution Presets (divisible by 64 / 8, logically ordered)
     const PRESETS = [
         // Square (Квадрат — базовые стандарты)
-        { label: "1:1", w: 1024, h: 1024, group: "square", desc: "SDXL / Flux 1024×1024" },
-        { label: "1:1", w: 768, h: 768, group: "square", desc: "SD 2.x 768×768" },
-        { label: "1:1", w: 512, h: 512, group: "square", desc: "SD 1.5 512×512" },
+        { label: "1:1", w: 1024, h: 1024, group: "square", family: "XL" },
+        { label: "1:1", w: 768, h: 768, group: "square", family: "SD2" },
+        { label: "1:1", w: 512, h: 512, group: "square", family: "SD15" },
 
         // Portrait (Портретные — от близких к квадрату до самых узких)
-        { label: "4:5", w: 896, h: 1152, group: "portrait", desc: "Фото / Инста 4:5 (SDXL/Flux)" },
-        { label: "3:4", w: 896, h: 1216, group: "portrait", desc: "Портрет 3:4 (SDXL/Flux)" },
-        { label: "2:3", w: 832, h: 1216, group: "portrait", desc: "Классический 35мм 2:3 (SDXL/Flux)" },
-        { label: "2:3", w: 512, h: 768, group: "portrait", desc: "SD 1.5 Портрет 512×768" },
-        { label: "9:16", w: 768, h: 1344, group: "portrait", desc: "Мобильный / Stories 9:16 (SDXL/Flux)" },
-        { label: "9:16", w: 512, h: 896, group: "portrait", desc: "SD 1.5 Мобильный 512×896" },
-        { label: "9:16", w: 480, h: 832, group: "portrait", desc: "Wan Video 480×832" },
-        { label: "9:21", w: 640, h: 1536, group: "portrait", desc: "Вытянутый кино 9:21" },
+        { label: "4:5", w: 896, h: 1152, group: "portrait", family: "XL" },
+        { label: "3:4", w: 896, h: 1216, group: "portrait", family: "XL" },
+        { label: "2:3", w: 832, h: 1216, group: "portrait", family: "XL" },
+        { label: "2:3", w: 512, h: 768, group: "portrait", family: "SD15" },
+        { label: "9:16", w: 768, h: 1344, group: "portrait", family: "XL" },
+        { label: "9:16", w: 512, h: 896, group: "portrait", family: "SD15" },
+        { label: "9:16", w: 480, h: 832, group: "portrait", family: "Wan" },
+        { label: "9:21", w: 640, h: 1536, group: "portrait", family: "XL" },
 
         // Landscape (Альбомные / Пейзажные — от близких к квадрату до ультрашироких)
-        { label: "5:4", w: 1152, h: 896, group: "landscape", desc: "Пейзаж 5:4 (SDXL/Flux)" },
-        { label: "4:3", w: 1216, h: 896, group: "landscape", desc: "Монитор 4:3 (SDXL/Flux)" },
-        { label: "3:2", w: 1216, h: 832, group: "landscape", desc: "Классический 35мм 3:2 (SDXL/Flux)" },
-        { label: "3:2", w: 768, h: 512, group: "landscape", desc: "SD 1.5 Пейзаж 768×512" },
-        { label: "16:9", w: 1344, h: 768, group: "landscape", desc: "Широкоформатный 16:9 (SDXL/Flux)" },
-        { label: "16:9", w: 896, h: 512, group: "landscape", desc: "SD 1.5 Широкий 896×512" },
-        { label: "16:9", w: 832, h: 480, group: "landscape", desc: "Wan Video 832×480" },
-        { label: "2:1", w: 1408, h: 704, group: "landscape", desc: "Панорама 2:1" },
-        { label: "21:9", w: 1536, h: 640, group: "landscape", desc: "Кинематографичный 21:9" },
+        { label: "5:4", w: 1152, h: 896, group: "landscape", family: "XL" },
+        { label: "4:3", w: 1216, h: 896, group: "landscape", family: "XL" },
+        { label: "3:2", w: 1216, h: 832, group: "landscape", family: "XL" },
+        { label: "3:2", w: 768, h: 512, group: "landscape", family: "SD15" },
+        { label: "16:9", w: 1344, h: 768, group: "landscape", family: "XL" },
+        { label: "16:9", w: 896, h: 512, group: "landscape", family: "SD15" },
+        { label: "16:9", w: 832, h: 480, group: "landscape", family: "Wan" },
+        { label: "2:1", w: 1408, h: 704, group: "landscape", family: "XL" },
+        { label: "21:9", w: 1536, h: 640, group: "landscape", family: "XL" },
     ];
 
     const I18N = {
         en_US: {
-            title: "Dimension Presets",
+            title: "Resolution",
+            samplingTitle: "Sampling",
+            presetsEmpty: "Enable a preset family in Theme settings, or enter a custom size.",
             aspectRatio: "Aspect Ratio",
             buttonsView: "Buttons",
             dropdownView: "Dropdown",
@@ -68,6 +71,8 @@
             height: "Height",
             batchCount: "Batch Count",
             batchSize: "Batch Size",
+            frames: "Frames",
+            saveModeError: "Could not save display mode.",
             swapTip: "Swap width and height (⇅)",
             closeTip: "Close",
             settingsTip: "Settings",
@@ -84,44 +89,8 @@
             "21:9": "Ultra-wide Cinema 21:9",
             "2:1": "Panorama 2:1",
         },
-        ru_RU: {
-            title: "Предустановки размера",
-            aspectRatio: "Соотношение сторон",
-            buttonsView: "Кнопки",
-            dropdownView: "Список",
-            buttonsViewTip: "Переключить на сетку кнопок",
-            dropdownViewTip: "Переключить на компактный выпадающий список",
-            filterAll: "Все",
-            filterSquare: "Квадрат",
-            filterPortrait: "Портрет",
-            filterLandscape: "Пейзаж",
-            resPreviewTip: "Текущее разрешение (Ширина × Высота)",
-            selectPreset: "Выбрать пресет...",
-            customRes: "Пользовательское",
-            portrait: "Портрет",
-            landscape: "Альбомный",
-            square: "Квадрат",
-            width: "Ширина",
-            height: "Высота",
-            batchCount: "Количество пакетов",
-            batchSize: "Размер пакета",
-            swapTip: "Поменять местами ширину и высоту (⇅)",
-            closeTip: "Закрыть",
-            settingsTip: "Настройки",
-            "1:1": "Квадрат 1:1",
-            "4:5": "Фото / Инста 4:5",
-            "3:4": "Портрет 3:4",
-            "2:3": "Классический 2:3",
-            "9:16": "Мобильный / Stories 9:16",
-            "9:21": "Вытянутый 9:21",
-            "5:4": "Пейзаж 5:4",
-            "4:3": "Монитор 4:3",
-            "3:2": "Классический 3:2",
-            "16:9": "Широкоформатный 16:9",
-            "21:9": "Кинематографичный 21:9",
-            "2:1": "Панорама 2:1",
-        },
         zh_CN: {
+            frames: "帧数",
             title: "尺寸预设",
             aspectRatio: "宽高比",
             buttonsView: "按钮",
@@ -162,141 +131,171 @@
 
     let activePopoverTab = null;
 
-    function closeAllPopovers() {
+    let activeTrigger = null;
+
+    function closeAllPopovers(restoreFocus = false) {
         document.querySelectorAll(".sd-ar-popover").forEach((p) => {
             p.style.display = "none";
         });
         document.querySelectorAll(".sd-ar-trigger").forEach((btn) => {
             btn.classList.remove("active");
+            btn.setAttribute("aria-expanded", "false");
         });
         document.querySelectorAll(".sd-ar-ratio-badge").forEach((badge) => {
             badge.classList.remove("active");
+            badge.setAttribute("aria-expanded", "false");
         });
         activePopoverTab = null;
+        if (restoreFocus) activeTrigger?.focus();
+        activeTrigger = null;
     }
 
     function positionPopover(triggerBtn, popover) {
         if (!triggerBtn || !popover) return;
         const rect = triggerBtn.getBoundingClientRect();
-        const popoverWidth = 320;
-        let left = rect.left;
-        let top = rect.bottom + 6;
-
-        if (left + popoverWidth > window.innerWidth - 16) {
-            left = window.innerWidth - popoverWidth - 16;
-        }
-        if (left < 16) left = 16;
-
+        const viewport = window.visualViewport;
+        const availableWidth = viewport?.width || window.innerWidth;
+        const availableHeight = viewport?.height || window.innerHeight;
+        const popoverWidth = Math.min(320, availableWidth - 32);
+        const left = Math.max(16, Math.min(rect.left, availableWidth - popoverWidth - 16));
         popover.style.position = "fixed";
+        popover.style.width = `${popoverWidth}px`;
+        popover.style.maxHeight = `${Math.max(80, availableHeight - 32)}px`;
+        const height = Math.min(popover.scrollHeight || 400, availableHeight - 32);
+        const below = rect.bottom + 6;
+        const top = below + height <= availableHeight - 16 ? below : Math.max(16, rect.top - height - 6);
         popover.style.top = `${Math.round(top)}px`;
         popover.style.left = `${Math.round(left)}px`;
-        popover.style.width = `${popoverWidth}px`;
-        popover.style.zIndex = "99999";
+        popover.style.zIndex = "10050";
+    }
+
+    function readThemeSetting() {
+        if (window.lobeThemeSetting) return window.lobeThemeSetting;
+        try {
+            const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING");
+            const setting = raw ? JSON.parse(raw) : {};
+            return setting && typeof setting === "object" && !Array.isArray(setting) ? setting : {};
+        } catch { return {}; }
     }
 
     function getLocale() {
-        if (typeof opts !== "undefined" && opts.localization) {
-            const loc = opts.localization.toLowerCase();
-            if (loc.startsWith("ru")) return "ru_RU";
-            if (loc.startsWith("zh")) return "zh_CN";
-            if (loc.startsWith("en")) return "en_US";
-        }
-
-        try {
-            const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING");
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (parsed && parsed.i18n) {
-                    if (parsed.i18n.startsWith("ru")) return "ru_RU";
-                    if (parsed.i18n.startsWith("zh")) return "zh_CN";
-                    if (parsed.i18n.startsWith("en")) return "en_US";
-                    return parsed.i18n;
-                }
-            }
-        } catch (e) {}
-
-        const nav = (navigator.language || navigator.userLanguage || "").toLowerCase();
-        if (nav.startsWith("ru")) return "ru_RU";
-        if (nav.startsWith("zh")) return "zh_CN";
+        const setting = readThemeSetting();
+        if (typeof setting.i18n === "string") return setting.i18n;
+        const language = (typeof opts !== "undefined" && opts.localization) || navigator.language || "en";
+        if (language.toLowerCase().startsWith("ru")) return "ru_RU";
+        if (language.toLowerCase().startsWith("zh")) return "zh_CN";
         return "en_US";
     }
 
     function t(key) {
         const loc = getLocale();
         const dict = I18N[loc] || I18N["en_US"];
-        return dict[key] || I18N["en_US"][key] || key;
+        const fallback = dict[key] || I18N["en_US"][key] || key;
+        return window.lobeTranslate?.(`aspectPanel.${key}`, fallback) || fallback;
     }
 
-    function renderRatioSvg(group) {
-        if (group === "square") {
-            return `<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"></rect></svg>`;
-        } else if (group === "portrait") {
-            return `<svg viewBox="0 0 16 16" width="10" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="1.5" width="9" height="13" rx="1.5"></rect></svg>`;
-        } else {
-            return `<svg viewBox="0 0 16 16" width="14" height="10" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"></rect></svg>`;
-        }
+    // Tabler Icons 3.50.0, MIT (TABLER-LICENSE.txt).
+    const ratioIcons = {
+        x: "<path d=\"M18 6l-12 12\" /><path d=\"M6 6l12 12\" />",
+        layoutGrid: "<path d=\"M4 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4\" /><path d=\"M14 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4\" /><path d=\"M4 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4\" /><path d=\"M14 15a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -4\" />",
+        chevronDown: "<path d=\"M6 9l6 6l6 -6\" />",
+        layoutList: "<path d=\"M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -2\" /><path d=\"M4 16a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -2\" />",
+        switchVertical: "<path d=\"M3 8l4 -4l4 4\" /><path d=\"M7 4l0 9\" /><path d=\"M13 16l4 4l4 -4\" /><path d=\"M17 10l0 10\" />",
+        circle: "<path d=\"M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0\" />",
+        square: "<path d=\"M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14\" />",
+        rectangleVertical: "<path d=\"M5 5a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2l0 -14\" />",
+        rectangle: "<path d=\"M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10\" />",
+    };
+    function ratioIcon(name, size = 12, className = "") {
+        return `<svg aria-hidden="true" class="${className}" viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">${ratioIcons[name]}</svg>`;
     }
 
     function isAspectRatioEnabled() {
-        if (typeof opts !== "undefined") {
-            if (typeof opts.lobe_enable_aspect_ratio !== "undefined") {
-                return Boolean(opts.lobe_enable_aspect_ratio);
-            }
-            if (typeof opts.enable_aspect_ratio !== "undefined") {
-                return Boolean(opts.enable_aspect_ratio);
-            }
-        }
-
-        try {
-            const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING");
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (typeof parsed.enableAspectRatio !== "undefined") {
-                    return Boolean(parsed.enableAspectRatio);
-                }
-            }
-        } catch (e) {}
-
-        const localFlag = localStorage.getItem("lobe_enable_aspect_ratio");
-        if (localFlag !== null) {
-            return localFlag === "true";
-        }
-
+        const setting = readThemeSetting();
+        if (typeof setting.enableAspectRatio === "boolean") return setting.enableAspectRatio;
         return true;
     }
 
-    function getAspectRatioViewMode() {
-        const local = localStorage.getItem("lobe_ratio_default_view");
-        if (local === "buttons" || local === "dropdown") return local;
+    function isResolutionFamilyEnabled(family, setting = readThemeSetting()) {
+        return setting[`resolutionPresets${family}`] ?? (family === "XL");
+    }
 
-        try {
-            const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING");
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (parsed.aspectRatioMode) return parsed.aspectRatioMode;
-                if (parsed.aspectRatioViewMode) return parsed.aspectRatioViewMode;
-            }
-        } catch (e) {}
-
-        if (typeof opts !== "undefined") {
-            if (typeof opts.lobe_ratio_default_view !== "undefined") return opts.lobe_ratio_default_view;
-            if (typeof opts.gal_ratio_default_view !== "undefined") return opts.gal_ratio_default_view;
+    function updatePresetVisibility(panel, popover) {
+        const setting = readThemeSetting();
+        const filters = [...panel.querySelectorAll(".sd-ar-filter-btn")];
+        const grid = [...panel.querySelectorAll(".sd-ar-btn")];
+        const available = grid.filter((button) => isResolutionFamilyEnabled(button.dataset.family, setting));
+        let active = filters.find((button) => button.classList.contains("active")) || filters[0];
+        if (active.dataset.filter !== "all" && !available.some((button) => button.dataset.group === active.dataset.filter)) {
+            active = filters[0];
         }
+        for (const button of filters) {
+            const group = button.dataset.filter;
+            const count = group === "all" ? available.length : available.filter((item) => item.dataset.group === group).length;
+            button.hidden = group !== "all" && count === 0;
+            button.classList.toggle("active", button === active);
+            button.setAttribute("aria-pressed", String(button === active));
+            button.querySelector(".sd-ar-filter-count").textContent = String(count);
+        }
+        for (const button of grid) {
+            const group = active.dataset.filter;
+            button.hidden = !isResolutionFamilyEnabled(button.dataset.family, setting) ||
+                (group !== "all" && button.dataset.group !== group);
+        }
+        for (const group of popover.querySelectorAll(".sd-ar-popover-grid")) {
+            const buttons = [...group.querySelectorAll("button[data-family]")];
+            buttons.forEach((button) => { button.hidden = !isResolutionFamilyEnabled(button.dataset.family, setting); });
+            group.hidden = group.previousElementSibling.hidden = buttons.every((button) => button.hidden);
+        }
+        panel.querySelector(".sd-ar-presets-empty").hidden = available.length > 0;
+        popover.querySelector(".sd-ar-presets-empty").hidden = available.length > 0;
+    }
 
+    function getAspectRatioViewMode() {
+        const setting = readThemeSetting();
+        if (["buttons", "dropdown"].includes(setting.aspectRatioMode)) return setting.aspectRatioMode;
+        let legacy;
+        try { legacy = localStorage.getItem("lobe_ratio_default_view"); } catch {}
+        if (["buttons", "dropdown"].includes(legacy)) return legacy;
         return "dropdown";
     }
 
-    function setAspectRatioViewMode(mode) {
-        localStorage.setItem("lobe_ratio_default_view", mode);
+    async function setAspectRatioViewMode(mode, panel) {
+        if (!["buttons", "dropdown"].includes(mode)) return;
         try {
-            const raw = localStorage.getItem("SD-LOBE-SETTING") || localStorage.getItem("SD-KITCHEN-SETTING") || "{}";
-            const parsed = JSON.parse(raw) || {};
-            parsed.aspectRatioMode = mode;
-            parsed.aspectRatioViewMode = mode;
-            const updated = JSON.stringify(parsed);
-            localStorage.setItem("SD-LOBE-SETTING", updated);
-            localStorage.setItem("SD-KITCHEN-SETTING", updated);
-        } catch (e) {}
+            if (typeof window.lobeThemeSetSetting === "function") {
+                await window.lobeThemeSetSetting({ aspectRatioMode: mode });
+            } else {
+                const setting = { ...readThemeSetting(), aspectRatioMode: mode };
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 5000);
+                try {
+                    const response = await fetch('/lobe/config', { method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(setting), signal: controller.signal });
+                    if (!response.ok) throw new Error('Settings save failed');
+                    localStorage.setItem('SD-LOBE-SETTING', JSON.stringify(setting));
+                    window.lobeThemeSetting = setting;
+                } finally { clearTimeout(timeout); }
+            }
+            panel?.querySelector(".sd-ar-save-error")?.remove();
+            localStorage.removeItem("lobe_ratio_default_view");
+            checkLiveSettings();
+        } catch (error) {
+            console.warn('[Lobe] Could not save aspect ratio settings', error);
+            checkLiveSettings();
+            if (panel) {
+                let status = panel.querySelector('.sd-ar-save-error');
+                if (!status) {
+                    status = document.createElement('div');
+                    status.className = 'sd-ar-save-error';
+                    status.setAttribute('role', 'alert');
+                    panel.append(status);
+                }
+                status.dataset.i18n = "saveModeError";
+                updateTranslatedText(status);
+            }
+        }
     }
 
     function getSliderBlock(input) {
@@ -331,57 +330,13 @@
         const numVal = parseInt(val, 10);
         if (isNaN(numVal)) return false;
 
-        const block = getSliderBlock(input);
-        const numberInput = block ? (block.querySelector("input[type=number]") || input) : input;
-        const rangeInput = block ? block.querySelector("input[type=range]") : null;
-
-        let changed = false;
-        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
-
-        // 1. Update number input
-        if (numberInput && parseInt(numberInput.value, 10) !== numVal) {
-            if (nativeSetter) {
-                nativeSetter.call(numberInput, numVal);
-            } else {
-                numberInput.value = numVal;
-            }
-
-            if (typeof updateInput === "function") {
-                updateInput(numberInput);
-            }
-            numberInput.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
-            numberInput.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-            numberInput.dispatchEvent(new Event("blur", { bubbles: true, composed: true }));
-            try {
-                numberInput.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, composed: true }));
-            } catch (e) {
-                numberInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, composed: true }));
-            }
-            changed = true;
-        }
-
-        // 2. Update range slider input (triggers Gradio reactive store & preview overlays)
-        if (rangeInput && parseInt(rangeInput.value, 10) !== numVal) {
-            if (nativeSetter) {
-                nativeSetter.call(rangeInput, numVal);
-            } else {
-                rangeInput.value = numVal;
-            }
-
-            if (typeof updateInput === "function") {
-                updateInput(rangeInput);
-            }
-            rangeInput.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
-            rangeInput.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-            try {
-                rangeInput.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, composed: true }));
-            } catch (e) {
-                rangeInput.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, composed: true }));
-            }
-            changed = true;
-        }
-
-        return changed;
+        const control = getSliderBlock(input)?.querySelector("input[type=range]") || input;
+        if (Number(control.value) === numVal && Number(input.value) === numVal) return false;
+        control.value = String(numVal);
+        control.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+        control.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+        queueMicrotask(() => control.dispatchEvent(new Event("pointerup", { bubbles: true, composed: true })));
+        return true;
     }
 
     function syncBoundsFromNative(nativeInput, customNum, customSlider, fallbackMin, fallbackMax, fallbackStep) {
@@ -390,9 +345,13 @@
         const rangeInput = block ? block.querySelector("input[type=range]") : null;
         const numberInput = block ? (block.querySelector("input[type=number]") || nativeInput) : nativeInput;
 
-        const min = parseFloat(numberInput?.min || rangeInput?.min) || fallbackMin;
-        const max = parseFloat(numberInput?.max || rangeInput?.max) || fallbackMax;
-        const step = parseFloat(numberInput?.step || rangeInput?.step) || fallbackStep;
+        const bound = (name, fallback) => {
+            const value = parseFloat(rangeInput?.[name] || numberInput?.[name]);
+            return Number.isFinite(value) ? value : fallback;
+        };
+        const min = bound("min", fallbackMin);
+        const max = bound("max", fallbackMax);
+        const step = bound("step", fallbackStep);
 
         if (customNum) {
             if (parseFloat(customNum.min) !== min) customNum.min = min;
@@ -425,11 +384,7 @@
         const max = parseFloat(slider.max) || 100;
         const val = parseFloat(slider.value) || 0;
         const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
-        slider.style.setProperty(
-            "background",
-            `linear-gradient(to right, var(--gf-primary, #52c41a) 0%, var(--gf-primary, #52c41a) ${pct}%, var(--gf-slider-unfilled, rgba(128, 128, 128, 0.2)) ${pct}%, var(--gf-slider-unfilled, rgba(128, 128, 128, 0.2)) 100%)`,
-            "important"
-        );
+        slider.style.setProperty("--lobe-range-progress", `${pct}%`);
     }
 
     function findMatchingPreset(w, h) {
@@ -481,6 +436,8 @@
         popover.className = "sd-ar-popover";
         popover.id = `${tabName}_ar_popover`;
         popover.style.display = "none";
+        popover.setAttribute("role", "dialog");
+        popover.setAttribute("aria-label", t("title"));
 
         const squarePresets = PRESETS.filter((p) => p.group === "square");
         const portraitPresets = PRESETS.filter((p) => p.group === "portrait");
@@ -491,19 +448,18 @@
                 <span class="sd-ar-popover-title" data-i18n="title">${t("title")}</span>
                 <div class="sd-ar-popover-actions">
                     <button type="button" class="sd-ar-popover-iconbtn sd-ar-popover-close" title="${t("closeTip")}">
-                        <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor">
-                            <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06z"/>
-                        </svg>
+                        ${ratioIcon("x", 14)}
                     </button>
                 </div>
             </div>
-            
+
             <div class="sd-ar-popover-content">
+                <p class="sd-ar-presets-empty" data-i18n="presetsEmpty" hidden>${t("presetsEmpty")}</p>
                 <!-- Square Section First (Baseline) -->
                 <div class="sd-ar-popover-sectitle" data-i18n="square">${t("square")}</div>
                 <div class="sd-ar-popover-grid">
                     ${squarePresets.map((p) => `
-                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) — ${p.desc}">
+                        <button type="button" class="sd-ar-popover-btn" data-family="${p.family}" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) · ${p.family}">
                             <span class="sd-ar-pop-ratio">${p.label}</span>
                             <span class="sd-ar-pop-res">${p.w} × ${p.h}</span>
                         </button>
@@ -514,7 +470,7 @@
                 <div class="sd-ar-popover-sectitle" data-i18n="portrait">${t("portrait")}</div>
                 <div class="sd-ar-popover-grid">
                     ${portraitPresets.map((p) => `
-                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) — ${p.desc}">
+                        <button type="button" class="sd-ar-popover-btn" data-family="${p.family}" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) · ${p.family}">
                             <span class="sd-ar-pop-ratio">${p.label}</span>
                             <span class="sd-ar-pop-res">${p.w} × ${p.h}</span>
                         </button>
@@ -525,7 +481,7 @@
                 <div class="sd-ar-popover-sectitle" data-i18n="landscape">${t("landscape")}</div>
                 <div class="sd-ar-popover-grid">
                     ${landscapePresets.map((p) => `
-                        <button type="button" class="sd-ar-popover-btn" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) — ${p.desc}">
+                        <button type="button" class="sd-ar-popover-btn" data-family="${p.family}" data-w="${p.w}" data-h="${p.h}" title="${p.w} × ${p.h} (${t(p.label)}) · ${p.family}">
                             <span class="sd-ar-pop-ratio">${p.label}</span>
                             <span class="sd-ar-pop-res">${p.w} × ${p.h}</span>
                         </button>
@@ -537,7 +493,19 @@
         document.body.appendChild(popover);
 
         const closeBtn = popover.querySelector(".sd-ar-popover-close");
-        if (closeBtn) closeBtn.addEventListener("click", closeAllPopovers);
+        if (closeBtn) closeBtn.addEventListener("click", () => closeAllPopovers(true));
+        popover.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                event.stopPropagation();
+                event.preventDefault();
+                closeAllPopovers(true);
+            } else if (event.key === "Tab") {
+                const buttons = Array.from(popover.querySelectorAll("button:not([disabled], [hidden])"));
+                const first = buttons[0], last = buttons[buttons.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            }
+        });
 
         return popover;
     }
@@ -555,47 +523,30 @@
             <!-- Top Toolbar: Preset Trigger Pill, Mode Toggle, and Swap Button -->
             <div class="sd-ar-card-header">
                 <div class="sd-ar-header-left">
+                    <strong class="sd-ar-panel-title" data-i18n="title">${t("title")}</strong>
                     <button type="button" class="sd-ar-trigger" id="${tabName}_ar_trigger_btn" title="${t("title")}">
-                        <svg class="sd-ar-icon-grid" viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
-                            <rect x="2" y="2" width="5" height="5" rx="1"></rect>
-                            <rect x="9" y="2" width="5" height="5" rx="1"></rect>
-                            <rect x="2" y="9" width="5" height="5" rx="1"></rect>
-                            <rect x="9" y="9" width="5" height="5" rx="1"></rect>
-                        </svg>
+                        ${ratioIcon("layoutGrid", 14, "sd-ar-icon-grid")}
                         <span class="sd-ar-trigger-res" id="${tabName}_ar_trigger_res">1024 × 1024</span>
                         <span class="sd-ar-ratio-badge" id="${tabName}_ar_ratio_btn">1:1</span>
-                        <svg class="sd-ar-icon-chevron" viewBox="0 0 12 12" width="10" height="10" fill="currentColor">
-                            <path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                        ${ratioIcon("chevronDown", 12, "sd-ar-icon-chevron")}
                     </button>
                 </div>
                 <div class="sd-ar-header-actions">
                     <!-- View Mode Toggle: [ ⊞ Кнопки ] [ ▾ Список ] -->
                     <div class="sd-ar-view-toggle">
                         <button type="button" class="sd-ar-toggle-btn" id="${tabName}_ar_view_buttons" data-view="buttons" title="${t("buttonsViewTip")}">
-                            <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor">
-                                <rect x="2" y="2" width="5" height="5" rx="1"></rect>
-                                <rect x="9" y="2" width="5" height="5" rx="1"></rect>
-                                <rect x="2" y="9" width="5" height="5" rx="1"></rect>
-                                <rect x="9" y="9" width="5" height="5" rx="1"></rect>
-                            </svg>
+                            ${ratioIcon("layoutGrid", 13)}
                             <span data-i18n="buttonsView">${t("buttonsView")}</span>
                         </button>
                         <button type="button" class="sd-ar-toggle-btn" id="${tabName}_ar_view_dropdown" data-view="dropdown" title="${t("dropdownViewTip")}">
-                            <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor">
-                                <rect x="2" y="3" width="12" height="2" rx="0.5"></rect>
-                                <rect x="2" y="7" width="12" height="2" rx="0.5"></rect>
-                                <rect x="2" y="11" width="12" height="2" rx="0.5"></rect>
-                            </svg>
+                            ${ratioIcon("layoutList", 13)}
                             <span data-i18n="dropdownView">${t("dropdownView")}</span>
                         </button>
                     </div>
 
                     <!-- Orientation Swap Button -->
                     <button type="button" class="sd-ar-icon-action-btn" id="${tabName}_ar_swap_btn" title="${t("swapTip")}">
-                        <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
-                            <path d="M4.5 2a.5.5 0 0 1 .5.5v9.793l2.146-2.147a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 1 1 .708-.708L4 12.293V2.5a.5.5 0 0 1 .5-.5zm7 12a.5.5 0 0 1-.5-.5V3.707l-2.146 2.147a.5.5 0 0 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L12 3.707V13.5a.5.5 0 0 1-.5.5z"/>
-                        </svg>
+                        ${ratioIcon("switchVertical", 15)}
                     </button>
                 </div>
             </div>
@@ -605,27 +556,28 @@
                 <div class="sd-ar-filter-row">
                     <div class="sd-ar-filter-bar">
                         <button type="button" class="sd-ar-filter-btn active" data-filter="all">
-                            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><circle cx="8" cy="8" r="5.5"></circle></svg>
-                            <span data-i18n="filterAll">${t("filterAll")}</span> (${PRESETS.length})
+                            ${ratioIcon("circle", 12, "sd-ar-tab-icon")}
+                            <span data-i18n="filterAll">${t("filterAll")}</span> <span class="sd-ar-filter-count">${PRESETS.length}</span>
                         </button>
                         <button type="button" class="sd-ar-filter-btn" data-filter="square">
-                            <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"></rect></svg>
-                            <span data-i18n="filterSquare">${t("filterSquare")}</span> (${squarePresets.length})
+                            ${ratioIcon("square", 12, "sd-ar-tab-icon")}
+                            <span data-i18n="filterSquare">${t("filterSquare")}</span> <span class="sd-ar-filter-count">${squarePresets.length}</span>
                         </button>
                         <button type="button" class="sd-ar-filter-btn" data-filter="portrait">
-                            <svg viewBox="0 0 16 16" width="9" height="12" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><rect x="3" y="1.5" width="10" height="13" rx="1.5"></rect></svg>
-                            <span data-i18n="filterPortrait">${t("filterPortrait")}</span> (${portraitPresets.length})
+                            ${ratioIcon("rectangleVertical", 12, "sd-ar-tab-icon")}
+                            <span data-i18n="filterPortrait">${t("filterPortrait")}</span> <span class="sd-ar-filter-count">${portraitPresets.length}</span>
                         </button>
                         <button type="button" class="sd-ar-filter-btn" data-filter="landscape">
-                            <svg viewBox="0 0 16 16" width="12" height="9" fill="none" stroke="currentColor" stroke-width="1.8" class="sd-ar-tab-icon"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"></rect></svg>
-                            <span data-i18n="filterLandscape">${t("filterLandscape")}</span> (${landscapePresets.length})
+                            ${ratioIcon("rectangle", 12, "sd-ar-tab-icon")}
+                            <span data-i18n="filterLandscape">${t("filterLandscape")}</span> <span class="sd-ar-filter-count">${landscapePresets.length}</span>
                         </button>
                     </div>
                 </div>
+                <p class="sd-ar-presets-empty" data-i18n="presetsEmpty" hidden>${t("presetsEmpty")}</p>
                 <div class="sd-ar-grid" id="${tabName}_ar_grid">
                     ${PRESETS.map((p, idx) => `
-                        <button type="button" class="sd-ar-btn" data-w="${p.w}" data-h="${p.h}" data-idx="${idx}" data-group="${p.group}" title="${p.label} (${p.w} × ${p.h}) — ${p.desc}">
-                            <div class="sd-ar-btn-icon">${renderRatioSvg(p.group)}</div>
+                        <button type="button" class="sd-ar-btn" data-family="${p.family}" data-w="${p.w}" data-h="${p.h}" data-idx="${idx}" data-group="${p.group}" title="${p.label} (${p.w} × ${p.h}) · ${p.family}">
+                            <div class="sd-ar-btn-icon" aria-hidden="true"><span style="--preset-ratio:${p.w} / ${p.h};--preset-icon-width:${Math.min(22, Math.round(20 * p.w / p.h))}px"></span></div>
                             <div class="sd-ar-btn-info">
                                 <span class="sd-ar-btn-ratio">${p.label}</span>
                                 <span class="sd-ar-btn-res">${p.w} × ${p.h}</span>
@@ -677,13 +629,19 @@
         return panel;
     }
 
+    function updateTranslatedText(element) {
+        const value = t(element.dataset.i18n);
+        if (element.textContent !== value) element.textContent = value;
+        if (element.classList.contains("sd-ar-label-name")) {
+            element.closest(".sd-ar-slider-cell").querySelectorAll("input").forEach((input) => {
+                if (input.getAttribute("aria-label") !== value) input.setAttribute("aria-label", value);
+            });
+        }
+    }
+
     function updateAllTexts() {
-        document.querySelectorAll("[data-i18n]").forEach((el) => {
-            const key = el.getAttribute("data-i18n");
-            if (key) {
-                el.textContent = t(key);
-            }
-        });
+        document.querySelectorAll(".sd-ar-panel-compact [data-i18n], .sd-ar-popover [data-i18n], .sd-ar-sampling-title")
+            .forEach(updateTranslatedText);
 
         document.querySelectorAll(".sd-ar-icon-action-btn").forEach((btn) => {
             btn.title = t("swapTip");
@@ -694,13 +652,25 @@
         document.querySelectorAll(".sd-ar-popover-close").forEach((btn) => {
             btn.title = t("closeTip");
         });
+        document.querySelectorAll(".sd-ar-popover-btn").forEach((btn) => {
+            const preset = PRESETS.find(({ w, h }) => w === Number(btn.dataset.w) && h === Number(btn.dataset.h));
+            if (preset) btn.title = `${preset.w} × ${preset.h} (${t(preset.label)}) · ${preset.family}`;
+        });
+    }
+
+    // Gradio stores component visibility on the block itself. offsetParent
+    // forces layout and also mistakes an inactive tab for a disabled control.
+    function isDistilledEnabled(element) {
+        return Boolean(element && !element.hidden &&
+            !element.classList.contains('hidden') && !element.classList.contains('hide') &&
+            element.style.display !== 'none');
     }
 
     function organizeGenerationParams(tabName) {
-        const root = gradioApp();
+        const root = getAppRoot();
         if (!root) return;
 
-        const isEnabled = isAspectRatioEnabled();
+        const isEnabled = readThemeSetting().enhanceSampling ?? true;
         const samplerContainer = root.querySelector(`#sampler_selection_${tabName}`);
         const formTarget = samplerContainer ? (samplerContainer.querySelector(".form") || samplerContainer) : null;
         const steps = root.querySelector(`#${tabName}_steps`);
@@ -710,6 +680,13 @@
         if (!samplerContainer) return;
 
         if (isEnabled) {
+            if (!samplerContainer.querySelector(":scope > .sd-ar-sampling-title")) {
+                const title = document.createElement("div");
+                title.className = "sd-ar-sampling-title";
+                title.dataset.i18n = "samplingTitle";
+                title.textContent = t("samplingTitle");
+                samplerContainer.prepend(title);
+            }
             samplerContainer.classList.add("sd-ar-enhanced-sampler");
             if (formTarget) formTarget.classList.add("sd-ar-enhanced-form");
 
@@ -721,16 +698,14 @@
             }
 
             if (cfgScale && formTarget && !formTarget.contains(cfgScale)) {
-                if (!cfgScale._origParent) cfgScale._origParent = cfgScale.parentElement;
+                if (!cfgScale._origParent) {
+                    cfgScale._origParent = cfgScale.parentElement;
+                    cfgScale._origNextSibling = cfgScale.nextSibling;
+                }
                 formTarget.appendChild(cfgScale);
             }
 
-            const isDistilledVisible = Boolean(
-                distilledCfg &&
-                distilledCfg.offsetParent !== null &&
-                !distilledCfg.style.display?.includes("none") &&
-                !distilledCfg.classList.contains("hide")
-            );
+            const isDistilledVisible = isDistilledEnabled(distilledCfg);
 
             if (isDistilledVisible) {
                 if (formTarget && !formTarget.contains(distilledCfg)) {
@@ -745,39 +720,29 @@
                 samplerContainer.classList.remove("has-distilled-cfg");
             }
 
-            const cfgWrapper = (cfgScale && cfgScale._origParent) || root.querySelector(`#${tabName}_settings > div:has(#${tabName}_cfg_scale)`);
-            if (cfgWrapper && cfgWrapper !== samplerContainer && cfgWrapper !== formTarget) {
-                cfgWrapper.classList.add("sd-ar-orig-cfg-container");
-                cfgWrapper.style.setProperty("display", "none", "important");
-                if (cfgWrapper.parentElement && cfgWrapper.parentElement.children.length === 1) {
-                    cfgWrapper.parentElement.style.setProperty("display", "none", "important");
-                }
+            for (const control of [steps, cfgScale, distilledCfg]) {
+                control?._origParent?.classList.add("sd-ar-sampling-source");
             }
         } else {
+            samplerContainer.querySelector(":scope > .sd-ar-sampling-title")?.remove();
             samplerContainer.classList.remove("sd-ar-enhanced-sampler");
             if (formTarget) formTarget.classList.remove("sd-ar-enhanced-form");
             samplerContainer.classList.remove("has-distilled-cfg");
 
-            if (steps && steps._origParent && formTarget && formTarget.contains(steps)) {
-                if (steps._origNextSibling && steps._origNextSibling.parentNode === steps._origParent) {
-                    steps._origParent.insertBefore(steps, steps._origNextSibling);
-                } else {
-                    steps._origParent.appendChild(steps);
+            for (const control of [distilledCfg, cfgScale, steps]) {
+                const originalParent = control?._origParent;
+                if (!originalParent) continue;
+                originalParent.classList.remove("sd-ar-sampling-source");
+                if (formTarget?.contains(control)) {
+                    const next = control._origNextSibling;
+                    originalParent.insertBefore(control, next?.parentNode === originalParent ? next : null);
                 }
-            }
-            if (cfgScale && cfgScale._origParent && formTarget && formTarget.contains(cfgScale)) {
-                cfgScale._origParent.appendChild(cfgScale);
-                cfgScale._origParent.style.display = "";
-            }
-            if (distilledCfg && distilledCfg._origParent && formTarget && formTarget.contains(distilledCfg)) {
-                distilledCfg._origParent.appendChild(distilledCfg);
-                distilledCfg._origParent.style.display = "";
             }
         }
     }
 
     function initTabControls(tabName) {
-        const root = gradioApp();
+        const root = getAppRoot();
         if (!root) return false;
 
         if (root.querySelector(`#${tabName}_ar_panel`)) {
@@ -805,13 +770,13 @@
         origDimensionsRow.classList.add("sd-ar-orig-dimensions-row");
 
         const panel = createAspectRatioPanel(tabName);
-        const samplerContainer = root.querySelector(`#sampler_selection_${tabName}`);
-        if (samplerContainer && samplerContainer.parentElement) {
-            samplerContainer.parentElement.insertBefore(panel, samplerContainer.nextSibling);
-        } else {
-            origDimensionsRow.parentElement.insertBefore(panel, origDimensionsRow);
+        const settings = root.querySelector(`#${tabName}_settings`);
+        let anchor = origDimensionsRow;
+        while (tabName === "txt2img" && anchor.parentElement && anchor.parentElement !== settings && settings?.contains(anchor.parentElement)) {
+            anchor = anchor.parentElement;
         }
-        
+        anchor.before(panel);
+
         const popover = createPopoverElement(tabName);
         organizeGenerationParams(tabName);
 
@@ -819,14 +784,10 @@
         if (isEnabled) {
             root.classList.add("sd-ar-hide-original");
             origDimensionsRow.style.setProperty("display", "none", "important");
-            if (origDimensionsRow.parentElement && origDimensionsRow.parentElement.children.length === 1) {
-                origDimensionsRow.parentElement.style.setProperty("display", "none", "important");
-            }
             panel.style.display = "flex";
         } else {
             root.classList.remove("sd-ar-hide-original");
             origDimensionsRow.style.display = "";
-            if (origDimensionsRow.parentElement) origDimensionsRow.parentElement.style.display = "";
             panel.style.display = "none";
         }
 
@@ -842,10 +803,12 @@
         const bcountSlider = panel.querySelector(`#${tabName}_ar_bcount_slider`);
         const bsizeNum = panel.querySelector(`#${tabName}_ar_bsize_num`);
         const bsizeSlider = panel.querySelector(`#${tabName}_ar_bsize_slider`);
-        
+
         const popoverBtns = popover.querySelectorAll(".sd-ar-popover-btn");
         const gridBtns = panel.querySelectorAll(".sd-ar-btn");
         const filterBtns = panel.querySelectorAll(".sd-ar-filter-btn");
+        const batchSizeCaption = panel.querySelector('[data-i18n="batchSize"]');
+        panel.querySelectorAll(".sd-ar-label-name").forEach(updateTranslatedText);
 
         const viewButtonsBtn = panel.querySelector(`#${tabName}_ar_view_buttons`);
         const viewDropdownBtn = panel.querySelector(`#${tabName}_ar_view_dropdown`);
@@ -876,45 +839,20 @@
 
         if (viewButtonsBtn) {
             viewButtonsBtn.addEventListener("click", () => {
-                setAspectRatioViewMode("buttons");
-                applyViewMode("buttons");
+                setAspectRatioViewMode("buttons", panel);
             });
         }
         if (viewDropdownBtn) {
             viewDropdownBtn.addEventListener("click", () => {
-                setAspectRatioViewMode("dropdown");
-                applyViewMode("dropdown");
+                setAspectRatioViewMode("dropdown", panel);
             });
         }
 
-        // Filter tabs in buttons mode
-        filterBtns.forEach((fbtn) => {
-            fbtn.addEventListener("click", () => {
-                filterBtns.forEach((b) => b.classList.remove("active"));
-                fbtn.classList.add("active");
-                const filter = fbtn.getAttribute("data-filter");
-
-                gridBtns.forEach((btn) => {
-                    const group = btn.getAttribute("data-group");
-                    let show = false;
-                    if (filter === "all") {
-                        show = true;
-                    } else if (filter === "square") {
-                        show = (group === "square");
-                    } else if (filter === "portrait") {
-                        show = (group === "portrait");
-                    } else if (filter === "landscape") {
-                        show = (group === "landscape");
-                    }
-
-                    if (show) {
-                        btn.classList.remove("sd-ar-hidden");
-                        btn.style.setProperty("display", "flex", "important");
-                    } else {
-                        btn.classList.add("sd-ar-hidden");
-                        btn.style.setProperty("display", "none", "important");
-                    }
-                });
+        updatePresetVisibility(panel, popover);
+        filterBtns.forEach((button) => {
+            button.addEventListener("click", () => {
+                filterBtns.forEach((item) => item.classList.toggle("active", item === button));
+                updatePresetVisibility(panel, popover);
             });
         });
 
@@ -934,17 +872,27 @@
             } else {
                 closeAllPopovers();
                 activePopoverTab = tabName;
+                activeTrigger = e.currentTarget;
                 popover.style.display = "block";
                 triggerBtn.classList.add("active");
+                triggerBtn.setAttribute("aria-expanded", "true");
+                if (ratioBtn) ratioBtn.setAttribute("aria-expanded", "true");
                 if (ratioBtn) ratioBtn.classList.add("active");
                 positionPopover(triggerBtn, popover);
+                (popover.querySelector(".sd-ar-popover-btn.active:not([hidden])") || popover.querySelector(".sd-ar-popover-btn:not([hidden])") || popover.querySelector(".sd-ar-popover-close"))?.focus();
             }
         };
 
         if (triggerBtn) {
+            triggerBtn.setAttribute("aria-haspopup", "dialog");
+            triggerBtn.setAttribute("aria-expanded", "false");
+            triggerBtn.setAttribute("aria-controls", popover.id);
             triggerBtn.addEventListener("click", togglePopover);
         }
         if (ratioBtn) {
+            ratioBtn.setAttribute("aria-haspopup", "dialog");
+            ratioBtn.setAttribute("aria-expanded", "false");
+            ratioBtn.setAttribute("aria-controls", popover.id);
             ratioBtn.addEventListener("click", togglePopover);
         }
 
@@ -960,7 +908,7 @@
                 const w = parseInt(btn.getAttribute("data-w"), 10);
                 const h = parseInt(btn.getAttribute("data-h"), 10);
                 applyResolution(w, h);
-                closeAllPopovers();
+                closeAllPopovers(true);
             });
         });
 
@@ -1002,25 +950,11 @@
                 triggerRes.textContent = `${numW} × ${numH}`;
             }
 
-            // Sync active state across both Popover buttons and Grid buttons
-            popoverBtns.forEach((btn) => {
-                const bw = parseInt(btn.getAttribute("data-w"), 10);
-                const bh = parseInt(btn.getAttribute("data-h"), 10);
-                if (bw === numW && bh === numH) {
-                    btn.classList.add("active");
-                } else {
-                    btn.classList.remove("active");
-                }
-            });
-
-            gridBtns.forEach((btn) => {
-                const bw = parseInt(btn.getAttribute("data-w"), 10);
-                const bh = parseInt(btn.getAttribute("data-h"), 10);
-                if (bw === numW && bh === numH) {
-                    btn.classList.add("active");
-                } else {
-                    btn.classList.remove("active");
-                }
+            // Announce selected presets to assistive technology.
+            [...popoverBtns, ...gridBtns].forEach((btn) => {
+                const active = parseInt(btn.dataset.w, 10) === numW && parseInt(btn.dataset.h, 10) === numH;
+                btn.classList.toggle("active", active);
+                btn.setAttribute("aria-pressed", String(active));
             });
         }
 
@@ -1034,7 +968,7 @@
         function updateBatchSizeUI(val) {
             const clamped = clampToInput(val, bsizeSlider, 1, 8, 1);
             if (parseInt(bsizeSlider.value, 10) !== clamped) bsizeSlider.value = clamped;
-            if (parseInt(bsizeNum.value, 10) !== clamped) bsizeNum.value = clamped;
+            if (parseInt(bsizeNum.value, 10) !== val) bsizeNum.value = val;
             updateSliderTrack(bsizeSlider);
         }
 
@@ -1137,23 +1071,31 @@
         if (nativeBatchSizeInput) updateBatchSizeUI(readNativeVal(nativeBatchSizeInput, 1));
 
         const syncFromNative = () => {
+            if (!panel.isConnected) return;
             syncAllBounds();
+            const nativeLabel = getSliderBlock(nativeBatchSizeInput)?.querySelector(".head label");
+            const nativeCaption = nativeLabel?.textContent.trim();
+            const localizedFrames = window.localization?.Frames;
+            const videoFrames = Number(bsizeSlider.step) > 1 || nativeCaption === "Frames" ||
+                (typeof localizedFrames === "string" && nativeCaption === localizedFrames);
+            const captionKey = videoFrames ? "frames" : "batchSize";
+            if (batchSizeCaption.dataset.i18n !== captionKey) {
+                batchSizeCaption.dataset.i18n = captionKey;
+                updateTranslatedText(batchSizeCaption);
+            }
             const w = readNativeVal(nativeWidthInput, null);
             const h = readNativeVal(nativeHeightInput, null);
-            if (w && h && (w !== parseInt(widthSlider.value, 10) || h !== parseInt(heightSlider.value, 10))) {
+            if (w && h && (w !== parseInt(widthNum.value, 10) || h !== parseInt(heightNum.value, 10) ||
+                w !== parseInt(widthSlider.value, 10) || h !== parseInt(heightSlider.value, 10))) {
                 updateDimensionsUI(w, h);
             }
             if (nativeBatchCountInput) {
                 const bc = readNativeVal(nativeBatchCountInput, null);
-                if (bc && bc !== parseInt(bcountNum.value, 10)) {
-                    updateBatchCountUI(bc);
-                }
+                if (bc) updateBatchCountUI(bc);
             }
             if (nativeBatchSizeInput) {
                 const bs = readNativeVal(nativeBatchSizeInput, null);
-                if (bs && bs !== parseInt(bsizeNum.value, 10)) {
-                    updateBatchSizeUI(bs);
-                }
+                if (bs) updateBatchSizeUI(bs);
             }
         };
 
@@ -1169,12 +1111,22 @@
             }
         };
 
+        const nativeChanges = new MutationObserver(syncFromNative);
+        for (const input of [nativeWidthInput, nativeHeightInput, nativeBatchCountInput, nativeBatchSizeInput]) {
+            const block = input && getSliderBlock(input);
+            if (block) nativeChanges.observe(block, {
+                attributes: true, attributeFilter: ["value", "style", "min", "max", "step"],
+                childList: true, characterData: true, subtree: true,
+            });
+        }
+        syncFromNative();
+
         attachListeners(nativeWidthInput);
         attachListeners(nativeHeightInput);
         attachListeners(nativeBatchCountInput);
         attachListeners(nativeBatchSizeInput);
 
-        setInterval(syncFromNative, 500);
+
         if (typeof onAfterUiUpdate === "function") {
             onAfterUiUpdate(syncFromNative);
         }
@@ -1224,7 +1176,7 @@
         if (lastEnabledState === enabled) return;
         lastEnabledState = enabled;
 
-        const root = gradioApp();
+        const root = getAppRoot();
         if (!root) return;
 
         ["txt2img", "img2img"].forEach((tab) => {
@@ -1243,7 +1195,6 @@
                     origRow.style.display = "";
                 }
             }
-            organizeGenerationParams(tab);
         });
 
         if (enabled) {
@@ -1255,16 +1206,11 @@
 
     let lastDistilledState = { txt2img: null, img2img: null };
     function checkDynamicLayoutState() {
-        const root = gradioApp();
+        const root = getAppRoot();
         if (!root) return;
         ["txt2img", "img2img"].forEach((tab) => {
             const distilledCfg = root.querySelector(`#${tab}_distilled_cfg_scale`);
-            const isVis = Boolean(
-                distilledCfg &&
-                distilledCfg.offsetParent !== null &&
-                !distilledCfg.style.display?.includes("none") &&
-                !distilledCfg.classList.contains("hide")
-            );
+            const isVis = isDistilledEnabled(distilledCfg);
             if (lastDistilledState[tab] !== isVis) {
                 lastDistilledState[tab] = isVis;
                 organizeGenerationParams(tab);
@@ -1273,7 +1219,7 @@
     }
 
     function attachPresetListener() {
-        const root = gradioApp();
+        const root = getAppRoot();
         if (!root) return;
         const presetEl = root.querySelector("#forge_ui_preset input") || root.querySelector("#forge_ui_preset select") || root.querySelector("#forge_ui_preset");
         if (presetEl && !presetEl._hasLobeListener) {
@@ -1289,6 +1235,13 @@
 
     function checkLiveSettings() {
         applyEnabledState(isAspectRatioEnabled());
+        const root = getAppRoot();
+        for (const tab of ["txt2img", "img2img"]) {
+            organizeGenerationParams(tab);
+            const panel = root.querySelector(`#${tab}_ar_panel`);
+            const popover = document.getElementById(`${tab}_ar_popover`);
+            if (panel && popover) updatePresetVisibility(panel, popover);
+        }
         checkDynamicLayoutState();
         attachPresetListener();
         const currentMode = getAspectRatioViewMode();
@@ -1317,22 +1270,32 @@
                 }
             });
         }
+        document.querySelectorAll('.sd-ar-view-toggle .sd-ar-view-btn, [id$="_ar_view_buttons"], [id$="_ar_view_dropdown"]').forEach((btn) => {
+            btn.setAttribute('aria-pressed', String(btn.classList.contains('active')));
+        });
         updateAllTexts();
     }
 
-    // Intercept localStorage.setItem in the same window so changes apply instantly
-    const originalSetItem = localStorage.setItem.bind(localStorage);
-    localStorage.setItem = function (key, value) {
-        originalSetItem(key, value);
-        if (key === "SD-LOBE-SETTING" || key === "SD-KITCHEN-SETTING" || key === "lobe_enable_aspect_ratio" || key === "lobe_ratio_default_view") {
-            try {
-                checkLiveSettings();
-            } catch (e) {}
+    window.addEventListener("lobe:settings", checkLiveSettings);
+    window.addEventListener("lobe:language", updateAllTexts);
+    const watchedDistilled = new WeakSet();
+    const distilledObserver = new MutationObserver(checkDynamicLayoutState);
+    function watchDistilledVisibility() {
+        const root = getAppRoot();
+        for (const tab of ['txt2img', 'img2img']) {
+            const block = root?.querySelector(`#${tab}_distilled_cfg_scale`);
+            if (block && !watchedDistilled.has(block)) {
+                watchedDistilled.add(block);
+                distilledObserver.observe(block, { attributes: true, attributeFilter: ['class', 'style', 'hidden'] });
+            }
         }
-    };
+    }
 
     window.addEventListener("storage", (e) => {
-        if (e.key === "SD-LOBE-SETTING" || e.key === "SD-KITCHEN-SETTING" || e.key === "lobe_enable_aspect_ratio" || e.key === "lobe_ratio_default_view") {
+        if (e.key === "SD-LOBE-SETTING" || e.key === "SD-KITCHEN-SETTING") {
+            if (e.key === "SD-LOBE-SETTING" && e.newValue) {
+                try { window.lobeThemeSetting = JSON.parse(e.newValue); } catch {}
+            }
             checkLiveSettings();
         }
     });
@@ -1345,6 +1308,7 @@
     function initAll() {
         const txtOk = initTabControls("txt2img");
         const imgOk = initTabControls("img2img");
+        watchDistilledVisibility();
         checkLiveSettings();
         if (txtOk && imgOk) {
             initialized = true;
@@ -1356,11 +1320,12 @@
     }
     document.addEventListener("DOMContentLoaded", initAll);
 
+    let attempts = 0;
     const interval = setInterval(() => {
         initAll();
-        if (initialized) {
+        if (initialized || ++attempts >= 60) {
             clearInterval(interval);
-            setInterval(checkLiveSettings, 400);
+
         }
     }, 500);
 })();

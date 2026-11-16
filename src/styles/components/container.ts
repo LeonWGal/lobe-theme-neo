@@ -8,8 +8,7 @@ export default (token: Theme) => {
       gap: 12px !important;
     }
 
-    .gradio-box,
-    .gradio-accordion {
+    .gradio-box:not(.gradio-accordion, .input-accordion, details.accordion):not(:has(> :is(.gradio-accordion, .input-accordion, details.accordion):only-child)) {
       &:not(.hidden):has(div) {
         margin: 0 !important;
         padding: 16px !important;

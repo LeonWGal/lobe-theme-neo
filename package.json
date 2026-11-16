@@ -1,7 +1,6 @@
 {
   "name": "lobe-theme-neo",
-  "version": "5.0.0-forge.neo.1",
-  "type": "module",
+  "version": "5.1.1",
   "private": true,
   "description": "Lobe Theme Neo for Forge Neo / Gradio 4 with layout enhancements, light/dark switching, and SplitView support.",
   "keywords": [
@@ -13,17 +12,18 @@
     "kitchen-theme",
     "extensions"
   ],
-  "homepage": "https://github.com/lobehub/sd-webui-lobe-theme",
+  "homepage": "https://github.com/LeonWGal/lobe-theme-neo",
   "bugs": {
-    "url": "https://github.com/lobehub/sd-webui-lobe-theme/issues/new"
+    "url": "https://github.com/LeonWGal/lobe-theme-neo/issues/new"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lobehub/sd-webui-lobe-theme.git"
+    "url": "https://github.com/LeonWGal/lobe-theme-neo.git"
   },
   "license": "AGPL3",
   "author": "LobeHub <i@lobehub.com>",
   "sideEffects": false,
+  "type": "module",
   "main": "javascript/main.mjs",
   "files": [
     "javascript"
@@ -41,9 +41,11 @@
     "prettier": "prettier -c --write \"**/**\"",
     "release": "semantic-release",
     "start": "npm run dev",
-    "test": "vitest --passWithNoTests",
-    "test:coverage": "vitest run --coverage  --passWithNoTests",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:python": "python -B tests/test_backend.py",
     "test:update": "vitest -u",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "lint-staged": {
@@ -70,12 +72,9 @@
   },
   "dependencies": {
     "@bluelovers/auto1111-pnginfo": "^2.0.3",
-    "@icons-pack/react-simple-icons": "^9.5.0",
-    "@lobehub/fluent-emoji": "^4.0.0",
-    "@lobehub/icons": "^5.0.0",
-    "@lobehub/ui": "^5.55.0",
-    "@rollup/rollup-win32-x64-msvc": "^4.18.0",
-    "@swc/core-win32-x64-msvc": "^1.16.13",
+    "@lobehub/fluent-emoji": "^5.0.1",
+    "@lobehub/icons": "^6.15.0",
+    "@lobehub/ui": "^6.15.2",
     "ahooks": "^3.8.0",
     "antd": "^6.1.1",
     "antd-style": "^4.1.0",
@@ -85,9 +84,8 @@
     "i18next-http-backend": "^2.5.2",
     "lodash-es": "^4.17.21",
     "lucide-react": "^1.24.0",
-    "lucide-static": "^0.395.0",
     "modern-screenshot": "^4.4.39",
-    "motion": "^12.0.0",
+    "motion": "^14.10.1",
     "polished": "^4.3.1",
     "react": "^19.0.0",
     "react-dnd": "^16.0.1",
@@ -109,6 +107,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.3.0",
     "@lobehub/lint": "^1.23.4",
+    "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^16.0.0",
     "@types/lodash-es": "^4.17.12",
@@ -138,6 +137,10 @@
     "typescript": "^5.4.5",
     "vite": "^5.2.11",
     "vitest": "~1.2.2"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.18.0",
+    "@swc/core-win32-x64-msvc": "^1.16.13"
   },
   "publishConfig": {
     "access": "public",

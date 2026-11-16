@@ -26,6 +26,10 @@ export default (token: Theme) => css`
         min-width: 0;
       }
 
+      #setting_localization {
+        display: none !important;
+      }
+
       #forge_ui_dtype {
         min-width: 7rem;
       }
@@ -66,6 +70,12 @@ export default (token: Theme) => css`
       #setting_sd_modules {
         flex: 0 0 auto;
 
+        .wrap:has(> .wrap-inner) {
+          height: auto !important;
+          min-height: 36px !important;
+          overflow: visible !important;
+        }
+
         div.wrap-inner {
           display: flex;
           flex-direction: column;
@@ -79,6 +89,7 @@ export default (token: Theme) => css`
         }
 
         div.token {
+          display: flex !important;
           box-sizing: border-box;
           flex: 0 0 auto;
           align-items: center;
@@ -86,9 +97,9 @@ export default (token: Theme) => css`
 
           width: 100%;
           height: auto !important;
-          min-height: 36px;
+          min-height: 32px;
           margin: 0 !important;
-          padding: 6px 8px;
+          padding: 4px 8px;
           border: 1px solid ${token.colorBorderSecondary};
           border-radius: ${token.borderRadiusSM}px;
 
@@ -142,9 +153,18 @@ export default (token: Theme) => css`
             right: 32px;
             transform: translateY(-50%);
 
-            width: 24px;
-            height: 24px;
+            width: 18px !important;
+            min-width: 18px !important;
+            height: 18px !important;
+            min-height: 18px !important;
             margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: var(--lobe-radius-sm);
+            color: var(--lobe-text-muted);
+            background: transparent;
+            &:hover { color: var(--lobe-text); background: var(--lobe-color-fill-secondary); }
+            svg { width: 12px; height: 12px; }
           }
         }
       }
@@ -418,7 +438,7 @@ export default (token: Theme) => css`
     details.gradio-accordion {
       border: 1px solid ${token.colorBorderSecondary} !important;
       border-radius: ${token.borderRadius}px !important;
-      background: ${token.colorFillQuaternary} !important;
+      background: ${token.colorBgContainer} !important;
       margin: 8px 0 !important;
       padding: 0 !important;
 
@@ -449,7 +469,7 @@ export default (token: Theme) => css`
       &:hover {
         border-color: ${token.colorPrimary} !important;
         background: ${token.colorFillSecondary} !important;
-        color: ${token.colorPrimary} !important;
+        color: var(--lobe-accent-text) !important;
       }
     }
 

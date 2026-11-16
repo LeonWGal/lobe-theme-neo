@@ -6,8 +6,48 @@ export const useStyles = createStyles(({ css, token, isDarkMode }) => {
   const color = isDarkMode ? colorScales.lime[type][9] : colorScales.green[type][10];
 
   return {
+    configHeader: css`
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      padding: 6px 10px;
+      cursor: pointer;
+      user-select: none;
+      font-family: ${token.fontFamilyCode};
+      font-size: 12px;
+      color: ${token.colorTextSecondary};
+      background: ${token.colorFillTertiary};
+      border: 0;
+      border-radius: ${token.borderRadius}px;
+      text-align: left;
+
+      &:hover {
+        color: ${token.colorText};
+        background: ${token.colorFillSecondary};
+      }
+    `,
+    configRow: css`
+      padding: 1px 0;
+      line-height: 1.35;
+      border-bottom: 1px solid ${token.colorSplit};
+
+      &:last-child {
+        border-bottom: none;
+      }
+    `,
+    configSummary: css`
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: ${token.colorText};
+    `,
     configTitle: css`
       color: ${token.colorTextSecondary};
+      flex-shrink: 0;
     `,
     configValue: css`
       color: ${token.colorInfoText};
@@ -15,10 +55,10 @@ export const useStyles = createStyles(({ css, token, isDarkMode }) => {
       word-break: break-word;
     `,
     container: css`
-      padding: 16px 10px 16px 24px;
+      padding: 8px 10px 8px 12px;
 
       font-family: ${token.fontFamilyCode};
-      font-size: 13px;
+      font-size: 12px;
 
       background: ${token.colorFillTertiary};
       border-radius: ${token.borderRadius}px;

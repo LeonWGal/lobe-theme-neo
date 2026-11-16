@@ -1,8 +1,11 @@
-import { Form, type FormItemProps, Modal, type ModalProps } from '@lobehub/ui';
+import { Modal, type ModalComponentProps } from '@lobehub/ui';
 import { Button, Input, Segmented, SegmentedProps, Switch } from 'antd';
 import { memo, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
+
+import Form from '@/features/Setting/Form/Fields';
+import type { SettingField } from '@/features/Setting/Form/types';
 
 import Preview from './Preview';
 import PreviewInner from './PreviewInner';
@@ -24,7 +27,7 @@ const DEFAULT_FIELD_VALUE: FieldType = {
   withFooter: false,
 };
 
-export interface ShareModalProps extends ModalProps {
+export interface ShareModalProps extends ModalComponentProps {
   type: 'txt' | 'img';
 }
 
@@ -47,7 +50,7 @@ const ShareModal = memo<ShareModalProps>(({ open, onCancel, type }) => {
     [],
   );
 
-  const items: FormItemProps[] = useMemo(
+  const items: SettingField[] = useMemo(
     () => [
       {
         children: <Input />,
@@ -109,7 +112,7 @@ const ShareModal = memo<ShareModalProps>(({ open, onCancel, type }) => {
   return (
     <Modal
       centered={false}
-      destroyOnClose
+      destroyOnHidden
       footer={
         <Button block loading={loading} onClick={onDownload} size={'large'} type={'primary'}>
           {t('shareModal.download')}
@@ -128,11 +131,11 @@ const ShareModal = memo<ShareModalProps>(({ open, onCancel, type }) => {
           value={tab}
         />
 
-        <Form
+        <Form<FieldType>
           initialValues={DEFAULT_FIELD_VALUE}
           items={items}
           itemsType={'flat'}
-          onValuesChange={(_, v) => setFieldValue({ ...fieldValue, ...v })}
+          onValuesChange={(changed) => setFieldValue((previous) => ({ ...previous, ...changed }))}
         />
 
         <Preview {...fieldValue}>

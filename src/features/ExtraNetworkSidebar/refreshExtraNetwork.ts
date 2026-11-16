@@ -5,34 +5,32 @@ const cardsNeedLoad = (root: Element): boolean => {
   for (const pane of panes) {
     // Skip Generation tab content if it somehow remains
     if (pane.id?.includes('_render') || pane.id?.includes('_generation')) continue;
+    if (pane.closest<HTMLElement>('.tabitem')?.style.display === 'none') continue;
 
-    const cards = pane.querySelectorAll('.card');
+    const card = pane.querySelector('.card');
     const nocards = pane.querySelector('.nocards');
     const pending = pane.querySelector('.pending');
     if (pending) return true;
-    if (nocards || cards.length === 0) return true;
+    if (!nocards && !card) return true;
   }
 
   return false;
 };
 
-const scheduleExtraNetworkRefresh = (fn: () => void, delayMs: number) => {
-  if (typeof requestIdleCallback === 'function' && delayMs < 500) {
-    requestIdleCallback(fn, { timeout: Math.max(delayMs, 1000) });
-  } else {
-    setTimeout(fn, delayMs);
-  }
-};
+const scheduled = new Map<string, ReturnType<typeof setTimeout>[]>();
+const requested = new WeakSet<HTMLButtonElement>();
 /**
  * After lobe moves Extra Networks into the sidebar, Forge still needs a
  * "search all" / tab activation pass so card HTML is populated.
  * Runs idle + one delayed retry; skips work when cards are already present.
  */
 export const refreshExtraNetwork = (type: 'txt' | 'img') => {
+  scheduled.get(type)?.forEach(clearTimeout);
   const rootSelector = `#${type}2img_extra_tabs`;
 
   const run = () => {
-    const app = typeof (window as any).gradioApp === 'function' ? (window as any).gradioApp() : null;
+    const app =
+      typeof (window as any).gradioApp === 'function' ? (window as any).gradioApp() : null;
     const root = app?.querySelector(rootSelector) || document.querySelector(rootSelector);
     if (!root) return;
 
@@ -48,29 +46,40 @@ export const refreshExtraNetwork = (type: 'txt' | 'img') => {
         return !btn.classList.contains('hidden') && btn.style.display !== 'none';
       }) ?? buttons[1];
 
-    if (enButton) {
-      const alreadyActive =
-        enButton.getAttribute('aria-selected') === 'true' ||
-        enButton.classList.contains('selected');
-      if (!alreadyActive) enButton.click();
-    }
+    const hasActiveNetwork = buttons
+      .slice(1)
+      .some(
+        (button) =>
+          button.getAttribute('aria-selected') === 'true' || button.classList.contains('selected'),
+      );
+    if (enButton && !hasActiveNetwork) enButton.click();
 
     if (!cardsNeedLoad(root)) return;
 
     const searchAll = Array.from(root.querySelectorAll('button.search-all')) as HTMLButtonElement[];
     for (const btn of searchAll) {
+      if (requested.has(btn)) continue;
       const pane = btn.closest('.extra-network-pane') || btn.closest('.tabitem');
+      if (pane?.closest<HTMLElement>('.tabitem')?.style.display === 'none') continue;
       if (!pane) {
+        requested.add(btn);
         btn.click();
         continue;
       }
-      const hasCards = pane.querySelectorAll('.card').length > 0;
-      const empty = !!pane.querySelector('.nocards') || !hasCards;
-      if (empty) btn.click();
+      const hasCards = Boolean(pane.querySelector('.card'));
+      if (!hasCards && !pane.querySelector('.nocards')) {
+        requested.add(btn);
+        btn.click();
+      }
     }
   };
 
   // First pass soon after inject; second pass after Forge finishes HTML fill
-  scheduleExtraNetworkRefresh(run, 200);
-  scheduleExtraNetworkRefresh(run, 1500);
+  scheduled.set(type, [
+    setTimeout(run, 200),
+    setTimeout(() => {
+      run();
+      scheduled.delete(type);
+    }, 1500),
+  ]);
 };

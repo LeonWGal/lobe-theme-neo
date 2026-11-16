@@ -14,6 +14,7 @@ const ImageInfo = (parentId: string, containerId: string) => {
 
   const settingsDiv = document.createElement('div') as HTMLDivElement;
   settingsDiv.id = containerId.replace('#', '');
+  settingsDiv.dataset.lobeLocalized = '';
 
   parent.append(settingsDiv);
 

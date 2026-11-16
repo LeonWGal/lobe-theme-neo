@@ -34,7 +34,10 @@ export default (token: Theme) => {
         [type='number'],
         [type='radio'],
         [type='file'],
-        .border-none
+        .border-none,
+        .ant-input,
+        .ant-select-input,
+        .ant-select-selection-search-input
       ) {
         resize: none;
 
@@ -57,7 +60,7 @@ export default (token: Theme) => {
         }
       }
 
-      &[type='number'] {
+      &[type='number']:not(.ant-input-number-input) {
         height: var(--button-lg-tool-height) !important;
         border-radius: ${token.borderRadius}px;
         background: ${token.colorFillTertiary} !important;
@@ -123,6 +126,7 @@ export default (token: Theme) => {
           border-color: ${token.colorPrimaryBorder} !important;
           background-color: ${token.colorPrimary} !important;
           background-image: var(--radio-circle) !important;
+        }
       }
     }
 

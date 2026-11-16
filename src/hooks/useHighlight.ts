@@ -1,46 +1,23 @@
-import { HighlighterCore, createHighlighterCore } from 'shiki/core';
-import getWasmInlined from 'shiki/wasm';
-import useSWR from 'swr';
+import { useMemo } from 'react';
 
-import prompt from '@/modules/PromptHighlight/features/grammar';
-import { themeConfig } from '@/modules/PromptHighlight/features/promptTheme';
+import { codeToHtml } from '@/modules/PromptHighlight/features/tokenize';
+import { escapeHtml } from '@/modules/PromptHighlight/features/tokenize-core';
 
-let cacheHighlighter: HighlighterCore;
-
-const initHighlighter = async(): Promise<HighlighterCore> => {
-  let highlighter = cacheHighlighter;
-
-  if (highlighter) return highlighter;
-
-  highlighter = await createHighlighterCore({
-    // @ts-ignore
-    langs: [prompt],
-    loadWasm: getWasmInlined,
-    themes: [themeConfig(true), themeConfig(false)],
-  });
-
-  cacheHighlighter = highlighter;
-
-  return highlighter;
-};
-
-export const useHighlight = (text: string, isDarkMode: boolean) =>
-  useSWR([isDarkMode ? 'dark' : 'light', text].join('-'), async() => {
+/**
+ * Highlighted HTML for a prompt. Synchronous: the tokenizer runs in well
+ * under a millisecond for a typical prompt, so there is no loading state and
+ * no flash of unhighlighted text on each keystroke.
+ */
+export const useHighlight = (text: string, isDarkMode: boolean) => {
+  const data = useMemo(() => {
     try {
-      const highlighter = await initHighlighter();
-      const html = highlighter?.codeToHtml(text, {
-        lang: 'prompt',
-        theme: isDarkMode ? 'dark' : 'light',
-        transformers: [
-          {
-            code(node) {
-              node.properties['id'] = 'lobe_highlighter';
-            },
-          },
-        ],
-      });
-      return html;
+      const value = text ?? '';
+      if (value.length > 30_000)
+        return `<pre class="shiki"><code id="lobe_highlighter">${escapeHtml(value)}</code></pre>`;
+      return codeToHtml(value, isDarkMode);
     } catch {
-      return text;
+      return `<pre class="shiki"><code id="lobe_highlighter">${escapeHtml(text ?? '')}</code></pre>`;
     }
-  });
+  }, [text, isDarkMode]);
+  return { data, isLoading: false };
+};
